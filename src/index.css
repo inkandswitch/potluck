@@ -1,3 +1,21 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.icon {
+  display: inline-block;
+  mask-position: center;
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  width: 1em;
+  height: 1em;
+
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+}
+
+.icon-highlighter {
+  mask-image: url('highlighter-solid.svg');
+  -webkit-mask-image: url('highlighter-solid.svg');
+}

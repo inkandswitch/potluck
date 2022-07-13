@@ -2,94 +2,130 @@ import {Decoration, DecorationSet, EditorView, keymap} from "@codemirror/view";
 import {EditorState, RangeSet, StateEffect, StateField} from "@codemirror/state";
 import {defaultKeymap} from "@codemirror/commands";
 import {minimalSetup} from "codemirror"
-import {useEffect, useRef} from "react";
+import {Ref, useEffect, useRef} from "react";
+import {nanoid} from 'nanoid';
 
-const initialValue = `
-  # monday
-  bench 50 10x3
-  squat 50 10x3
-`
+import {autorun, comparer, computed, reaction, runInAction} from "mobx";
+import {observer} from "mobx-react-lite";
+import {Snippet, snippetsMobx, Span, textEditorStateMobx} from "./primitives";
 
-const setSnippet = StateEffect.define<{ from: number, to: number }>()
+const setSnippetsEffect =
+  StateEffect.define<(Snippet)[]>();
+const snippetsField = StateField.define<Snippet[]>(
+  {
+    create() {
+      return [];
+    },
+    update(snippets, tr) {
+      for (let e of tr.effects) {
+        if (e.is(setSnippetsEffect)) {
+          return e.value;
+        }
+      }
+      return snippets.map((snippet) => ({
+        ...snippet,
+        span: [
+          tr.changes.mapPos(snippet.span[0]),
+          tr.changes.mapPos(snippet.span[1]),
+        ],
+      }));
+    },
+  }
+);
 
-const snippetsField = StateField.define<DecorationSet>({
-  create() {
-    return Decoration.none
-  },
-  update(underlines, tr) {
-    underlines = underlines.map(tr.changes)
-    for (let e of tr.effects) if (e.is(setSnippet)) {
-      return RangeSet.of([underlineMark.range(e.value.from, e.value.to)])
-    }
-    return underlines
-  },
-  provide: f => EditorView.decorations.from(f)
-})
+const snippetDecorations = EditorView.decorations.compute(
+  [snippetsField],
+  (state) => {
+    return Decoration.set(
+      state.field(snippetsField).map((snippet) => (
+        Decoration.mark({
+          class: `bg-gray-200`,
+        }).range(snippet.span[0], snippet.span[1])
+      )),
+      true
+    );
+  }
+);
 
-const underlineMark = Decoration.mark({ class: "cm-underline" })
-
-const underlineTheme = EditorView.baseTheme({
-  ".cm-underline": { textDecoration: "underline 3px red" }
-})
-
-export function underlineSelection(view: EditorView) {
-  let effects: StateEffect<unknown>[] = view.state.selection.ranges
-    .filter(r => !r.empty)
-    .map(({ from, to }) => setSnippet.of({ from, to }))
-  if (!effects.length) return false
-
-  if (!view.state.field(snippetsField, false))
-    effects.push(StateEffect.appendConfig.of([snippetsField,
-      underlineTheme]))
-  view.dispatch({ effects })
-  return true
-}
-
-
-const snippetKeymap = keymap.of([{
+export const snippetsKeymap = keymap.of([{
   key: "Mod-h",
   preventDefault: true,
-  run: underlineSelection
+  run: (view: EditorView) => {
+    runInAction(() => {
+      for (const { from, to } of view.state.selection.ranges) {
+
+        const id = nanoid()
+
+        snippetsMobx.set(id, { id, span: [from, to] })
+      }
+    })
+    return true
+  }
 }])
 
-export const Editor = () => {
+export const Editor = observer(() => {
   const editorRef = useRef(null);
 
   useEffect(() => {
-    if (!editorRef.current) {
-      return
-    }
-
     const view = new EditorView({
-      state: EditorState.create({
-        doc: initialValue,
-        extensions: [
-          minimalSetup,
-          keymap.of(defaultKeymap),
-          EditorView.theme({
-            "&": { height: "100%" },
-          }),
-          [
-            snippetKeymap
-          ],
-        ],
-      }),
-      parent: editorRef.current,
+      doc: textEditorStateMobx.get()?.doc,
+      extensions: [
+        minimalSetup,
+        EditorView.theme({
+          "&": {
+            height: "100%",
+          }
+        }),
+        EditorView.lineWrapping,
+        snippetsField,
+        snippetsKeymap,
+        snippetDecorations
+      ],
+      parent: editorRef.current!,
       dispatch(transaction) {
         view.update([transaction]);
+        runInAction(() => {
+          for (const snippet of snippetsMobx.values()) {
+            const newSpan: Span = [
+              transaction.changes.mapPos(snippet.span[0]),
+              transaction.changes.mapPos(snippet.span[1]),
+            ];
+            if (newSpan[0] === newSpan[1]) {
+              snippetsMobx.delete(snippet.id);
+            } else {
+              snippet.span = newSpan;
+            }
+          }
+          textEditorStateMobx.set(transaction.state);
+        });
       },
     });
 
+    runInAction(() => {
+      textEditorStateMobx.set(view.state);
+    });
 
+    const unsubscribes: (() => void)[] = [
+      reaction(
+        () => snippetsMobx.values(),
+        (snippets) => {
+          view.dispatch({
+            effects: [setSnippetsEffect.of(Array.from(snippets))],
+          });
+        },
+        { equals: comparer.structural }
+      )
+    ];
     return () => {
       view.destroy();
+      unsubscribes.forEach((unsubscribe) => unsubscribe());
     };
-  }, [editorRef]);
+  }, []);
 
   return (
     <div
-      className="text-lg h-[500px] w-[500px] bg-white border-2 border-black rounded-lg overflow-auto"
+      className="text-lg h-[500px] bg-white border-black border-2 rounded-lg overflow-auto"
       ref={editorRef}
     />
   );
-}
+});

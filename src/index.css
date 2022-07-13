@@ -14,8 +14,3 @@
   -webkit-mask-size: contain;
   -webkit-mask-repeat: no-repeat;
 }
-
-.icon-highlighter {
-  mask-image: url('highlighter-solid.svg');
-  -webkit-mask-image: url('highlighter-solid.svg');
-}

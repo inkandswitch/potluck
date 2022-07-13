@@ -1,5 +1,5 @@
-import {Decoration, DecorationSet, EditorView, keymap} from "@codemirror/view";
-import {EditorState, RangeSet, StateEffect, StateField} from "@codemirror/state";
+import {Decoration, DecorationSet, EditorView, keymap, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
+import {EditorSelection, EditorState, RangeSet, SelectionRange, StateEffect, StateField} from "@codemirror/state";
 import {defaultKeymap} from "@codemirror/commands";
 import {minimalSetup} from "codemirror"
 import {Ref, useEffect, useRef} from "react";
@@ -9,8 +9,9 @@ import {autorun, comparer, computed, reaction, runInAction} from "mobx";
 import {observer} from "mobx-react-lite";
 import {Snippet, snippetsMobx, Span, textEditorStateMobx} from "./primitives";
 
+
 const setSnippetsEffect =
-  StateEffect.define<(Snippet)[]>();
+  StateEffect.define<Snippet[]>();
 const snippetsField = StateField.define<Snippet[]>(
   {
     create() {
@@ -63,11 +64,13 @@ export const snippetsKeymap = keymap.of([{
   }
 }])
 
+export let EDITOR_VIEW : EditorView;
+
 export const Editor = observer(() => {
   const editorRef = useRef(null);
 
   useEffect(() => {
-    const view = new EditorView({
+    const view = EDITOR_VIEW = new EditorView({
       doc: textEditorStateMobx.get()?.doc,
       extensions: [
         minimalSetup,

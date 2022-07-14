@@ -31,6 +31,10 @@ export type Parser = {
 const NUMBER_TYPE = 'number'
 const EXERCISE_TYPE = 'exercise'
 
+export function getParserOfType (type: string) {
+  return PARSER.find((parser) => parser.type === type)
+}
+
 const PARSER: Parser[] = [
   {
     color: 'text-blue-500',
@@ -160,6 +164,11 @@ class DraggableSnippetWidget extends WidgetType {
     const parser = PARSER.find(({ type }) => this.snippet.type === type)
 
     token.style.cursor = "grab"
+    token.draggable = true
+    token.ondragstart = (evt: DragEvent) => {
+      evt.dataTransfer.setData("text/json", JSON.stringify(this.snippet));
+    }
+
     token.className = `${parser!.bgColor} rounded ${parser!.color}`
     token.innerText = this.text
 
@@ -167,7 +176,7 @@ class DraggableSnippetWidget extends WidgetType {
   }
 
   ignoreEvent() {
-    return false
+    return true
   }
 }
 

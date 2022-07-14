@@ -1,11 +1,13 @@
 import {observable} from "mobx";
 import {EditorState} from "@codemirror/state";
+import {nanoid} from "nanoid";
 
 export type Span = [from: number, to: number];
 
 export type Snippet = {
   span: Span
   id: string
+  type: string
 }
 
 const INITIAL_TEXT = `4/15 gym: run + plank
@@ -28,6 +30,4 @@ Pullups 2x3 in between (Next time 3x3)
 Bench 70 10 8 3 (wrist problems, weight felt good)
 `
 
-export const textEditorStateMobx = observable.box(EditorState.create({doc: INITIAL_TEXT}))
-
-export const snippetsMobx = observable.map<string, Snippet>({});
+export const textEditorStateMobx = observable.box(EditorState.create({ doc: INITIAL_TEXT }))

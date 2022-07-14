@@ -118,7 +118,7 @@ const parserPlugin = ViewPlugin.fromClass(class {
 
 // DRAGGABLE HIGHLIGHTS
 
-const setIsInDragMode = StateEffect.define<boolean>();
+export const setIsInDragMode = StateEffect.define<boolean>();
 const isInDragModeField = StateField.define<boolean>({
   create() {
     return false;

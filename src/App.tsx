@@ -1,4 +1,4 @@
-import {Editor, EDITOR_VIEW, getAllSortedSnippets, getParserOfType} from "./Editor";
+import {Editor, EDITOR_VIEW, getAllSortedSnippets, getParserOfType, setIsInDragMode} from "./Editor";
 import {Snippet, Span, textEditorStateMobx} from "./primitives";
 import {observer} from "mobx-react-lite";
 import {useState} from "react";
@@ -37,6 +37,8 @@ export const Table = observer(() => {
       name: `Column${columns.length + 1}`,
       example: snippet
     }))
+
+    EDITOR_VIEW.dispatch({ effects: setIsInDragMode.of(false)})
   }
 
   const changeColumnNameAt = (changedIndex : number, name: string) => {
@@ -81,7 +83,7 @@ export const Table = observer(() => {
 
               return (
                 <td key={index} className={`border border-gray-200 px-1 ${(isDraggingOver && index === columns.length - 1) ? 'border-r-yellow-200' : ''}`}>
-                  <span className={`rounded ${parser!.color} ${parser!.bgColor}`}>{text}</span>
+                  <span className={parser!.color}>{text}</span>
                 </td>
               )
             })}
@@ -109,7 +111,7 @@ export const Table = observer(() => {
                 if (snippet) {
                   const text = doc.sliceString(snippet.span[0], snippet.span[1])
                   const parser = getParserOfType(snippet.type)
-                  value = <span className={`rounded ${parser!.color} ${parser!.bgColor}`}>{text}</span>
+                  value = <span className={parser!.color}>{text}</span>
                 }
 
                 return (

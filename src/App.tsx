@@ -3,22 +3,8 @@ import {Snippet, Span, textEditorStateMobx} from "./primitives";
 import {observer} from "mobx-react-lite";
 import {useState} from "react";
 import {AdjacentTokenRelationshipType, Column, findMatches, inferRelationships, Match} from "./rules";
-import {computed} from "mobx";
 import {nanoid} from "nanoid";
 
-
-function getMatchingSelectionSpan(value: string): Span | undefined {
-
-  const doc = EDITOR_VIEW.state.doc
-
-  for (const { from, to } of EDITOR_VIEW.state.selection.ranges) {
-    const rangeText = doc.sliceString(from, to)
-
-    if (rangeText === value) {
-      return [from, to]
-    }
-  }
-}
 
 export const Table = observer(() => {
   const doc = textEditorStateMobx.get().doc
@@ -53,6 +39,11 @@ export const Table = observer(() => {
     }))
   }
 
+  const changeColumnNameAt = (changedIndex : number, name: string) => {
+    setColumns(columns.map((column, index) => (
+      index === changedIndex ? { ... column, name } : column
+    )))
+  }
 
   const relationships = inferRelationships(
     columns, [
@@ -73,8 +64,8 @@ export const Table = observer(() => {
 
             {columns.map((column, index) => {
               return (
-                <th key={index} className="bg-gray-100 border border-gray-200 px-1">
-                  {column.name}
+                <th key={index} className="bg-gray-100 border border-gray-200">
+                  <input className="px-1 bg-gray-100" value={column.name} onChange={(evt) => changeColumnNameAt(index, evt.target.value)}/>
                 </th>
               )
             })}

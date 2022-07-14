@@ -8,6 +8,7 @@ import {useEffect, useRef} from "react";
 import {runInAction} from "mobx";
 import {observer} from "mobx-react-lite";
 import {Snippet, textEditorStateMobx} from "./primitives";
+import {sortBy} from "lodash";
 
 
 // PARSING
@@ -75,14 +76,14 @@ const PARSER: Parser[] = [
   }
 ]
 
-export function getAllSnippets(string: string): Snippet[] {
+export function getAllSortedSnippets(string: string): Snippet[] {
   let snippets: Snippet[] = []
 
   PARSER.forEach((parser) => {
     snippets = snippets.concat(parser.parse(string))
   })
 
-  return snippets
+  return sortBy(snippets, ({span}) => span[0])
 }
 
 const parserPlugin = ViewPlugin.fromClass(class {
@@ -99,7 +100,7 @@ const parserPlugin = ViewPlugin.fromClass(class {
 
   parseSnippets() {
     this.view.dispatch({
-      effects: setSnippetsEffect.of(getAllSnippets(this.view.state.doc.sliceString(0)))
+      effects: setSnippetsEffect.of(getAllSortedSnippets(this.view.state.doc.sliceString(0)))
     })
 
   }
@@ -157,7 +158,7 @@ class DraggableSnippetWidget extends WidgetType {
     token.style.cursor = "grab"
     token.draggable = true
     token.ondragstart = (evt: DragEvent) => {
-      evt.dataTransfer.setData("text/json", JSON.stringify(this.snippet));
+      evt!.dataTransfer!.setData("text/json", JSON.stringify(this.snippet));
     }
 
     token.className = `${parser!.bgColor} rounded ${parser!.color}`

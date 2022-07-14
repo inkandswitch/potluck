@@ -1,8 +1,8 @@
-import {Editor, EDITOR_VIEW, getAllSnippets, getParserOfType} from "./Editor";
+import {Editor, EDITOR_VIEW, getAllSortedSnippets, getParserOfType} from "./Editor";
 import {Snippet, Span, textEditorStateMobx} from "./primitives";
 import {observer} from "mobx-react-lite";
 import {useState} from "react";
-import {AdjacentTokenRelationshipType, Column, inferRelationships} from "./rules";
+import {AdjacentTokenRelationshipType, Column, findMatches, inferRelationships, Match} from "./rules";
 import {computed} from "mobx";
 import {nanoid} from "nanoid";
 
@@ -58,8 +58,12 @@ export const Table = observer(() => {
     columns, [
       AdjacentTokenRelationshipType
     ],
-    getAllSnippets(doc.sliceString(0))
+    getAllSortedSnippets(doc.sliceString(0))
   )
+
+  const sortedSnippets = getAllSortedSnippets(doc.sliceString(0))
+
+  const matches: Match[] = findMatches(columns, relationships, sortedSnippets)
 
   return (
     <div className="flex flex-col gap-2 items-start">
@@ -99,6 +103,33 @@ export const Table = observer(() => {
               &nbsp;
             </td>
           </tr>
+          {(matches.length > 0) && (
+            <tr>
+              <td className="text-gray-300">Matches</td>
+            </tr>
+          )}
+
+          {matches.map((match) => (
+            <tr>
+              {columns.map((column) => {
+                const snippet = match[column.id]
+                let value
+
+                if (snippet) {
+                  const text = doc.sliceString(snippet.span[0], snippet.span[1])
+                  const parser = getParserOfType(snippet.type)
+                  value = <span className={`rounded ${parser!.color} ${parser!.bgColor}`}>{text}</span>
+                }
+
+                return (
+                  <td className="border border-gray-200 px-1">
+                    {value}
+                  </td>
+                )
+              })}
+            </tr>
+          ))}
+
         </tbody>
       </table>
 

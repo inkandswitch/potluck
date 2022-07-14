@@ -121,7 +121,7 @@ const parserPlugin = ViewPlugin.fromClass(class {
 const setIsInDragMode = StateEffect.define<boolean>();
 const isInDragModeField = StateField.define<boolean>({
   create() {
-    return true;
+    return false;
   },
 
   update(isInDragMode, tr) {

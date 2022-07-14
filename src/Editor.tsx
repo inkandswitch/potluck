@@ -1,5 +1,13 @@
 import {Decoration, DecorationSet, EditorView, keymap, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
-import {EditorSelection, EditorState, RangeSet, SelectionRange, StateEffect, StateField} from "@codemirror/state";
+import {
+  EditorSelection,
+  EditorState,
+  Facet,
+  RangeSet,
+  SelectionRange,
+  StateEffect,
+  StateField
+} from "@codemirror/state";
 import {defaultKeymap} from "@codemirror/commands";
 import {minimalSetup} from "codemirror"
 import {Ref, useEffect, useRef} from "react";
@@ -10,20 +18,23 @@ import {autorun, comparer, computed, reaction, runInAction} from "mobx";
 import {observer} from "mobx-react-lite";
 import {Snippet, textEditorStateMobx} from "./primitives";
 
+
+// PARSING
+
 export type Parser = {
   type: string,
   color: string,
+  bgColor: string,
   parse: (text: string) => Snippet[]
 }
-
 
 const NUMBER_TYPE = 'number'
 const EXERCISE_TYPE = 'exercise'
 
-
 const PARSER: Parser[] = [
   {
     color: 'text-blue-500',
+    bgColor: 'bg-blue-100',
     type: EXERCISE_TYPE,
     parse(string) {
       const snippets: Snippet[] = []
@@ -37,7 +48,6 @@ const PARSER: Parser[] = [
 
         snippets.push({
           type: this.type,
-          id: nanoid(),
           span: [from, to]
         })
       }
@@ -47,6 +57,7 @@ const PARSER: Parser[] = [
   },
   {
     color: 'text-green-500',
+    bgColor: 'bg-green-100',
     type: NUMBER_TYPE,
     parse(string) {
       const snippets: Snippet[] = []
@@ -60,7 +71,6 @@ const PARSER: Parser[] = [
 
         snippets.push({
           type: this.type,
-          id: nanoid(),
           span: [from, to]
         })
       }
@@ -110,6 +120,96 @@ const parserPlugin = ViewPlugin.fromClass(class {
 })
 
 
+// DRAGGABLE HIGHLIGHTS
+
+const setIsInDragMode = StateEffect.define<boolean>();
+const isInDragModeField = StateField.define<boolean>({
+  create() {
+    return true;
+  },
+
+  update(isInDragMode, tr) {
+    for (let e of tr.effects) {
+      if (e.is(setIsInDragMode)) {
+        return e.value;
+      }
+    }
+    return isInDragMode;
+  },
+});
+
+
+class DraggableSnippetWidget extends WidgetType {
+  constructor(readonly snippet: Snippet, readonly text: string) {
+    super()
+  }
+
+  eq(other: DraggableSnippetWidget) {
+    return (
+      other.text === this.text &&
+      other.snippet.type === this.snippet.type &&
+      other.snippet.span[0] === this.snippet.span[0] &&
+      other.snippet.span[1] === this.snippet.span[1]
+    )
+  }
+
+
+  toDOM() {
+    let token = document.createElement("span")
+
+    const parser = PARSER.find(({ type }) => this.snippet.type === type)
+
+    token.style.cursor = "grab"
+    token.className = `${parser!.bgColor} rounded ${parser!.color}`
+    token.innerText = this.text
+
+    return token
+  }
+
+  ignoreEvent() {
+    return false
+  }
+}
+
+
+const draggableTokensPlugin = ViewPlugin.fromClass(class {
+
+  view: EditorView
+
+  constructor(view: EditorView) {
+    this.view = view
+
+    this.onKeyDown = this.onKeyDown.bind(this)
+    this.onKeyUp = this.onKeyUp.bind(this)
+
+    window.addEventListener("keydown", this.onKeyDown)
+    window.addEventListener("keyup", this.onKeyUp)
+  }
+
+  onKeyDown(evt: KeyboardEvent) {
+    if (evt.metaKey) {
+      this.view.dispatch({
+        effects: setIsInDragMode.of(true)
+      })
+    }
+  }
+
+  onKeyUp(evt: KeyboardEvent) {
+    if (!evt.metaKey) {
+      this.view.dispatch({
+        effects: setIsInDragMode.of(false)
+      })
+    }
+  }
+
+  destroy() {
+    window.removeEventListener("keydown", this.onKeyDown)
+    window.removeEventListener("keyup", this.onKeyUp)
+  }
+})
+
+// SNIPPETS
+
 const setSnippetsEffect =
   StateEffect.define<Snippet[]>();
 const snippetsField = StateField.define<Snippet[]>(
@@ -135,16 +235,26 @@ const snippetsField = StateField.define<Snippet[]>(
 );
 
 const snippetDecorations = EditorView.decorations.compute(
-  [snippetsField],
+  [snippetsField, isInDragModeField],
   (state) => {
+
+    const isinDragMode: boolean = state.field(isInDragModeField)
+
     return Decoration.set(
       state.field(snippetsField).map((snippet) => {
         const parser = PARSER.find(({ type }) => snippet.type === type)
+        const text = state.doc.sliceString(snippet.span[0], snippet.span[1])
 
         return (
-          Decoration.mark({
-            class: parser!.color,
-          }).range(snippet.span[0], snippet.span[1])
+          (isinDragMode
+            ? Decoration.replace({
+              widget: new DraggableSnippetWidget(snippet, text),
+              side: 1
+            })
+            : Decoration.mark({
+              class: parser!.color
+            }))
+            .range(snippet.span[0], snippet.span[1])
         )
       }),
       true
@@ -170,7 +280,9 @@ export const Editor = observer(() => {
         EditorView.lineWrapping,
         snippetsField,
         snippetDecorations,
-        parserPlugin
+        parserPlugin,
+        isInDragModeField,
+        draggableTokensPlugin
       ],
       parent: editorRef.current!,
       dispatch(transaction) {

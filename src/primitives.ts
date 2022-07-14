@@ -6,7 +6,6 @@ export type Span = [from: number, to: number];
 
 export type Snippet = {
   span: Span
-  id: string
   type: string
 }
 

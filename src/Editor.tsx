@@ -1,20 +1,11 @@
-import {Decoration, DecorationSet, EditorView, keymap, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
+import {Decoration, EditorView, ViewPlugin, ViewUpdate, WidgetType} from "@codemirror/view";
 import {
-  EditorSelection,
-  EditorState,
-  Facet,
-  RangeSet,
-  SelectionRange,
   StateEffect,
   StateField
 } from "@codemirror/state";
-import {defaultKeymap} from "@codemirror/commands";
 import {minimalSetup} from "codemirror"
-import {Ref, useEffect, useRef} from "react";
-import {nanoid} from 'nanoid';
-import {sortBy} from 'lodash';
-
-import {autorun, comparer, computed, reaction, runInAction} from "mobx";
+import {useEffect, useRef} from "react";
+import {runInAction} from "mobx";
 import {observer} from "mobx-react-lite";
 import {Snippet, textEditorStateMobx} from "./primitives";
 

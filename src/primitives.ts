@@ -1,5 +1,5 @@
 import { makeObservable, observable } from "mobx";
-import { EditorState } from "@codemirror/state";
+import { EditorState, Text } from "@codemirror/state";
 import { nanoid } from "nanoid";
 import { FormulaColumn } from "./formulas";
 
@@ -16,11 +16,16 @@ export type SheetConfig = {
   columns: FormulaColumn[];
 };
 
+export type TextDocumentSheet = {
+  id: string;
+  configId: string;
+};
+
 export type TextDocument = {
   id: string;
   name: string;
-  text: string;
-  sheets: { configId: string }[];
+  text: Text;
+  sheets: TextDocumentSheet[];
 };
 
 const INITIAL_TEXT = `4/15 gym: run + plank
@@ -47,11 +52,30 @@ export const textEditorStateMobx = observable.box(
   EditorState.create({ doc: INITIAL_TEXT })
 );
 
-export const textDocumentsMobx = observable.array<TextDocument>([
-  {
-    id: nanoid(),
+export const FIRST_TEXT_DOCUMENT_ID = "workout";
+export const FIRST_SHEET_CONFIG_ID = "first-sheet-config";
+export const textDocumentsMobx = observable.map<string, TextDocument>({
+  [FIRST_TEXT_DOCUMENT_ID]: {
+    id: FIRST_TEXT_DOCUMENT_ID,
     name: "workout",
-    text: INITIAL_TEXT,
-    sheets: [],
+    text: Text.of(INITIAL_TEXT.split("\n")),
+    sheets: [
+      {
+        id: nanoid(),
+        configId: FIRST_SHEET_CONFIG_ID,
+      },
+    ],
   },
-]);
+});
+export const sheetConfigsMobx = observable.map<string, SheetConfig>({
+  [FIRST_SHEET_CONFIG_ID]: {
+    id: FIRST_SHEET_CONFIG_ID,
+    name: "workout",
+    columns: [
+      {
+        name: "col1",
+        formula: "",
+      },
+    ],
+  },
+});

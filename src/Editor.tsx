@@ -5,12 +5,17 @@ import {
   ViewUpdate,
   WidgetType,
 } from "@codemirror/view";
-import { StateEffect, StateField } from "@codemirror/state";
+import { EditorState, StateEffect, StateField } from "@codemirror/state";
 import { minimalSetup } from "codemirror";
 import { useEffect, useRef } from "react";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { Snippet, textEditorStateMobx } from "./primitives";
+import {
+  Snippet,
+  TextDocument,
+  textDocumentsMobx,
+  textEditorStateMobx,
+} from "./primitives";
 import { sortBy } from "lodash";
 
 // PARSING
@@ -260,49 +265,52 @@ const snippetDecorations = EditorView.decorations.compute(
 
 export let EDITOR_VIEW: EditorView;
 
-export const Editor = observer(() => {
-  const editorRef = useRef(null);
+export const Editor = observer(
+  ({ textDocument }: { textDocument: TextDocument }) => {
+    const editorRef = useRef(null);
 
-  useEffect(() => {
-    const view = (EDITOR_VIEW = new EditorView({
-      doc: textEditorStateMobx.get()?.doc,
-      extensions: [
-        minimalSetup,
-        EditorView.theme({
-          "&": {
-            height: "100%",
-          },
-        }),
-        EditorView.lineWrapping,
-        snippetsField,
-        snippetDecorations,
-        parserPlugin,
-        isInDragModeField,
-        draggableTokensPlugin,
-      ],
-      parent: editorRef.current!,
-      dispatch(transaction) {
-        view.update([transaction]);
+    useEffect(() => {
+      const view = (EDITOR_VIEW = new EditorView({
+        doc: textDocument.text,
+        extensions: [
+          minimalSetup,
+          EditorView.theme({
+            "&": {
+              height: "100%",
+            },
+          }),
+          EditorView.lineWrapping,
+          snippetsField,
+          snippetDecorations,
+          parserPlugin,
+          isInDragModeField,
+          draggableTokensPlugin,
+        ],
+        parent: editorRef.current!,
+        dispatch(transaction) {
+          view.update([transaction]);
 
-        runInAction(() => {
-          textEditorStateMobx.set(transaction.state);
-        });
-      },
-    }));
+          runInAction(() => {
+            textDocument.text = view.state.doc;
+            textEditorStateMobx.set(transaction.state);
+          });
+        },
+      }));
 
-    runInAction(() => {
-      textEditorStateMobx.set(view.state);
-    });
+      runInAction(() => {
+        textEditorStateMobx.set(view.state);
+      });
 
-    return () => {
-      view.destroy();
-    };
-  }, []);
+      return () => {
+        view.destroy();
+      };
+    }, []);
 
-  return (
-    <div
-      className="text-lg h-[500px] bg-white border-black border-2 rounded-lg overflow-auto"
-      ref={editorRef}
-    />
-  );
-});
+    return (
+      <div
+        className="text-lg h-[500px] bg-white border-black border-2 rounded-lg overflow-auto"
+        ref={editorRef}
+      />
+    );
+  }
+);

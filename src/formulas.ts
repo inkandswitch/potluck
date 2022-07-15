@@ -9,9 +9,9 @@ export type FormulaColumn = {
   formula: string
 }
 
-export type ResultRow = {[name: string]: any}
+export type ResultRow = { [name: string]: any }
 
-function evaluateFormula (source: string, snippets: Snippet[], doc: Text, context: ResultRow) {
+function evaluateFormula(source: string, snippets: Snippet[], doc: Text, context: ResultRow) {
 
   const API = {
     VALUES_OF_TYPE: (type: string): Snippet[] => {
@@ -51,7 +51,8 @@ function evaluateFormula (source: string, snippets: Snippet[], doc: Text, contex
     }
   }
 
-  let fn = new Function('API', 'context', `
+  try {
+    let fn = new Function('API', 'context', `
     with (context) {
       with (API) {
         return ${source}
@@ -59,11 +60,14 @@ function evaluateFormula (source: string, snippets: Snippet[], doc: Text, contex
     }
   `)
 
-  return fn(API, context)
+    return fn(API, context)
+  } catch (e) {
+    return e
+  }
 }
 
-export function evaluateColumns (columns: FormulaColumn[], snippets: Snippet[], doc: Text) : ResultRow[]  {
-  let resultRows : ResultRow[] = [];
+export function evaluateColumns(columns: FormulaColumn[], snippets: Snippet[], doc: Text): ResultRow[] {
+  let resultRows: ResultRow[] = [];
 
 
   for (const column of columns) {
@@ -83,14 +87,9 @@ export function evaluateColumns (columns: FormulaColumn[], snippets: Snippet[], 
       resultRows = resultRows.map((row) => {
         const result = evaluateFormula(column.formula, snippets, doc, row)
 
-        return {...row, [column.name]: result };
+        return { ...row, [column.name]: result };
       })
     }
-
-
-
-
-
 
 
   }

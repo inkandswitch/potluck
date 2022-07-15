@@ -14,3 +14,8 @@
   -webkit-mask-size: contain;
   -webkit-mask-repeat: no-repeat;
 }
+
+.icon-plus {
+  mask-image: url('plus-icon.svg');
+  -webkit-mask-image: url('plus-icon.svg');
+}

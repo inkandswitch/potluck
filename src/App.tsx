@@ -159,23 +159,27 @@ export const Table = observer(() => {
 })
 
 
+let i = 1;
+
 export const SpreadSheet = observer(() => {
   const doc = textEditorStateMobx.get().doc
 
   const sortedSnippets = getAllSortedSnippets(doc.sliceString(0))
 
 
-  const [selectedFormulaIndex, setSelectedFormulaIndex] = useState<number | undefined>(undefined)
+  const [selectedFormulaIndex, setSelectedFormulaIndex] = useState<number>(0)
 
   const [columns, setColumns] = useState<FormulaColumn[]>([
-    {
-      name: 'exercise',
-      formula: 'VALUES_OF_TYPE("exercise")'
-    },
-    {
-      name: 'numbers',
-      formula: 'FILTER(VALUES_OF_TYPE("number"), IS_ON_SAME_LINE_AS(exercise))'
-    }
+    { name: 'col1', formula: '' }
+
+    /* {
+       name: 'exercise',
+       formula: 'VALUES_OF_TYPE("exercise")'
+     },
+     {
+       name: 'numbers',
+       formula: 'FILTER(VALUES_OF_TYPE("number"), IS_ON_SAME_LINE_AS(exercise))'
+     } */
   ])
 
   const rows: ResultRow[] = evaluateColumns(columns, sortedSnippets, doc)
@@ -192,15 +196,27 @@ export const SpreadSheet = observer(() => {
     )))
   }
 
+  const addColumn = () => {
+    setColumns(columns.concat({
+      name: `col${++i}`,
+      formula: ''
+    }))
+    setSelectedFormulaIndex(columns.length)
+  }
+
   return (
     <div className="flex flex-col gap-2 flex-1">
 
       {selectedFormulaIndex !== undefined && (
-        <input
-          className="border border-gray-200 w-f"
-          value={columns[selectedFormulaIndex].formula}
-          onChange={(evt) => changeFormulaAt(selectedFormulaIndex, evt.target.value)}
-        />
+        <div className="flex">
+          <span>{columns[selectedFormulaIndex].name} =&nbsp;</span>
+          <input
+            className="border border-gray-200 flex-1"
+            value={columns[selectedFormulaIndex].formula}
+            onChange={(evt) => changeFormulaAt(selectedFormulaIndex, evt.target.value)}
+          />
+
+        </div>
       )}
 
       <table>
@@ -217,6 +233,12 @@ export const SpreadSheet = observer(() => {
                 </th>
               )
             })}
+            <th className="w-[30px]">
+              <button
+                className="icon icon-plus bg-gray-500"
+                onClick={() => addColumn()}
+              />
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -224,7 +246,6 @@ export const SpreadSheet = observer(() => {
             <tr>
               {columns.map((column) => {
                 const value: any = row[column.name]
-
 
                 return (
                   <td className="border border-gray-200 px-1">
@@ -234,7 +255,6 @@ export const SpreadSheet = observer(() => {
               })}
             </tr>
           ))}
-
         </tbody>
       </table>
     </div>
@@ -243,6 +263,11 @@ export const SpreadSheet = observer(() => {
 
 
 function ValueDisplay({ value, doc }: { value: any, doc: Text }) {
+
+  if (value instanceof Error) {
+    return <span className="text-red-500">#Err</span>
+  }
+
   if (value && value.span && value.type) {
     const text = doc.sliceString(value.span[0], value.span[1])
     const parser = getParserOfType(value.type)

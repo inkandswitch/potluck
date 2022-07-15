@@ -1,12 +1,26 @@
-import { observable } from "mobx";
+import { makeObservable, observable } from "mobx";
 import { EditorState } from "@codemirror/state";
 import { nanoid } from "nanoid";
+import { FormulaColumn } from "./formulas";
 
 export type Span = [from: number, to: number];
 
 export type Snippet = {
   span: Span;
   type: string;
+};
+
+export type SheetConfig = {
+  id: string;
+  name: string;
+  columns: FormulaColumn[];
+};
+
+export type TextDocument = {
+  id: string;
+  name: string;
+  text: string;
+  sheets: { configId: string }[];
 };
 
 const INITIAL_TEXT = `4/15 gym: run + plank
@@ -32,3 +46,12 @@ Bench 70 10 8 3 (wrist problems, weight felt good)
 export const textEditorStateMobx = observable.box(
   EditorState.create({ doc: INITIAL_TEXT })
 );
+
+export const textDocumentsMobx = observable.array<TextDocument>([
+  {
+    id: nanoid(),
+    name: "workout",
+    text: INITIAL_TEXT,
+    sheets: [],
+  },
+]);

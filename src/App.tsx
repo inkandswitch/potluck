@@ -5,6 +5,8 @@ import { useState } from "react";
 import { AdjacentTokenRelationshipType, Column, findMatches, inferRelationships, Match } from "./rules";
 import { nanoid } from "nanoid";
 import { evaluateColumns, FormulaColumn, ResultRow } from "./formulas";
+import { isArray } from "lodash";
+import { Text } from "@codemirror/state";
 
 
 export const Table = observer(() => {
@@ -167,8 +169,12 @@ export const SpreadSheet = observer(() => {
 
   const [columns, setColumns] = useState<FormulaColumn[]>([
     {
-      name: 'workouts',
-      formula: 'VALUES_OF_TYPE("number")'
+      name: 'exercise',
+      formula: 'VALUES_OF_TYPE("exercise")'
+    },
+    {
+      name: 'numbers',
+      formula: 'FILTER(VALUES_OF_TYPE("number"), IS_ON_SAME_LINE_AS(exercise))'
     }
   ])
 
@@ -180,13 +186,11 @@ export const SpreadSheet = observer(() => {
     )))
   }
 
-
   const changeFormulaAt = (changedIndex: number, formula: string) => {
     setColumns(columns.map((column, index) => (
       index === changedIndex ? { ...column, formula } : column
     )))
   }
-
 
   return (
     <div className="flex flex-col gap-2 flex-1">
@@ -206,12 +210,10 @@ export const SpreadSheet = observer(() => {
               return (
                 <th
                   key={index}
-                  className={`bg-gray-100 border ${selectedFormulaIndex === index ? 'border-blue-300' : 'border-gray-200'}`}
+                  className={`text-left font-normal px-1 bg-gray-100 border ${selectedFormulaIndex === index ? 'border-blue-300' : 'border-gray-200'}`}
                   onClick={() => setSelectedFormulaIndex(index)}
                 >
                   {column.name}
-
-                  {false && <input className="bg-gray-100" value={column.name} onChange={(evt) => changeColumnNameAt(index, evt.target.value)} />}
                 </th>
               )
             })}
@@ -223,17 +225,10 @@ export const SpreadSheet = observer(() => {
               {columns.map((column) => {
                 const value: any = row[column.name]
 
-                let displayValue = JSON.stringify(value);
-
-                if (value.span && value.type) {
-                  const text = doc.sliceString(value.span[0], value.span[1])
-                  const parser = getParserOfType(value.type)
-                  displayValue = <span className={parser!.color}>{text}</span>
-                }
 
                 return (
                   <td className="border border-gray-200 px-1">
-                    {displayValue}
+                    <ValueDisplay value={value} doc={doc} />
                   </td>
                 )
               })}
@@ -245,6 +240,33 @@ export const SpreadSheet = observer(() => {
     </div>
   )
 })
+
+
+function ValueDisplay({ value, doc }: { value: any, doc: Text }) {
+  if (value && value.span && value.type) {
+    const text = doc.sliceString(value.span[0], value.span[1])
+    const parser = getParserOfType(value.type)
+    return (
+      <span className={parser!.color}>{text}</span>
+    )
+  }
+
+  if (isArray(value)) {
+    const lastIndex = value.length - 1
+
+    return (
+      <span>
+        {value.map((item, index) => (
+          index === lastIndex
+            ? <ValueDisplay value={item} doc={doc} />
+            : <span><ValueDisplay value={item} doc={doc} /><span className="text-gray-400">,</span> </span>
+        ))}
+      </span>
+    )
+  }
+
+  return <span>{JSON.stringify(value)}</span>;
+}
 
 function App() {
   return (

@@ -11,14 +11,14 @@ export type FormulaColumn = {
 
 export type ResultRow = {[name: string]: any}
 
-function evaluateFormula (source: string, snippets: Snippet[], doc: Text) {
+function evaluateFormula (source: string, snippets: Snippet[], doc: Text, context: ResultRow) {
 
   const API = {
     VALUES_OF_TYPE: (type: string): Snippet[] => {
       return snippets.filter((snippet) => snippet.type === type)
     },
 
-    ON_SAME_LINE: curry((a: Snippet, b: Snippet): boolean => {
+    IS_ON_SAME_LINE_AS: curry((a: Snippet, b: Snippet): boolean => {
       const lineStartA = doc.lineAt(a.span[0]).number
       const lineEndA = doc.lineAt(a.span[1]).number
       const lineStartB = doc.lineAt(b.span[0]).number
@@ -51,13 +51,15 @@ function evaluateFormula (source: string, snippets: Snippet[], doc: Text) {
     }
   }
 
-  let fn = new Function('API', `
-    with (API) {
-      return ${source}
+  let fn = new Function('API', 'context', `
+    with (context) {
+      with (API) {
+        return ${source}
+      }
     }
   `)
 
-  return fn(API)
+  return fn(API, context)
 }
 
 export function evaluateColumns (columns: FormulaColumn[], snippets: Snippet[], doc: Text) : ResultRow[]  {
@@ -66,7 +68,7 @@ export function evaluateColumns (columns: FormulaColumn[], snippets: Snippet[], 
 
   for (const column of columns) {
     if (resultRows.length === 0) {
-      const result = evaluateFormula(column.formula, snippets, doc)
+      const result = evaluateFormula(column.formula, snippets, doc, {})
 
       if (isArray(result)) {
         for (const item of result) {
@@ -76,7 +78,21 @@ export function evaluateColumns (columns: FormulaColumn[], snippets: Snippet[], 
       } else {
         resultRows.push({ [column.name]: result })
       }
+    } else {
+
+      resultRows = resultRows.map((row) => {
+        const result = evaluateFormula(column.formula, snippets, doc, row)
+
+        return {...row, [column.name]: result };
+      })
     }
+
+
+
+
+
+
+
   }
 
   return resultRows

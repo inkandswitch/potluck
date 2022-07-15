@@ -5,7 +5,7 @@ import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { getAllSortedSnippets, getParserOfType } from "./Editor";
 import { ResultRow, evaluateColumns } from "./formulas";
-import { sheetConfigsMobx, TextDocument } from "./primitives";
+import { SheetConfig, sheetConfigsMobx, TextDocument } from "./primitives";
 
 let i = 1;
 function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
@@ -40,6 +40,21 @@ function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
 
   return <span>{JSON.stringify(value)}</span>;
 }
+
+const SheetName = observer(({ sheetConfig }: { sheetConfig: SheetConfig }) => {
+  return (
+    <div>
+      <input
+        type="text"
+        value={sheetConfig.name}
+        onChange={action((e) => {
+          sheetConfig.name = e.target.value;
+        })}
+        className="font-medium text-lg border-b border-gray-200 w-full mb-2 outline-none focus:border-gray-400"
+      />
+    </div>
+  );
+});
 
 export const Sheet = observer(
   ({
@@ -94,7 +109,7 @@ export const Sheet = observer(
 
     return (
       <div className="flex flex-col gap-2 flex-1">
-        <div className="font-semibold">{sheetConfig.name}</div>
+        <SheetName sheetConfig={sheetConfig} />
         {selectedFormulaIndex !== undefined && (
           <div className="flex">
             <span>{columns[selectedFormulaIndex].name} =&nbsp;</span>

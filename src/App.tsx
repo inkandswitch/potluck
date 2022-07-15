@@ -241,28 +241,48 @@ const AddNewDocumentSheet = observer(
   }
 );
 
+const TextDocumentName = observer(
+  ({ textDocument }: { textDocument: TextDocument }) => {
+    return (
+      <div>
+        <input
+          type="text"
+          value={textDocument.name}
+          onChange={action((e) => {
+            textDocument.name = e.target.value;
+          })}
+          className="text-xl border-b border-gray-200 w-[500px] mb-2 outline-none focus:border-gray-400"
+        />
+      </div>
+    );
+  }
+);
+
 const TextDocumentComponent = observer(
   ({ textDocumentId }: { textDocumentId: string }) => {
     const textDocument = textDocumentsMobx.get(textDocumentId)!;
     return (
-      <div className="flex p-4 gap-4 items-start">
-        <Editor textDocument={textDocument} />
-        <div className="grow">
-          <div className="flex flex-col gap-4">
-            {textDocument.sheets.map((sheet) => {
-              return (
-                <Sheet
-                  textDocument={textDocument}
-                  sheetConfigId={sheet.configId}
-                  key={sheet.id}
-                />
-              );
-            })}
-          </div>
-          <div
-            className={classNames({ "mt-8": textDocument.sheets.length > 0 })}
-          >
-            <AddNewDocumentSheet textDocument={textDocument} />
+      <div className="px-4">
+        <TextDocumentName textDocument={textDocument} />
+        <div className="flex gap-4 items-start">
+          <Editor textDocument={textDocument} />
+          <div className="grow">
+            <div className="flex flex-col gap-4">
+              {textDocument.sheets.map((sheet) => {
+                return (
+                  <Sheet
+                    textDocument={textDocument}
+                    sheetConfigId={sheet.configId}
+                    key={sheet.id}
+                  />
+                );
+              })}
+            </div>
+            <div
+              className={classNames({ "mt-8": textDocument.sheets.length > 0 })}
+            >
+              <AddNewDocumentSheet textDocument={textDocument} />
+            </div>
           </div>
         </div>
       </div>

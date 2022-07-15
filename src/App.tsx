@@ -4,6 +4,7 @@ import {observer} from "mobx-react-lite";
 import {useState} from "react";
 import {AdjacentTokenRelationshipType, Column, findMatches, inferRelationships, Match} from "./rules";
 import {nanoid} from "nanoid";
+import { run } from "./formulas";
 
 
 export const Table = observer(() => {
@@ -55,6 +56,10 @@ export const Table = observer(() => {
   )
 
   const sortedSnippets = getAllSortedSnippets(doc.sliceString(0))
+
+
+  run(sortedSnippets, doc)
+
 
   const matches: Match[] = findMatches(columns, relationships, sortedSnippets)
 

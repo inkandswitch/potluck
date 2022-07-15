@@ -53,7 +53,7 @@ export const textEditorStateMobx = observable.box(
 );
 
 export const FIRST_TEXT_DOCUMENT_ID = "workout";
-export const FIRST_SHEET_CONFIG_ID = "first-sheet-config";
+export const FIRST_SHEET_CONFIG_ID = nanoid();
 export const textDocumentsMobx = observable.map<string, TextDocument>({
   [FIRST_TEXT_DOCUMENT_ID]: {
     id: FIRST_TEXT_DOCUMENT_ID,
@@ -87,3 +87,5 @@ export function addSheetConfig() {
   });
   return sheetConfig;
 }
+
+export const selectedTextDocumentIdBox = observable.box(FIRST_TEXT_DOCUMENT_ID);

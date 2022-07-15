@@ -7,8 +7,8 @@ import {
 } from "./Editor";
 import {
   addSheetConfig,
-  FIRST_SHEET_CONFIG_ID,
   FIRST_TEXT_DOCUMENT_ID,
+  selectedTextDocumentIdBox,
   sheetConfigsMobx,
   Snippet,
   Span,
@@ -27,7 +27,9 @@ import {
 } from "./rules";
 import { nanoid } from "nanoid";
 import { Sheet } from "./Sheet";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
+import { Text } from "@codemirror/state";
+import classNames from "classnames";
 
 export const Table = observer(() => {
   const doc = textEditorStateMobx.get().doc;
@@ -221,7 +223,7 @@ const AddNewDocumentSheet = observer(
         className="flex gap-4"
       >
         <select
-          className="border border-gray-200 rounded"
+          className="border border-gray-200 rounded px-1"
           ref={sheetConfigSelectRef}
         >
           <option value={NEW_OPTION_ID}>new sheet config</option>
@@ -239,27 +241,75 @@ const AddNewDocumentSheet = observer(
   }
 );
 
-const App = observer(() => {
-  const textDocument = textDocumentsMobx.get(FIRST_TEXT_DOCUMENT_ID)!;
-  return (
-    <div className="flex p-4 gap-4 items-start">
-      <Editor textDocument={textDocument} />
-      <div className="grow">
-        <div className="flex flex-col gap-4">
-          {textDocument.sheets.map((sheet) => {
-            return (
-              <Sheet
-                textDocument={textDocument}
-                sheetConfigId={sheet.configId}
-                key={sheet.id}
-              />
-            );
-          })}
-        </div>
-        <div className="mt-8">
-          <AddNewDocumentSheet textDocument={textDocument} />
+const TextDocumentComponent = observer(
+  ({ textDocumentId }: { textDocumentId: string }) => {
+    const textDocument = textDocumentsMobx.get(textDocumentId)!;
+    return (
+      <div className="flex p-4 gap-4 items-start">
+        <Editor textDocument={textDocument} />
+        <div className="grow">
+          <div className="flex flex-col gap-4">
+            {textDocument.sheets.map((sheet) => {
+              return (
+                <Sheet
+                  textDocument={textDocument}
+                  sheetConfigId={sheet.configId}
+                  key={sheet.id}
+                />
+              );
+            })}
+          </div>
+          <div
+            className={classNames({ "mt-8": textDocument.sheets.length > 0 })}
+          >
+            <AddNewDocumentSheet textDocument={textDocument} />
+          </div>
         </div>
       </div>
+    );
+  }
+);
+
+const TextDocumentSelector = observer(() => {
+  return (
+    <div className="p-4">
+      <select
+        onChange={action((e) => {
+          let newDocumentId = e.target.value;
+          if (newDocumentId === NEW_OPTION_ID) {
+            newDocumentId = nanoid();
+            textDocumentsMobx.set(newDocumentId, {
+              id: newDocumentId,
+              name: "Untitled",
+              text: Text.empty,
+              sheets: [],
+            });
+          }
+          selectedTextDocumentIdBox.set(newDocumentId);
+        })}
+        value={selectedTextDocumentIdBox.get()}
+        className="border border-gray-200 rounded p-1"
+      >
+        {[...textDocumentsMobx.values()].map((textDocument) => (
+          <option value={textDocument.id} key={textDocument.id}>
+            {textDocument.name}
+          </option>
+        ))}
+        <option value={NEW_OPTION_ID}>New text document</option>
+      </select>
+    </div>
+  );
+});
+
+const App = observer(() => {
+  const textDocumentId = selectedTextDocumentIdBox.get();
+  return (
+    <div>
+      <TextDocumentSelector />
+      <TextDocumentComponent
+        textDocumentId={textDocumentId}
+        key={textDocumentId}
+      />
     </div>
   );
 });

@@ -16,6 +16,6 @@
 }
 
 .icon-plus {
-  mask-image: url('plus-icon.svg');
-  -webkit-mask-image: url('plus-icon.svg');
+  mask-image: url("plus-icon.svg");
+  -webkit-mask-image: url("plus-icon.svg");
 }

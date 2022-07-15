@@ -26,8 +26,8 @@ import {
   Match,
 } from "./rules";
 import { nanoid } from "nanoid";
-import { Sheet } from "./Sheet";
-import { action, runInAction } from "mobx";
+import { SheetComponent } from "./SheetComponent";
+import { action } from "mobx";
 import { Text } from "@codemirror/state";
 import classNames from "classnames";
 
@@ -270,7 +270,7 @@ const TextDocumentComponent = observer(
             <div className="flex flex-col gap-4">
               {textDocument.sheets.map((sheet) => {
                 return (
-                  <Sheet
+                  <SheetComponent
                     textDocument={textDocument}
                     sheetConfigId={sheet.configId}
                     key={sheet.id}

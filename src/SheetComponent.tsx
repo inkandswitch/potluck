@@ -56,7 +56,7 @@ const SheetName = observer(({ sheetConfig }: { sheetConfig: SheetConfig }) => {
   );
 });
 
-export const Sheet = observer(
+export const SheetComponent = observer(
   ({
     textDocument,
     sheetConfigId,

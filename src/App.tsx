@@ -5,9 +5,19 @@ import {
   getParserOfType,
   setIsInDragMode,
 } from "./Editor";
-import { Snippet, Span, textEditorStateMobx } from "./primitives";
+import {
+  addSheetConfig,
+  FIRST_TEXT_DOCUMENT_ID,
+  selectedTextDocumentIdBox,
+  sheetConfigsMobx,
+  Snippet,
+  Span,
+  TextDocument,
+  textDocumentsMobx,
+  textEditorStateMobx,
+} from "./primitives";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   AdjacentTokenRelationshipType,
   Column,
@@ -16,9 +26,10 @@ import {
   Match,
 } from "./rules";
 import { nanoid } from "nanoid";
-import { evaluateColumns, FormulaColumn, ResultRow } from "./formulas";
-import { isArray } from "lodash";
+import { SheetComponent } from "./SheetComponent";
+import { action } from "mobx";
 import { Text } from "@codemirror/state";
+import classNames from "classnames";
 
 export const Table = observer(() => {
   const doc = textEditorStateMobx.get().doc;
@@ -189,157 +200,138 @@ export const Table = observer(() => {
   );
 });
 
-let i = 1;
+const NEW_OPTION_ID = "new";
+const AddNewDocumentSheet = observer(
+  ({ textDocument }: { textDocument: TextDocument }) => {
+    const sheetConfigSelectRef = useRef<HTMLSelectElement>(null);
 
-export const SpreadSheet = observer(() => {
-  const doc = textEditorStateMobx.get().doc;
-
-  const sortedSnippets = getAllSortedSnippets(doc.sliceString(0));
-
-  const [selectedFormulaIndex, setSelectedFormulaIndex] = useState<number>(0);
-
-  const [columns, setColumns] = useState<FormulaColumn[]>([
-    { name: "col1", formula: "" },
-
-    /* {
-       name: 'exercise',
-       formula: 'VALUES_OF_TYPE("exercise")'
-     },
-     {
-       name: 'numbers',
-       formula: 'FILTER(VALUES_OF_TYPE("number"), IS_ON_SAME_LINE_AS(exercise))'
-     } */
-  ]);
-
-  const rows: ResultRow[] = evaluateColumns(columns, sortedSnippets, doc);
-
-  const changeColumnNameAt = (changedIndex: number, name: string) => {
-    setColumns(
-      columns.map((column, index) =>
-        index === changedIndex ? { ...column, name } : column
-      )
+    return (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          let sheetConfigId = sheetConfigSelectRef.current!.value;
+          if (sheetConfigId === NEW_OPTION_ID) {
+            const sheetConfig = addSheetConfig();
+            sheetConfigId = sheetConfig.id;
+          }
+          textDocument.sheets.push({
+            id: nanoid(),
+            configId: sheetConfigId,
+          });
+          sheetConfigSelectRef.current!.value = NEW_OPTION_ID;
+        }}
+        className="flex gap-4"
+      >
+        <select
+          className="border border-gray-200 rounded px-1"
+          ref={sheetConfigSelectRef}
+        >
+          <option value={NEW_OPTION_ID}>new sheet config</option>
+          {[...sheetConfigsMobx.values()].map((sheetConfig) => (
+            <option value={sheetConfig.id} key={sheetConfig.id}>
+              {sheetConfig.name}
+            </option>
+          ))}
+        </select>
+        <button type="submit" className="button">
+          add sheet
+        </button>
+      </form>
     );
-  };
+  }
+);
 
-  const changeFormulaAt = (changedIndex: number, formula: string) => {
-    setColumns(
-      columns.map((column, index) =>
-        index === changedIndex ? { ...column, formula } : column
-      )
+const TextDocumentName = observer(
+  ({ textDocument }: { textDocument: TextDocument }) => {
+    return (
+      <div>
+        <input
+          type="text"
+          value={textDocument.name}
+          onChange={action((e) => {
+            textDocument.name = e.target.value;
+          })}
+          className="text-xl border-b border-gray-200 w-[500px] mb-2 outline-none focus:border-gray-400"
+        />
+      </div>
     );
-  };
+  }
+);
 
-  const addColumn = () => {
-    setColumns(
-      columns.concat({
-        name: `col${++i}`,
-        formula: "",
-      })
-    );
-    setSelectedFormulaIndex(columns.length);
-  };
-
-  return (
-    <div className="flex flex-col gap-2 flex-1">
-      {selectedFormulaIndex !== undefined && (
-        <div className="flex">
-          <span>{columns[selectedFormulaIndex].name} =&nbsp;</span>
-          <input
-            className="border border-gray-200 flex-1"
-            value={columns[selectedFormulaIndex].formula}
-            onChange={(evt) =>
-              changeFormulaAt(selectedFormulaIndex, evt.target.value)
-            }
-          />
-        </div>
-      )}
-
-      <table>
-        <thead>
-          <tr>
-            {columns.map((column, index) => {
-              return (
-                <th
-                  key={index}
-                  className={`text-left font-normal px-1 bg-gray-100 border ${
-                    selectedFormulaIndex === index
-                      ? "border-blue-300"
-                      : "border-gray-200"
-                  }`}
-                  onClick={() => setSelectedFormulaIndex(index)}
-                >
-                  {column.name}
-                </th>
-              );
-            })}
-            <th className="w-[30px]">
-              <button
-                className="icon icon-plus bg-gray-500"
-                onClick={() => addColumn()}
-              />
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row) => (
-            <tr>
-              {columns.map((column) => {
-                const value: any = row[column.name];
-
+const TextDocumentComponent = observer(
+  ({ textDocumentId }: { textDocumentId: string }) => {
+    const textDocument = textDocumentsMobx.get(textDocumentId)!;
+    return (
+      <div className="px-4">
+        <TextDocumentName textDocument={textDocument} />
+        <div className="flex gap-4 items-start">
+          <Editor textDocument={textDocument} />
+          <div className="grow">
+            <div className="flex flex-col gap-4">
+              {textDocument.sheets.map((sheet) => {
                 return (
-                  <td className="border border-gray-200 px-1">
-                    <ValueDisplay value={value} doc={doc} />
-                  </td>
+                  <SheetComponent
+                    textDocument={textDocument}
+                    sheetConfigId={sheet.configId}
+                    key={sheet.id}
+                  />
                 );
               })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+            </div>
+            <div
+              className={classNames({ "mt-8": textDocument.sheets.length > 0 })}
+            >
+              <AddNewDocumentSheet textDocument={textDocument} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
+
+const TextDocumentSelector = observer(() => {
+  return (
+    <div className="p-4">
+      <select
+        onChange={action((e) => {
+          let newDocumentId = e.target.value;
+          if (newDocumentId === NEW_OPTION_ID) {
+            newDocumentId = nanoid();
+            textDocumentsMobx.set(newDocumentId, {
+              id: newDocumentId,
+              name: "Untitled",
+              text: Text.empty,
+              sheets: [],
+            });
+          }
+          selectedTextDocumentIdBox.set(newDocumentId);
+        })}
+        value={selectedTextDocumentIdBox.get()}
+        className="border border-gray-200 rounded p-1"
+      >
+        {[...textDocumentsMobx.values()].map((textDocument) => (
+          <option value={textDocument.id} key={textDocument.id}>
+            {textDocument.name}
+          </option>
+        ))}
+        <option value={NEW_OPTION_ID}>New text document</option>
+      </select>
     </div>
   );
 });
 
-function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
-  if (value instanceof Error) {
-    return <span className="text-red-500">#Err</span>;
-  }
-
-  if (value && value.span && value.type) {
-    const text = doc.sliceString(value.span[0], value.span[1]);
-    const parser = getParserOfType(value.type);
-    return <span className={parser!.color}>{text}</span>;
-  }
-
-  if (isArray(value)) {
-    const lastIndex = value.length - 1;
-
-    return (
-      <span>
-        {value.map((item, index) =>
-          index === lastIndex ? (
-            <ValueDisplay value={item} doc={doc} />
-          ) : (
-            <span>
-              <ValueDisplay value={item} doc={doc} />
-              <span className="text-gray-400">,</span>{" "}
-            </span>
-          )
-        )}
-      </span>
-    );
-  }
-
-  return <span>{JSON.stringify(value)}</span>;
-}
-
-function App() {
+const App = observer(() => {
+  const textDocumentId = selectedTextDocumentIdBox.get();
   return (
-    <div className="flex p-4 gap-4 items-start">
-      <Editor />
-      <SpreadSheet />
+    <div>
+      <TextDocumentSelector />
+      <TextDocumentComponent
+        textDocumentId={textDocumentId}
+        key={textDocumentId}
+      />
     </div>
   );
-}
+});
 
 export default App;

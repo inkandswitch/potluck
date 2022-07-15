@@ -19,3 +19,7 @@
   mask-image: url("plus-icon.svg");
   -webkit-mask-image: url("plus-icon.svg");
 }
+
+.button {
+  @apply px-3 py-1 bg-blue-500 text-white rounded;
+}

@@ -1,4 +1,4 @@
-import { makeObservable, observable } from "mobx";
+import { makeObservable, observable, runInAction } from "mobx";
 import { EditorState, Text } from "@codemirror/state";
 import { nanoid } from "nanoid";
 import { FormulaColumn } from "./formulas";
@@ -67,15 +67,23 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
     ],
   },
 });
+let nextSheetIndex = 1;
 export const sheetConfigsMobx = observable.map<string, SheetConfig>({
   [FIRST_SHEET_CONFIG_ID]: {
     id: FIRST_SHEET_CONFIG_ID,
-    name: "workout",
-    columns: [
-      {
-        name: "col1",
-        formula: "",
-      },
-    ],
+    name: `sheet${nextSheetIndex++}`,
+    columns: [{ name: "col1", formula: "" }],
   },
 });
+export function addSheetConfig() {
+  const id = nanoid();
+  const sheetConfig = {
+    id,
+    name: `sheet${nextSheetIndex++}`,
+    columns: [{ name: "col1", formula: "" }],
+  };
+  runInAction(() => {
+    sheetConfigsMobx.set(id, sheetConfig);
+  });
+  return sheetConfig;
+}

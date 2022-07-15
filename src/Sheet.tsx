@@ -94,6 +94,7 @@ export const Sheet = observer(
 
     return (
       <div className="flex flex-col gap-2 flex-1">
+        <div className="font-semibold">{sheetConfig.name}</div>
         {selectedFormulaIndex !== undefined && (
           <div className="flex">
             <span>{columns[selectedFormulaIndex].name} =&nbsp;</span>

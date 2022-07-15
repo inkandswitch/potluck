@@ -6,6 +6,7 @@ import {
   setIsInDragMode,
 } from "./Editor";
 import {
+  addSheetConfig,
   FIRST_SHEET_CONFIG_ID,
   FIRST_TEXT_DOCUMENT_ID,
   sheetConfigsMobx,
@@ -16,7 +17,7 @@ import {
   textEditorStateMobx,
 } from "./primitives";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   AdjacentTokenRelationshipType,
   Column,
@@ -26,6 +27,7 @@ import {
 } from "./rules";
 import { nanoid } from "nanoid";
 import { Sheet } from "./Sheet";
+import { action } from "mobx";
 
 export const Table = observer(() => {
   const doc = textEditorStateMobx.get().doc;
@@ -196,21 +198,67 @@ export const Table = observer(() => {
   );
 });
 
+const NEW_OPTION_ID = "new";
+const AddNewDocumentSheet = observer(
+  ({ textDocument }: { textDocument: TextDocument }) => {
+    const sheetConfigSelectRef = useRef<HTMLSelectElement>(null);
+
+    return (
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          let sheetConfigId = sheetConfigSelectRef.current!.value;
+          if (sheetConfigId === NEW_OPTION_ID) {
+            const sheetConfig = addSheetConfig();
+            sheetConfigId = sheetConfig.id;
+          }
+          textDocument.sheets.push({
+            id: nanoid(),
+            configId: sheetConfigId,
+          });
+          sheetConfigSelectRef.current!.value = NEW_OPTION_ID;
+        }}
+        className="flex gap-4"
+      >
+        <select
+          className="border border-gray-200 rounded"
+          ref={sheetConfigSelectRef}
+        >
+          <option value={NEW_OPTION_ID}>new sheet config</option>
+          {[...sheetConfigsMobx.values()].map((sheetConfig) => (
+            <option value={sheetConfig.id} key={sheetConfig.id}>
+              {sheetConfig.name}
+            </option>
+          ))}
+        </select>
+        <button type="submit" className="button">
+          add sheet
+        </button>
+      </form>
+    );
+  }
+);
+
 const App = observer(() => {
   const textDocument = textDocumentsMobx.get(FIRST_TEXT_DOCUMENT_ID)!;
   return (
     <div className="flex p-4 gap-4 items-start">
       <Editor textDocument={textDocument} />
       <div className="grow">
-        {textDocument.sheets.map((sheet) => {
-          return (
-            <Sheet
-              textDocument={textDocument}
-              sheetConfigId={sheet.configId}
-              key={sheet.id}
-            />
-          );
-        })}
+        <div className="flex flex-col gap-4">
+          {textDocument.sheets.map((sheet) => {
+            return (
+              <Sheet
+                textDocument={textDocument}
+                sheetConfigId={sheet.configId}
+                key={sheet.id}
+              />
+            );
+          })}
+        </div>
+        <div className="mt-8">
+          <AddNewDocumentSheet textDocument={textDocument} />
+        </div>
       </div>
     </div>
   );

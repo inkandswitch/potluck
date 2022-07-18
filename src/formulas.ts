@@ -5,6 +5,7 @@ import {
   textDocumentsMobx,
   getSheetConfigsOfTextDocument,
   TextDocument,
+  SheetValueRow,
 } from "./primitives";
 import {
   curry,
@@ -16,6 +17,7 @@ import {
   isString,
 } from "lodash";
 import { Text } from "@codemirror/state";
+import { getComputedSheetValue } from "./compute";
 
 export type FormulaColumn = {
   name: string;
@@ -28,7 +30,6 @@ function evaluateFormula(
   textDocument: TextDocument,
   sheetConfig: SheetConfig,
   source: string,
-  highlights: Highlight[],
   sheetsScope: Scope,
   scope: Scope
 ) {
@@ -84,10 +85,7 @@ function evaluateFormula(
     },
 
     // this method is not curried because it has an optional isCaseSensitive parameter
-    HIGHLIGHTS_OF: (
-      values: string | string[],
-      isCaseSensitive: boolean
-    ): Highlight[] => {
+    HIGHLIGHTS_OF: (values: string | string[], isCaseSensitive: boolean) => {
       if (!isArray(values)) {
         values = [values];
       }
@@ -105,47 +103,32 @@ function evaluateFormula(
       return highlights;
     },
 
-    VALUES_OF_TYPE: (type: string): Highlight[] => {
-      const sheetConfig = Array.from(sheetConfigsMobx.values()).find(
+    VALUES_OF_TYPE: (type: string) => {
+      const typeSheetConfig = Array.from(sheetConfigsMobx.values()).find(
         (sheetConfig) => sheetConfig.name === type
       );
 
-      if (!sheetConfig) {
+      if (!typeSheetConfig) {
         return [];
       }
-
-      return highlights.filter(
-        (highlight) => highlight.sheetConfigId === sheetConfig.id
-      );
+      return getComputedSheetValue(textDocument.id, typeSheetConfig.id).get();
     },
 
-    NEXT: curry((highlight: Highlight, condition: any) => {
-      return highlights.find((otherHighlight) => {
-        if (otherHighlight.span[1] <= highlight.span[1]) {
-          return false;
-        }
-
-        if (isFunction(condition)) {
-          return condition(otherHighlight);
-        }
-
-        return condition;
-      });
-    }),
-
-    PREV: curry((highlight: Highlight, condition: any) => {
-      return highlights.reverse().find((otherHighlight) => {
-        if (otherHighlight.span[1] > highlight.span[0]) {
-          return false;
-        }
-
-        if (isFunction(condition)) {
-          return condition(otherHighlight);
-        }
-
-        return condition;
-      });
-    }),
+    NEXT_OF_TYPE: (highlight: Highlight, type: string) => {
+      const typeSheetConfig = Array.from(sheetConfigsMobx.values()).find(
+        (sheetConfig) => sheetConfig.name === type
+      );
+      if (!typeSheetConfig) {
+        return [];
+      }
+      const sheetValue = getComputedSheetValue(
+        textDocument.id,
+        typeSheetConfig.id
+      ).get();
+      return sheetValue.find(
+        (r) => "span" in r && r.span[0] > highlight.span[1]
+      );
+    },
 
     HAS_TYPE: curry((type: string, highlight: Highlight) => {
       const sheetConfig = Array.from(sheetConfigsMobx.values()).find(
@@ -245,6 +228,8 @@ function evaluateFormula(
     }
   `
     );
+    debugger;
+    console.log(fn);
 
     console.log("successfully evald", source);
     return fn(API, sheetsScope, scope);
@@ -270,7 +255,6 @@ export function evaluateColumns(
         textDocument,
         sheetConfig,
         column.formula,
-        snippets,
         proxiedSheetsContext,
         {}
       );
@@ -286,7 +270,6 @@ export function evaluateColumns(
           textDocument,
           sheetConfig,
           column.formula,
-          snippets,
           proxiedSheetsContext,
           { ...row }
         );
@@ -302,28 +285,26 @@ export function evaluateColumns(
 export function evaluateSheet(
   textDocument: TextDocument,
   sheetConfig: SheetConfig,
-  highlights: Highlight[],
   sheetsContext: Scope
-): Highlight[] {
-  let resultRows: Scope[] = [];
+): SheetValueRow[] {
+  let resultRows: { [columnName: string]: any }[] | undefined;
 
   const proxiedSheetsContext = sheetsScopeProxy(sheetsContext);
 
   for (const column of sheetConfig.columns) {
-    if (resultRows.length === 0) {
+    if (resultRows === undefined) {
       const result = evaluateFormula(
         textDocument,
         sheetConfig,
         column.formula,
-        highlights,
         proxiedSheetsContext,
         {}
       );
 
       if (isArray(result)) {
-        result.forEach((item) => resultRows.push({ [column.name]: item }));
+        resultRows = result.map((item) => ({ [column.name]: item }));
       } else {
-        resultRows.push({ [column.name]: result });
+        resultRows = [{ [column.name]: result }];
       }
     } else {
       resultRows = resultRows.map((row) => {
@@ -331,7 +312,6 @@ export function evaluateSheet(
           textDocument,
           sheetConfig,
           column.formula,
-          highlights,
           proxiedSheetsContext,
           { ...row }
         );
@@ -341,7 +321,30 @@ export function evaluateSheet(
     }
   }
 
-  return resultRows;
+  return (resultRows ?? []).map((rowData) => {
+    let from, to;
+
+    for (const value of Object.values(rowData)) {
+      if (value && value.span) {
+        const [valueFrom, valueTo] = value.span;
+
+        if (from === undefined || valueFrom < from) {
+          from = valueFrom;
+        }
+
+        if (to === undefined || valueTo > to) {
+          to = valueTo;
+        }
+      }
+    }
+
+    return {
+      documentId: textDocument.id,
+      sheetConfigId: sheetConfig.id,
+      span: from !== undefined && to !== undefined ? [from, to] : undefined,
+      data: rowData,
+    };
+  });
 }
 
 function sheetsScopeProxy(sheetsScope: Scope) {
@@ -405,41 +408,50 @@ export function evaluateSheetConfigs(
   const sheetsScope: Scope = {};
 
   sheetConfigs.forEach((sheetConfig) => {
-    const matches = evaluateColumns(
+    const sheetValueRows = evaluateSheet(
       textDocument,
       sheetConfig,
-      highlights,
       sheetsScope
     );
+    sheetsScope[sheetConfig.id] = sheetValueRows.map((r) => r.data);
+    highlights.push(
+      ...sheetValueRows.filter((r): r is Highlight => "span" in r)
+    );
+    // const matches = evaluateColumns(
+    //   textDocument,
+    //   sheetConfig,
+    //   highlights,
+    //   sheetsScope
+    // );
 
-    sheetsScope[sheetConfig.id] = matches;
+    // sheetsScope[sheetConfig.id] = matches;
 
-    for (const match of matches) {
-      let from, to;
+    // for (const match of matches) {
+    //   let from, to;
 
-      for (const value of Object.values(match)) {
-        if (value && value.span) {
-          const [valueFrom, valueTo] = value.span;
+    //   for (const value of Object.values(match)) {
+    //     if (value && value.span) {
+    //       const [valueFrom, valueTo] = value.span;
 
-          if (from === undefined || valueFrom < from) {
-            from = valueFrom;
-          }
+    //       if (from === undefined || valueFrom < from) {
+    //         from = valueFrom;
+    //       }
 
-          if (to === undefined || valueTo > to) {
-            to = valueTo;
-          }
-        }
-      }
+    //       if (to === undefined || valueTo > to) {
+    //         to = valueTo;
+    //       }
+    //     }
+    //   }
 
-      if (from !== undefined && to !== undefined) {
-        highlights.push({
-          documentId: textDocument.id,
-          sheetConfigId: sheetConfig.id,
-          span: [from, to],
-          data: match,
-        });
-      }
-    }
+    //   if (from !== undefined && to !== undefined) {
+    //     highlights.push({
+    //       documentId: textDocument.id,
+    //       sheetConfigId: sheetConfig.id,
+    //       span: [from, to],
+    //       data: match,
+    //     });
+    //   }
+    // }
   });
 
   return {

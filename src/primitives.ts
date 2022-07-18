@@ -211,7 +211,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
         name: "reps",
         formula: 'FILTER(VALUES_OF_TYPE("numbers"), HAS_TEXT_ON_RIGHT("x"))',
       },
-      { name: "sets", formula: 'NEXT(reps, HAS_TYPE("numbers"))' },
+      { name: "sets", formula: 'NEXT_OF_TYPE(reps, "numbers")' },
     ],
   },
   [INGREDIENTS_SHEET_CONFIG_ID]: {

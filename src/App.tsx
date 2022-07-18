@@ -2,7 +2,7 @@ import {
   Editor,
 } from "./Editor";
 import {
-  addSheetConfig,
+  addSheetConfig, getSheetConfigsOfTextDocument,
   selectedTextDocumentIdBox,
   sheetConfigsMobx,
   TextDocument,
@@ -15,6 +15,7 @@ import { SheetComponent } from "./SheetComponent";
 import { action } from "mobx";
 import { Text } from "@codemirror/state";
 import classNames from "classnames";
+import { evaluateSheetConfigs } from "./formulas";
 
 const NEW_OPTION_ID = "new";
 const AddNewDocumentSheet = observer(
@@ -77,11 +78,18 @@ const TextDocumentName = observer(
 const TextDocumentComponent = observer(
   ({ textDocumentId }: { textDocumentId: string }) => {
     const textDocument = textDocumentsMobx.get(textDocumentId)!;
+
+    const sheetConfigs = getSheetConfigsOfTextDocument(textDocument)
+    const {sheetsScope}  = evaluateSheetConfigs(textDocument.text, sheetConfigs)
+
+    console.log(sheetsScope)
+
     return (
       <div className="px-4">
         <TextDocumentName textDocument={textDocument} />
         <div className="flex gap-4 items-start">
           <Editor textDocumentId={textDocumentId} />
+
           <div className="grow">
             <div className="flex flex-col gap-4">
               {textDocument.sheets.map((sheet) => {
@@ -90,6 +98,7 @@ const TextDocumentComponent = observer(
                     textDocument={textDocument}
                     sheetConfigId={sheet.configId}
                     key={sheet.id}
+                    rows={sheetsScope[sheet.configId]}
                   />
                 );
               })}

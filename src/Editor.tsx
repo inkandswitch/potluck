@@ -13,7 +13,7 @@ import {
   Highlight, SheetConfig, sheetConfigsMobx, textDocumentsMobx,
   textEditorStateMobx,
 } from "./primitives";
-import { getAllSortedHighlights } from "./formulas";
+import { evaluateSheetConfigs } from "./formulas";
 
 const textDocumentIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
@@ -35,7 +35,7 @@ function parseHighlights(view: EditorView) {
 
   view.dispatch({
     effects: setHighlightsEffect.of(
-      getAllSortedHighlights(doc, sheetConfigs)
+      evaluateSheetConfigs(doc, sheetConfigs).highlights
     ),
   });
 }
@@ -125,6 +125,7 @@ export const Editor = observer(
         view.destroy();
       };
     }, [textDocumentId]);
+
 
     return (
       <div

@@ -3,8 +3,8 @@ import { isArray } from "lodash";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { ResultRow, evaluateColumns, getAllSortedHighlights } from "./formulas";
-import { getSheetConfigsOfTextDocument, SheetConfig, sheetConfigsMobx, TextDocument } from "./primitives";
+import { Scope } from "./formulas";
+import { SheetConfig, sheetConfigsMobx, TextDocument } from "./primitives";
 
 let i = 1;
 function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
@@ -59,27 +59,18 @@ export const SheetComponent = observer(
   ({
     textDocument,
     sheetConfigId,
+    rows
   }: {
     textDocument: TextDocument;
     sheetConfigId: string;
+    rows: Scope[]
   }) => {
     const doc = textDocument.text;
-
-    const sheetConfigs = getSheetConfigsOfTextDocument(textDocument)
-    const sortedHighlights = getAllSortedHighlights(doc, sheetConfigs);
 
     const [selectedFormulaIndex, setSelectedFormulaIndex] = useState<number>(0);
 
     const sheetConfig = sheetConfigsMobx.get(sheetConfigId)!;
     const columns = sheetConfig.columns;
-
-    const rows: ResultRow[] = evaluateColumns(columns, sortedHighlights, doc);
-
-    const changeColumnNameAt = action((changedIndex: number, name: string) => {
-      sheetConfig.columns = sheetConfig.columns.map((column, index) =>
-        index === changedIndex ? { ...column, name } : column
-      );
-    });
 
     const changeFormulaAt = action((changedIndex: number, formula: string) => {
       sheetConfig.columns = sheetConfig.columns.map((column, index) =>

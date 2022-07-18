@@ -1,5 +1,5 @@
-import { SheetConfig, Highlight } from "./primitives";
-import { curry, isFunction, isArray, sortBy } from "lodash";
+import { SheetConfig, Highlight, sheetConfigsMobx } from "./primitives";
+import { curry, isFunction, isArray, sortBy, isObject } from "lodash";
 import { Text } from "@codemirror/state";
 
 export type FormulaColumn = {
@@ -7,13 +7,14 @@ export type FormulaColumn = {
   formula: string;
 };
 
-export type ResultRow = { [name: string]: any };
+export type Scope = { [name: string]: any };
 
 function evaluateFormula(
   source: string,
   highlights: Highlight[],
   doc: Text,
-  context: ResultRow
+  sheetsScope: Scope,
+  scope: Scope,
 ) {
   const API = {
 
@@ -94,17 +95,20 @@ function evaluateFormula(
   try {
     let fn = new Function(
       "API",
+      "sheetsContext",
       "context",
       `
-    with (context) {
-      with (API) {
-        return ${source}
+    with (API) {  
+      with (sheetsContext) {
+        with (context) {
+          return ${source}
+        }
       }
     }
   `
     );
 
-    return fn(API, context);
+    return fn(API, sheetsScope, scope);
   } catch (e) {
     console.error(e)
     return e;
@@ -114,24 +118,25 @@ function evaluateFormula(
 export function evaluateColumns(
   columns: FormulaColumn[],
   snippets: Highlight[],
-  doc: Text
-): ResultRow[] {
-  let resultRows: ResultRow[] = [];
+  doc: Text,
+  sheetsContext: Scope
+): Scope[] {
+  let resultRows: Scope[] = [];
+
+  const proxiedSheetsContext = sheetsScopeProxy(sheetsContext)
 
   for (const column of columns) {
     if (resultRows.length === 0) {
-      const result = evaluateFormula(column.formula, snippets, doc, {});
+      const result = evaluateFormula(column.formula, snippets, doc, proxiedSheetsContext, {});
 
       if (isArray(result)) {
-        for (const item of result) {
-          resultRows.push({ [column.name]: item });
-        }
+        result.forEach(item => resultRows.push({ [column.name]: item }))
       } else {
         resultRows.push({ [column.name]: result });
       }
     } else {
       resultRows = resultRows.map((row) => {
-        const result = evaluateFormula(column.formula, snippets, doc, row);
+        const result = evaluateFormula(column.formula, snippets, doc, proxiedSheetsContext, {...row});
 
         return { ...row, [column.name]: result };
       });
@@ -141,17 +146,76 @@ export function evaluateColumns(
   return resultRows;
 }
 
-export function getAllSortedHighlights(doc: Text, sheetConfigs: SheetConfig[]): Highlight[] {
+function sheetsScopeProxy (sheetsScope: Scope) {
+  const resolved: Scope = {}
+
+  for (const [id, rows] of Object.entries(sheetsScope)) {
+    const name = sheetConfigsMobx.get(id)?.name
+    if (name) {
+      resolved[name] = rows
+    }
+  }
+
+  return scopeProxy(resolved)
+}
+
+function wrapValueInProxy (value : any) {
+  if (isArray(value)) {
+    return arrayProxy(value)
+  }
+
+  if (isObject(value)) {
+    return scopeProxy(value)
+  }
+
+  return value
+}
+
+function arrayProxy (array: any[]) {
+  const handler = {
+    get (target: any[], prop: string) : any[] {
+
+      if (array[0] && array[0].hasOwnProperty(prop)) {
+        return (
+          array
+          .map((item) => wrapValueInProxy(item[prop]))
+          .filter(value => value !== undefined)
+        )
+      }
+
+
+      return Reflect.get(...arguments);
+    }
+  }
+
+  return new Proxy(array, handler)
+}
+
+function scopeProxy(scope: Scope) {
+  const handler = {
+    get (target: any, prop : string) : any {
+      return wrapValueInProxy(scope[prop])
+    }
+  }
+
+  return new Proxy(scope, handler)
+}
+
+export function evaluateSheetConfigs (doc: Text, sheetConfigs: SheetConfig[]): { highlights: Highlight[], sheetsScope: Scope } {
   let highlights: Highlight[] = [];
 
+  const sheetsScope: Scope = {}
+
   sheetConfigs.forEach((sheetConfig) => {
-    const matches = evaluateColumns(sheetConfig.columns, highlights, doc)
+    const matches = evaluateColumns(sheetConfig.columns, highlights, doc, sheetsScope)
+
+    sheetsScope[sheetConfig.id] = matches
 
     for (const match of matches) {
       let from, to;
 
       for (const value of Object.values(match)) {
-        if (value.span) {
+        if (value && value.span) {
           const [valueFrom, valueTo] = value.span
 
           if (from === undefined || valueFrom < from) {
@@ -174,5 +238,8 @@ export function getAllSortedHighlights(doc: Text, sheetConfigs: SheetConfig[]): 
     }
   })
 
-  return sortBy(highlights, ({ span }) => span[0]);
+  return {
+    sheetsScope,
+    highlights: sortBy(highlights, ({ span }) => span[0])
+  }
 }

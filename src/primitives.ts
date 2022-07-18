@@ -8,7 +8,7 @@ export type Span = [from: number, to: number];
 export type Highlight = {
   span: Span;
   sheetConfigId?: string;
-  data: { [colId: string]: any }
+  data: { [colId: string]: any };
 };
 
 export type SheetConfig = {
@@ -30,11 +30,11 @@ export type TextDocument = {
 };
 
 export function getSheetConfigsOfTextDocument(textDocument: TextDocument) {
-  return (
-    textDocument.sheets
-      .map((textDocumentSheet) => sheetConfigsMobx.get(textDocumentSheet.configId))
-      .filter((sheetConfig) => sheetConfig !== undefined) as SheetConfig[]
-  )
+  return textDocument.sheets
+    .map((textDocumentSheet) =>
+      sheetConfigsMobx.get(textDocumentSheet.configId)
+    )
+    .filter((sheetConfig) => sheetConfig !== undefined) as SheetConfig[];
 }
 
 const WORKOUT_TEXT = `
@@ -78,7 +78,7 @@ const ICE_CREAM_TEXT = `Ingredients
 
 Instructions
 Pour 1 cup of the cream into a saucepan and add the sugar, salt. Scrape the seeds of the vanilla bean into the pot and then add the vanilla pod to the pot. Warm the mixture over medium heat, just until the sugar dissolves. Remove from the heat and add the remaining cream, milk, and vanilla extract (if using extract). Stir to combine and chill in the refrigerator.
-When ready to churn, remove the vanilla pod, whisk mixture again and pour into ice cream maker. Churn according to the manufacturer’s instructions. Transfer the finished ice cream to an airtight container and place in the freezer until ready to serve. Enjoy!`
+When ready to churn, remove the vanilla pod, whisk mixture again and pour into ice cream maker. Churn according to the manufacturer’s instructions. Transfer the finished ice cream to an airtight container and place in the freezer until ready to serve. Enjoy!`;
 
 const GOCHUJANG_PORK_TEXT = `Grilled Gochujang Pork With Fresh Sesame Kimchi
 
@@ -113,16 +113,16 @@ Step 3
 Grill the pork and onion, in batches if necessary, until nicely charred and caramelized around the edges, and the pork is cooked through, about 3 minutes per side. Transfer to a serving platter.
 
 Step 4
-Serve the grilled pork and onions with the fresh sesame kimchi and rice on the side.`
+Serve the grilled pork and onions with the fresh sesame kimchi and rice on the side.`;
 
 export const WORKOUT_DOCUMENT_ID = "workout";
-export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork"
-export const WORKOUT_SHEET_CONFIG_ID = nanoid()
-export const NUMBER_SHEET_CONFIG_ID = nanoid()
-export const FOOD_TYPES_SHEET_CONFIG_ID = nanoid()
-export const ICE_CREAM_DOCUMENT_ID = "ice cream"
-export const INGREDIENTS_SHEET_CONFIG_ID = nanoid()
-export const REPS_SHEET_CONFIG_ID = nanoid()
+export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork";
+export const WORKOUT_SHEET_CONFIG_ID = nanoid();
+export const NUMBER_SHEET_CONFIG_ID = nanoid();
+export const FOOD_TYPES_SHEET_CONFIG_ID = nanoid();
+export const ICE_CREAM_DOCUMENT_ID = "ice cream";
+export const INGREDIENTS_SHEET_CONFIG_ID = nanoid();
+export const REPS_SHEET_CONFIG_ID = nanoid();
 
 export const textDocumentsMobx = observable.map<string, TextDocument>({
   [WORKOUT_DOCUMENT_ID]: {
@@ -132,23 +132,23 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
     sheets: [
       {
         id: nanoid(),
-        configId: NUMBER_SHEET_CONFIG_ID
+        configId: NUMBER_SHEET_CONFIG_ID,
       },
       {
         id: nanoid(),
-        configId: REPS_SHEET_CONFIG_ID
+        configId: REPS_SHEET_CONFIG_ID,
       },
       {
         id: nanoid(),
         configId: WORKOUT_SHEET_CONFIG_ID,
-      }
+      },
     ],
   },
   [ICE_CREAM_DOCUMENT_ID]: {
     id: ICE_CREAM_DOCUMENT_ID,
     name: "ice cream",
     text: Text.of(ICE_CREAM_TEXT.split("\n")),
-    sheets: []
+    sheets: [],
   },
   [GOCHUJANG_PORK_DOCUMENT_ID]: {
     id: GOCHUJANG_PORK_DOCUMENT_ID,
@@ -162,43 +162,54 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: nanoid(),
         configId: INGREDIENTS_SHEET_CONFIG_ID,
-      }
+      },
     ],
-  }
+  },
 });
 let nextSheetIndex = 1;
 export const sheetConfigsMobx = observable.map<string, SheetConfig>({
   [NUMBER_SHEET_CONFIG_ID]: {
     id: NUMBER_SHEET_CONFIG_ID,
-    name: 'numbers',
-    columns: [{ name: "value", formula: 'HIGHLIGHTS_OF_REGEX("[0-9]+")' }]
+    name: "numbers",
+    columns: [{ name: "value", formula: 'HIGHLIGHTS_OF_REGEX("[0-9]+")' }],
   },
   [WORKOUT_SHEET_CONFIG_ID]: {
     id: WORKOUT_SHEET_CONFIG_ID,
-    name: 'workouts',
+    name: "workouts",
     columns: [
       { name: "activity", formula: 'HIGHLIGHTS_OF_REGEX("Squat|Dead")' },
-      { name: "exercises", formula: 'FILTER(VALUES_OF_TYPE("reps"), IS_ON_SAME_LINE_AS(activity))' }
+      {
+        name: "exercises",
+        formula: 'FILTER(VALUES_OF_TYPE("reps"), IS_ON_SAME_LINE_AS(activity))',
+      },
     ],
   },
   [REPS_SHEET_CONFIG_ID]: {
     id: REPS_SHEET_CONFIG_ID,
-    name: 'reps',
+    name: "reps",
     columns: [
-      { name: "reps", formula: 'FILTER(VALUES_OF_TYPE("numbers"), HAS_TEXT_ON_RIGHT("x"))' },
-      { name: "sets", formula: 'NEXT(reps, HAS_TYPE("numbers"))' }
+      {
+        name: "reps",
+        formula: 'FILTER(VALUES_OF_TYPE("numbers"), HAS_TEXT_ON_RIGHT("x"))',
+      },
+      { name: "sets", formula: 'NEXT(reps, HAS_TYPE("numbers"))' },
     ],
   },
   [FOOD_TYPES_SHEET_CONFIG_ID]: {
     id: FOOD_TYPES_SHEET_CONFIG_ID,
-    name: 'foodTypes',
+    name: "foodTypes",
     columns: [{ name: "name", formula: '["pork", "gochugaru", "vinegar"]' }],
   },
   [INGREDIENTS_SHEET_CONFIG_ID]: {
     id: INGREDIENTS_SHEET_CONFIG_ID,
-    name: 'ingredients',
-    columns: [{ name: "name", formula: 'HIGHLIGHTS_OF(["pork", "gochugaru", "vinegar"])' }],
-  }
+    name: "ingredients",
+    columns: [
+      {
+        name: "name",
+        formula: 'HIGHLIGHTS_OF(["pork", "gochugaru", "vinegar"])',
+      },
+    ],
+  },
 });
 
 export function addSheetConfig() {

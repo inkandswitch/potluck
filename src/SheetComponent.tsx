@@ -59,11 +59,11 @@ export const SheetComponent = observer(
   ({
     textDocument,
     sheetConfigId,
-    rows
+    rows,
   }: {
     textDocument: TextDocument;
     sheetConfigId: string;
-    rows: Scope[]
+    rows: Scope[];
   }) => {
     const doc = textDocument.text;
 

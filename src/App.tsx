@@ -1,8 +1,7 @@
+import { Editor } from "./Editor";
 import {
-  Editor,
-} from "./Editor";
-import {
-  addSheetConfig, getSheetConfigsOfTextDocument,
+  addSheetConfig,
+  getSheetConfigsOfTextDocument,
   selectedTextDocumentIdBox,
   sheetConfigsMobx,
   TextDocument,
@@ -79,8 +78,11 @@ const TextDocumentComponent = observer(
   ({ textDocumentId }: { textDocumentId: string }) => {
     const textDocument = textDocumentsMobx.get(textDocumentId)!;
 
-    const sheetConfigs = getSheetConfigsOfTextDocument(textDocument)
-    const {sheetsScope}  = evaluateSheetConfigs(textDocument.text, sheetConfigs)
+    const sheetConfigs = getSheetConfigsOfTextDocument(textDocument);
+    const { sheetsScope } = evaluateSheetConfigs(
+      textDocument.text,
+      sheetConfigs
+    );
 
     return (
       <div className="px-4">

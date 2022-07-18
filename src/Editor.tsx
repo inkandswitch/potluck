@@ -1,7 +1,8 @@
 import {
   Decoration,
   EditorView,
-  ViewPlugin, ViewUpdate
+  ViewPlugin,
+  ViewUpdate,
 } from "@codemirror/view";
 import { Facet, StateEffect, StateField } from "@codemirror/state";
 import { minimalSetup } from "codemirror";
@@ -10,7 +11,10 @@ import { autorun, comparer, reaction, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   getSheetConfigsOfTextDocument,
-  Highlight, SheetConfig, sheetConfigsMobx, textDocumentsMobx,
+  Highlight,
+  SheetConfig,
+  sheetConfigsMobx,
+  textDocumentsMobx,
   textEditorStateMobx,
 } from "./primitives";
 import { evaluateSheetConfigs } from "./formulas";
@@ -22,16 +26,17 @@ const textDocumentIdFacet = Facet.define<string, string>({
 // HIGHLIGHTS
 
 function parseHighlights(view: EditorView) {
-  const doc = view.state.doc
-  const textDocumentId = view.state.facet(textDocumentIdFacet)
+  const doc = view.state.doc;
+  const textDocumentId = view.state.facet(textDocumentIdFacet);
 
-  const textDocument = textDocumentsMobx.get(textDocumentId)
+  const textDocument = textDocumentsMobx.get(textDocumentId);
 
   if (!textDocument) {
-    return
+    return;
   }
 
-  const sheetConfigs: SheetConfig[] = getSheetConfigsOfTextDocument(textDocument)
+  const sheetConfigs: SheetConfig[] =
+    getSheetConfigsOfTextDocument(textDocument);
 
   view.dispatch({
     effects: setHighlightsEffect.of(
@@ -51,17 +56,17 @@ const highlightsField = StateField.define<Highlight[]>({
         return e.value;
       }
     }
-    return (
-      snippets
-        .map((highlight) => ({
-          ...highlight,
-          span: [
-            tr.changes.mapPos(highlight.span[0]),
-            tr.changes.mapPos(highlight.span[1]),
-          ],
-        }))
-        .filter((highlight) => highlight.span[0] !== highlight.span[1]) as Highlight[]
-    )
+    return snippets
+      .map((highlight) => ({
+        ...highlight,
+        span: [
+          tr.changes.mapPos(highlight.span[0]),
+          tr.changes.mapPos(highlight.span[1]),
+        ],
+      }))
+      .filter(
+        (highlight) => highlight.span[0] !== highlight.span[1]
+      ) as Highlight[];
   },
 });
 
@@ -70,11 +75,9 @@ const snippetDecorations = EditorView.decorations.compute(
   (state) => {
     return Decoration.set(
       state.field(highlightsField).map((snippet) => {
-        return (
-          Decoration.mark({
-            class: 'bg-yellow-100 rounded',
-          })
-        ).range(snippet.span[0], snippet.span[1]);
+        return Decoration.mark({
+          class: "bg-yellow-100 rounded",
+        }).range(snippet.span[0], snippet.span[1]);
       }),
       true
     );
@@ -107,7 +110,7 @@ export const Editor = observer(
         dispatch(transaction) {
           view.update([transaction]);
 
-          setTimeout(() => parseHighlights(view))
+          setTimeout(() => parseHighlights(view));
 
           runInAction(() => {
             textDocument.text = view.state.doc;
@@ -123,15 +126,14 @@ export const Editor = observer(
       const unsubscribes: (() => void)[] = [
         autorun(() => {
           // parseHighlights(view)
-        })
-      ]
+        }),
+      ];
 
       return () => {
-        unsubscribes.forEach((unsubscribe) => unsubscribe())
+        unsubscribes.forEach((unsubscribe) => unsubscribe());
         view.destroy();
       };
     }, [textDocumentId]);
-
 
     return (
       <div

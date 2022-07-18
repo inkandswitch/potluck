@@ -73,10 +73,10 @@ export const textEditorStateMobx = observable.box(
 
 const ICE_CREAM_TEXT = `Ingredients
 1¾ cups heavy cream
-1¼ cup whole milk
-¾ cup sugar
-⅛ teaspoon fine sea salt
-1 tablespoon vanilla extract
+2¼ cup whole milk
+3¾ cup sugar
+4⅛ teaspoon fine sea salt
+5 tablespoon vanilla extract
 
 Instructions
 Pour 1 cup of the cream into a saucepan and add the sugar, salt. Scrape the seeds of the vanilla bean into the pot and then add the vanilla pod to the pot. Warm the mixture over medium heat, just until the sugar dissolves. Remove from the heat and add the remaining cream, milk, and vanilla extract (if using extract). Stir to combine and chill in the refrigerator.
@@ -117,11 +117,22 @@ Grill the pork and onion, in batches if necessary, until nicely charred and cara
 Step 4
 Serve the grilled pork and onions with the fresh sesame kimchi and rice on the side.`;
 
+const ALL_INGREDIENTS_TEXT = `pork
+gochugaru
+vinegar
+apples
+bananas
+salt
+cream
+milk
+sugar`;
+
 export const WORKOUT_DOCUMENT_ID = "workout";
 export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork";
-export const INGREDIENTS_DOCUMENT_ID = "all ingredients";
+export const ALL_INGREDIENTS_DOCUMENT_ID = "all ingredients";
 export const WORKOUT_SHEET_CONFIG_ID = nanoid();
 export const NUMBER_SHEET_CONFIG_ID = nanoid();
+export const QUANTITY_SHEET_CONFIG_ID = nanoid();
 export const ICE_CREAM_DOCUMENT_ID = "ice cream";
 export const INGREDIENTS_SHEET_CONFIG_ID = nanoid();
 export const REPS_SHEET_CONFIG_ID = nanoid();
@@ -151,7 +162,20 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
     id: ICE_CREAM_DOCUMENT_ID,
     name: "ice cream",
     text: Text.of(ICE_CREAM_TEXT.split("\n")),
-    sheets: [],
+    sheets: [
+      {
+        id: nanoid(),
+        configId: NUMBER_SHEET_CONFIG_ID,
+      },
+      {
+        id: nanoid(),
+        configId: QUANTITY_SHEET_CONFIG_ID,
+      },
+      {
+        id: nanoid(),
+        configId: INGREDIENTS_SHEET_CONFIG_ID,
+      },
+    ],
   },
   [GOCHUJANG_PORK_DOCUMENT_ID]: {
     id: GOCHUJANG_PORK_DOCUMENT_ID,
@@ -160,21 +184,22 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
     sheets: [
       {
         id: nanoid(),
+        configId: NUMBER_SHEET_CONFIG_ID,
+      },
+      {
+        id: nanoid(),
+        configId: QUANTITY_SHEET_CONFIG_ID,
+      },
+      {
+        id: nanoid(),
         configId: INGREDIENTS_SHEET_CONFIG_ID,
       },
     ],
   },
-  [INGREDIENTS_DOCUMENT_ID]: {
-    id: INGREDIENTS_DOCUMENT_ID,
+  [ALL_INGREDIENTS_DOCUMENT_ID]: {
+    id: ALL_INGREDIENTS_DOCUMENT_ID,
     name: "all ingredients",
-    text: Text.of([
-      "pork",
-      "gochugaru",
-      "vinegar",
-      "apples",
-      "bananas",
-      "salt",
-    ]),
+    text: Text.of(ALL_INGREDIENTS_TEXT.split("\n")),
     sheets: [
       {
         id: nanoid(),
@@ -189,6 +214,17 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     id: NUMBER_SHEET_CONFIG_ID,
     name: "numbers",
     columns: [{ name: "value", formula: 'HIGHLIGHTS_OF_REGEX("[0-9]+")' }],
+  },
+  [QUANTITY_SHEET_CONFIG_ID]: {
+    id: QUANTITY_SHEET_CONFIG_ID,
+    name: "quantity",
+    columns: [
+      {
+        name: "unit",
+        formula: 'HIGHLIGHTS_OF_REGEX("(cup|tablespoon|tbsp|teaspoon|tsp)s?")',
+      },
+      { name: "amount", formula: "PREV(unit, HAS_TYPE('numbers'))" },
+    ],
   },
   [WORKOUT_SHEET_CONFIG_ID]: {
     id: WORKOUT_SHEET_CONFIG_ID,
@@ -220,6 +256,10 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
         name: "name",
         formula:
           'HIGHLIGHTS_OF(DATA_FROM_DOC("all ingredients", "allIngredients", "name"))',
+      },
+      {
+        name: "quantity",
+        formula: 'PREV(name, HAS_TYPE("quantity"))',
       },
     ],
   },

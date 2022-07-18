@@ -14,6 +14,7 @@ import {
   isObject,
   map,
   isString,
+  clone,
 } from "lodash";
 import { Text } from "@codemirror/state";
 
@@ -134,17 +135,19 @@ function evaluateFormula(
     }),
 
     PREV: curry((highlight: Highlight, condition: any) => {
-      return highlights.reverse().find((otherHighlight) => {
-        if (otherHighlight.span[1] > highlight.span[0]) {
-          return false;
-        }
+      return clone(highlights)
+        .reverse()
+        .find((otherHighlight) => {
+          if (otherHighlight.span[1] > highlight.span[0]) {
+            return false;
+          }
 
-        if (isFunction(condition)) {
-          return condition(otherHighlight);
-        }
+          if (isFunction(condition)) {
+            return condition(otherHighlight);
+          }
 
-        return condition;
-      });
+          return condition;
+        });
     }),
 
     HAS_TYPE: curry((type: string, highlight: Highlight) => {
@@ -246,7 +249,6 @@ function evaluateFormula(
   `
     );
 
-    console.log("successfully evald", source);
     return fn(API, sheetsScope, scope);
   } catch (e) {
     console.error(e);

@@ -37,14 +37,21 @@ export function getSheetConfigsOfTextDocument (textDocument: TextDocument) {
   )
 }
 
-const WORKOUT_TEXT = `4/15 gym: run + plank
+const WORKOUT_TEXT = `
+Squat 50 10x3
+Dead 45 10x3
+Bench 70 776
+`;
+
+/*
+`4/15 gym: run + plank
 4/17 gym: elliptical + plank
-4/20 gym: 
+4/20 gym:
 Squat 50 10x3
 Dead 45 10x3
 Bench 70 776
 
-Next time: 
+Next time:
 
 Maintain all weights, better form and intensity
 Squad dead bench farmer lat
@@ -56,6 +63,7 @@ Dead 50 10x3, 40 10x3
 Pullups 2x3 in between (Next time 3x3)
 Bench 70 10 8 3 (wrist problems, weight felt good)
 `;
+*/
 
 export const textEditorStateMobx = observable.box(
   EditorState.create({ doc: WORKOUT_TEXT })
@@ -102,6 +110,7 @@ export const WORKOUT_SHEET_CONFIG_ID = nanoid()
 export const NUMBER_SHEET_CONFIG_ID = nanoid()
 export const FOOD_TYPES_SHEET_CONFIG_ID = nanoid()
 export const INGREDIENTS_SHEET_CONFIG_ID = nanoid()
+export const REPS_SHEET_CONFIG_ID = nanoid()
 
 export const textDocumentsMobx = observable.map<string, TextDocument>({
   [WORKOUT_DOCUMENT_ID]: {
@@ -112,6 +121,10 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: nanoid(),
         configId: NUMBER_SHEET_CONFIG_ID
+      },
+      {
+        id: nanoid(),
+        configId: REPS_SHEET_CONFIG_ID
       },
       {
         id: nanoid(),
@@ -145,7 +158,18 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
   [WORKOUT_SHEET_CONFIG_ID]: {
     id: WORKOUT_SHEET_CONFIG_ID,
     name: 'workouts',
-    columns: [{ name: "activity", formula: 'HIGHLIGHTS_OF_REGEX("Squat|Dead")' }],
+    columns: [
+      { name: "activity", formula: 'HIGHLIGHTS_OF_REGEX("Squat|Dead")' },
+      { name: "exercises", formula: 'FILTER(VALUES_OF_TYPE("reps"), IS_ON_SAME_LINE_AS(activity))'}
+    ],
+  },
+  [REPS_SHEET_CONFIG_ID]: {
+    id: REPS_SHEET_CONFIG_ID,
+    name: 'reps',
+    columns: [
+      { name: "reps", formula: 'FILTER(VALUES_OF_TYPE("numbers"), HAS_TEXT_ON_RIGHT("x"))' },
+      { name: "sets", formula: 'NEXT(reps, HAS_TYPE("numbers"))' }
+    ],
   },
   [FOOD_TYPES_SHEET_CONFIG_ID]: {
     id: FOOD_TYPES_SHEET_CONFIG_ID,
@@ -171,4 +195,4 @@ export function addSheetConfig() {
   return sheetConfig;
 }
 
-export const selectedTextDocumentIdBox = observable.box(GOCHUJANG_PORK_DOCUMENT_ID);
+export const selectedTextDocumentIdBox = observable.box(WORKOUT_DOCUMENT_ID);

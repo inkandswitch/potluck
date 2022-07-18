@@ -82,8 +82,6 @@ const TextDocumentComponent = observer(
     const sheetConfigs = getSheetConfigsOfTextDocument(textDocument)
     const {sheetsScope}  = evaluateSheetConfigs(textDocument.text, sheetConfigs)
 
-    console.log(sheetsScope)
-
     return (
       <div className="px-4">
         <TextDocumentName textDocument={textDocument} />

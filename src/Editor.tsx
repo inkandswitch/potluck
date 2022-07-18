@@ -103,6 +103,8 @@ export const Editor = observer(
         dispatch(transaction) {
           view.update([transaction]);
 
+          setTimeout(() => parseHighlights(view))
+
           runInAction(() => {
             textDocument.text = view.state.doc;
             textEditorStateMobx.set(transaction.state);

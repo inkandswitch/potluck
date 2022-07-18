@@ -1,5 +1,5 @@
 import { SheetConfig, Highlight, sheetConfigsMobx } from "./primitives";
-import { curry, isFunction, isArray, sortBy, isObject } from "lodash";
+import { curry, isFunction, isArray, sortBy, isObject, map } from "lodash";
 import { Text } from "@codemirror/state";
 
 export type FormulaColumn = {
@@ -58,8 +58,53 @@ function evaluateFormula(
     },
 
     VALUES_OF_TYPE: (type: string): Highlight[] => {
-      return highlights.filter((snippet) => snippet.sheetConfigId === type);
+      const sheetConfig = Array.from(sheetConfigsMobx.values()).find((sheetConfig) => sheetConfig.name === type)
+
+      if (!sheetConfig) {
+        return []
+      }
+
+      return highlights.filter((highlight) => highlight.sheetConfigId === sheetConfig.id);
     },
+
+    NEXT: curry((highlight: Highlight, condition: any) => {
+      return highlights.find((otherHighlight) => {
+        if (otherHighlight.span[1] <= highlight.span[1]) {
+          return false
+        }
+
+        if (isFunction(condition)) {
+          return condition(otherHighlight);
+        }
+
+        return  condition
+      })
+    }),
+
+    HAS_TYPE: curry((type: string, highlight : Highlight) => {
+      const sheetConfig = Array.from(sheetConfigsMobx.values()).find((sheetConfig) => sheetConfig.name === type)
+
+      if (!sheetConfig) {
+        return false
+      }
+
+      return sheetConfig.id === highlight.sheetConfigId
+    }),
+
+    HAS_TEXT_ON_LEFT: curry((text: string, highlight: Highlight): boolean => {
+      const from = highlight.span[0]
+      const prevText = doc.sliceString(0, from).trim()
+
+      console.log(prevText)
+
+      return prevText.endsWith(text)
+    }),
+
+    HAS_TEXT_ON_RIGHT: curry((text: string, highlight: Highlight): boolean => {
+      const to = highlight.span[1]
+      const followingText = doc.sliceString(to).trim()
+      return followingText.startsWith(text)
+    }),
 
     IS_ON_SAME_LINE_AS: curry((a: Highlight, b: Highlight): boolean => {
       const lineStartA = doc.lineAt(a.span[0]).number;
@@ -79,7 +124,7 @@ function evaluateFormula(
         if (isFunction(condition)) {
           return condition(item);
         }
-        return item;
+        return condition;
       });
     }),
 
@@ -89,7 +134,7 @@ function evaluateFormula(
 
     SECOND: (list: any[]): any => {
       return list[1];
-    },
+    }
   };
 
   try {
@@ -183,7 +228,7 @@ function arrayProxy (array: any[]) {
         )
       }
 
-
+      // @ts-ignore
       return Reflect.get(...arguments);
     }
   }
@@ -222,7 +267,7 @@ export function evaluateSheetConfigs (doc: Text, sheetConfigs: SheetConfig[]): {
             from = valueFrom
           }
 
-          if (to === undefined || valueTo < to) {
+          if (to === undefined || valueTo > to) {
             to = valueTo
           }
         }

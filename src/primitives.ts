@@ -7,7 +7,7 @@ export type Span = [from: number, to: number];
 
 export type Snippet = {
   span: Span;
-  type: string;
+  type?: string;
 };
 
 export type SheetConfig = {
@@ -90,6 +90,7 @@ Serve the grilled pork and onions with the fresh sesame kimchi and rice on the s
 export const WORKOUT_DOCUMENT_ID = "workout";
 export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork"
 export const FIRST_SHEET_CONFIG_ID = nanoid()
+export const NUMBER_SHEET_CONFIG_ID = nanoid()
 
 export const textDocumentsMobx = observable.map<string, TextDocument>({
   [WORKOUT_DOCUMENT_ID]: {
@@ -101,6 +102,10 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
         id: nanoid(),
         configId: FIRST_SHEET_CONFIG_ID,
       },
+      {
+        id: nanoid(),
+        configId: NUMBER_SHEET_CONFIG_ID
+      }
     ],
   },
   [GOCHUJANG_PORK_DOCUMENT_ID]: {
@@ -122,6 +127,12 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     name: `sheet${nextSheetIndex++}`,
     columns: [{ name: "col1", formula: "" }],
   },
+
+  [NUMBER_SHEET_CONFIG_ID]: {
+    id: NUMBER_SHEET_CONFIG_ID,
+    name: 'numbers',
+    columns: [{ name: "value", formula: 'HIGHLIGHTS_OF_REGEX("[0-9]+")'}]
+  }
 });
 export function addSheetConfig() {
   const id = nanoid();

@@ -13,10 +13,13 @@ function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
     return <span className="text-red-500">#Err</span>;
   }
 
-  if (value && value.span && value.type) {
+  if (value && value.span) {
     const text = doc.sliceString(value.span[0], value.span[1]);
     const parser = getParserOfType(value.type);
-    return <span className={parser!.color}>{text}</span>;
+    const color = parser ? parser.color : ''
+    const bgColor = parser ? parser.bgColor : 'bg-gray-100'
+
+    return <span className={`${color} ${bgColor} rounded`}>{text}</span>;
   }
 
   if (isArray(value)) {

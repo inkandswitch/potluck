@@ -17,6 +17,28 @@ function evaluateFormula(
   context: ResultRow
 ) {
   const API = {
+
+    // this method is not curried because it has an optional flags parameter
+    HIGHLIGHTS_OF_REGEX: (regexString: string, flags: string): Snippet[] => {
+
+      const regex = new RegExp(regexString, "g" + (flags? flags : ''))
+
+      const docString = doc.sliceString(0);
+
+      const highlights = []
+
+      let match
+      while ((match = regex.exec(docString)) != null) {
+        const value = match[0];
+        const from = match.index;
+        const to = from + value.length;
+
+        highlights.push({ span: [from, to] } as Snippet)
+      }
+
+      return highlights;
+    },
+
     VALUES_OF_TYPE: (type: string): Snippet[] => {
       return snippets.filter((snippet) => snippet.type === type);
     },
@@ -67,6 +89,7 @@ function evaluateFormula(
 
     return fn(API, context);
   } catch (e) {
+    console.error(e)
     return e;
   }
 }

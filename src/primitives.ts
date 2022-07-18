@@ -221,7 +221,9 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     columns: [
       {
         name: "unit",
-        formula: 'HIGHLIGHTS_OF_REGEX("(cup|tablespoon|tbsp|teaspoon|tsp)s?")',
+        formula:
+          // There are two layers of escaping going on here; todo: improve the situation by auto-escaping user input?
+          'HIGHLIGHTS_OF_REGEX("\\\\b(cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|gram|g|milliliter|ml)s?\\\\b")',
       },
       { name: "amount", formula: "PREV(unit, HAS_TYPE('numbers'))" },
     ],

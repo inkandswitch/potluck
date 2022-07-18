@@ -25,6 +25,10 @@ export type FormulaColumn = {
 
 export type Scope = { [name: string]: any };
 
+// This is a default distance limit built into prev/next to limit the search.
+// TODO: make this dynamic as an argument? (not sure how that intersects with currying)
+const PREV_NEXT_DISTANCE_LIMIT = 10;
+
 function evaluateFormula(
   textDocument: TextDocument,
   sheetConfig: SheetConfig,
@@ -122,7 +126,10 @@ function evaluateFormula(
 
     NEXT: curry((highlight: Highlight, condition: any) => {
       return highlights.find((otherHighlight) => {
-        if (otherHighlight.span[1] <= highlight.span[1]) {
+        if (
+          otherHighlight.span[0] <= highlight.span[1] ||
+          otherHighlight.span[0] > highlight.span[1] + PREV_NEXT_DISTANCE_LIMIT
+        ) {
           return false;
         }
 
@@ -138,7 +145,11 @@ function evaluateFormula(
       return clone(highlights)
         .reverse()
         .find((otherHighlight) => {
-          if (otherHighlight.span[1] > highlight.span[0]) {
+          if (
+            otherHighlight.span[1] > highlight.span[0] ||
+            otherHighlight.span[1] <
+              highlight.span[0] - PREV_NEXT_DISTANCE_LIMIT
+          ) {
             return false;
           }
 

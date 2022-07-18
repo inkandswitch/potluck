@@ -8,7 +8,7 @@ export type Span = [from: number, to: number];
 export type Highlight = {
   span: Span;
   sheetConfigId?: string;
-  data: {[colId: string]: any}
+  data: { [colId: string]: any }
 };
 
 export type SheetConfig = {
@@ -29,7 +29,7 @@ export type TextDocument = {
   sheets: TextDocumentSheet[];
 };
 
-export function getSheetConfigsOfTextDocument (textDocument: TextDocument) {
+export function getSheetConfigsOfTextDocument(textDocument: TextDocument) {
   return (
     textDocument.sheets
       .map((textDocumentSheet) => sheetConfigsMobx.get(textDocumentSheet.configId))
@@ -129,7 +129,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: nanoid(),
         configId: WORKOUT_SHEET_CONFIG_ID,
-      },
+      }
     ],
   },
   [GOCHUJANG_PORK_DOCUMENT_ID]: {
@@ -153,14 +153,14 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
   [NUMBER_SHEET_CONFIG_ID]: {
     id: NUMBER_SHEET_CONFIG_ID,
     name: 'numbers',
-    columns: [{ name: "value", formula: 'HIGHLIGHTS_OF_REGEX("[0-9]+")'}]
+    columns: [{ name: "value", formula: 'HIGHLIGHTS_OF_REGEX("[0-9]+")' }]
   },
   [WORKOUT_SHEET_CONFIG_ID]: {
     id: WORKOUT_SHEET_CONFIG_ID,
     name: 'workouts',
     columns: [
       { name: "activity", formula: 'HIGHLIGHTS_OF_REGEX("Squat|Dead")' },
-      { name: "exercises", formula: 'FILTER(VALUES_OF_TYPE("reps"), IS_ON_SAME_LINE_AS(activity))'}
+      { name: "exercises", formula: 'FILTER(VALUES_OF_TYPE("reps"), IS_ON_SAME_LINE_AS(activity))' }
     ],
   },
   [REPS_SHEET_CONFIG_ID]: {
@@ -182,6 +182,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     columns: [{ name: "name", formula: 'HIGHLIGHTS_OF(["pork", "gochugaru", "vinegar"])' }],
   }
 });
+
 export function addSheetConfig() {
   const id = nanoid();
   const sheetConfig = {

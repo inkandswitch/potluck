@@ -81,6 +81,20 @@ function evaluateFormula(
       })
     }),
 
+    PREV: curry((highlight: Highlight, condition: any) => {
+      return highlights.reverse().find((otherHighlight) => {
+        if (otherHighlight.span[1] > highlight.span[0]) {
+          return false
+        }
+
+        if (isFunction(condition)) {
+          return condition(otherHighlight);
+        }
+
+        return  condition
+      })
+    }),
+
     HAS_TYPE: curry((type: string, highlight : Highlight) => {
       const sheetConfig = Array.from(sheetConfigsMobx.values()).find((sheetConfig) => sheetConfig.name === type)
 

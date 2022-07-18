@@ -2,6 +2,7 @@ import { observable, runInAction } from "mobx";
 import { EditorState, Text } from "@codemirror/state";
 import { nanoid } from "nanoid";
 import { FormulaColumn } from "./formulas";
+import { ALL_INGREDIENTS_TEXT } from "./data/all_ingredients";
 
 export type Span = [from: number, to: number];
 
@@ -118,16 +119,6 @@ Grill the pork and onion, in batches if necessary, until nicely charred and cara
 
 Step 4
 Serve the grilled pork and onions with the fresh sesame kimchi and rice on the side.`;
-
-const ALL_INGREDIENTS_TEXT = `pork
-gochugaru
-vinegar
-apples
-bananas
-salt
-cream
-milk
-sugar`;
 
 export const WORKOUT_DOCUMENT_ID = "workout";
 export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork";

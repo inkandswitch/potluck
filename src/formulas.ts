@@ -99,7 +99,7 @@ function evaluateFormula(
       for (const value of values) {
         if (isString(value)) {
           highlights = highlights.concat(
-            API.MatchRegexp(value, isCaseSensitive ? "i" : "")
+            API.MatchRegexp(value, isCaseSensitive === false ? "" : "i")
           );
         }
       }

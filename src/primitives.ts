@@ -10,7 +10,7 @@ export type Highlight = {
   documentId: string;
   sheetConfigId: string;
   span: Span;
-  data: { [colId: string]: any };
+  data: { [columnName: string]: any };
 };
 export type SheetValueRowWithoutSpan = Omit<Highlight, "span">;
 export type SheetValueRow = Highlight | SheetValueRowWithoutSpan;

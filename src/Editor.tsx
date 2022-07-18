@@ -1,229 +1,53 @@
 import {
   Decoration,
   EditorView,
-  ViewPlugin,
-  ViewUpdate,
-  WidgetType,
+  ViewPlugin, ViewUpdate
 } from "@codemirror/view";
-import { EditorState, StateEffect, StateField } from "@codemirror/state";
+import { Facet, StateEffect, StateField } from "@codemirror/state";
 import { minimalSetup } from "codemirror";
 import { useEffect, useRef } from "react";
-import { runInAction } from "mobx";
+import { autorun, comparer, reaction, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
-  Snippet,
-  TextDocument,
-  textDocumentsMobx,
+  getSheetConfigsOfTextDocument,
+  Highlight, SheetConfig, sheetConfigsMobx, textDocumentsMobx,
   textEditorStateMobx,
 } from "./primitives";
-import { sortBy } from "lodash";
+import { getAllSortedHighlights } from "./formulas";
 
-// PARSING
-
-export type Parser = {
-  type: string;
-  color: string;
-  bgColor: string;
-  parse: (text: string) => Snippet[];
-};
-
-const NUMBER_TYPE = "number";
-const EXERCISE_TYPE = "exercise";
-
-export function getParserOfType(type: string) {
-  return PARSER.find((parser) => parser.type === type);
-}
-
-const PARSER: Parser[] = [
-  {
-    color: "text-blue-500",
-    bgColor: "bg-blue-100",
-    type: EXERCISE_TYPE,
-    parse(string) {
-      const snippets: Snippet[] = [];
-      const regex = /Squat|Dead/g;
-
-      let match;
-      while ((match = regex.exec(string)) != null) {
-        const value = match[0];
-        const from = match.index;
-        const to = from + value.length;
-
-        snippets.push({
-          type: this.type,
-          span: [from, to],
-        });
-      }
-
-      return snippets;
-    },
-  },
-  {
-    color: "text-green-500",
-    bgColor: "bg-green-100",
-    type: NUMBER_TYPE,
-    parse(string) {
-      const snippets: Snippet[] = [];
-      const regex = /[0-9]+/g;
-
-      let match;
-      while ((match = regex.exec(string)) != null) {
-        const value = match[0];
-        const from = match.index;
-        const to = from + value.length;
-
-        snippets.push({
-          type: this.type,
-          span: [from, to],
-        });
-      }
-
-      return snippets;
-    },
-  },
-];
-
-export function getAllSortedSnippets(string: string): Snippet[] {
-  let snippets: Snippet[] = [];
-
-  PARSER.forEach((parser) => {
-    snippets = snippets.concat(parser.parse(string));
-  });
-
-  return sortBy(snippets, ({ span }) => span[0]);
-}
-
-const parserPlugin = ViewPlugin.fromClass(
-  class {
-    view: EditorView;
-
-    constructor(view: EditorView) {
-      this.view = view;
-
-      setTimeout(() => {
-        this.parseSnippets();
-      });
-    }
-
-    parseSnippets() {
-      this.view.dispatch({
-        effects: setSnippetsEffect.of(
-          getAllSortedSnippets(this.view.state.doc.sliceString(0))
-        ),
-      });
-    }
-
-    update(update: ViewUpdate) {
-      if (update.docChanged) {
-        setTimeout(() => {
-          this.parseSnippets();
-        });
-      }
-    }
-  }
-);
-
-// DRAGGABLE HIGHLIGHTS
-
-export const setIsInDragMode = StateEffect.define<boolean>();
-const isInDragModeField = StateField.define<boolean>({
-  create() {
-    return false;
-  },
-
-  update(isInDragMode, tr) {
-    for (let e of tr.effects) {
-      if (e.is(setIsInDragMode)) {
-        return e.value;
-      }
-    }
-    return isInDragMode;
-  },
+const textDocumentIdFacet = Facet.define<string, string>({
+  combine: (values) => values[0],
 });
 
-class DraggableSnippetWidget extends WidgetType {
-  constructor(readonly snippet: Snippet, readonly text: string) {
-    super();
+// HIGHLIGHTS
+
+function parseHighlights(view: EditorView) {
+  const doc = view.state.doc
+  const textDocumentId = view.state.facet(textDocumentIdFacet)
+
+  const textDocument = textDocumentsMobx.get(textDocumentId)
+
+  if (!textDocument) {
+    return
   }
 
-  eq(other: DraggableSnippetWidget) {
-    return (
-      other.text === this.text &&
-      other.snippet.type === this.snippet.type &&
-      other.snippet.span[0] === this.snippet.span[0] &&
-      other.snippet.span[1] === this.snippet.span[1]
-    );
-  }
+  const sheetConfigs: SheetConfig[] = getSheetConfigsOfTextDocument(textDocument)
 
-  toDOM() {
-    let token = document.createElement("span");
-
-    const parser = PARSER.find(({ type }) => this.snippet.type === type);
-
-    token.style.cursor = "grab";
-    token.draggable = true;
-    token.ondragstart = (evt: DragEvent) => {
-      evt!.dataTransfer!.setData("text/json", JSON.stringify(this.snippet));
-    };
-
-    token.className = `${parser!.bgColor} rounded ${parser!.color}`;
-    token.innerText = this.text;
-
-    return token;
-  }
-
-  ignoreEvent() {
-    return true;
-  }
+  view.dispatch({
+    effects: setHighlightsEffect.of(
+      getAllSortedHighlights(doc, sheetConfigs)
+    ),
+  });
 }
 
-const draggableTokensPlugin = ViewPlugin.fromClass(
-  class {
-    view: EditorView;
-
-    constructor(view: EditorView) {
-      this.view = view;
-
-      this.onKeyDown = this.onKeyDown.bind(this);
-      this.onKeyUp = this.onKeyUp.bind(this);
-
-      window.addEventListener("keydown", this.onKeyDown);
-      window.addEventListener("keyup", this.onKeyUp);
-    }
-
-    onKeyDown(evt: KeyboardEvent) {
-      if (evt.metaKey) {
-        this.view.dispatch({
-          effects: setIsInDragMode.of(true),
-        });
-      }
-    }
-
-    onKeyUp(evt: KeyboardEvent) {
-      if (!evt.metaKey) {
-        this.view.dispatch({
-          effects: setIsInDragMode.of(false),
-        });
-      }
-    }
-
-    destroy() {
-      window.removeEventListener("keydown", this.onKeyDown);
-      window.removeEventListener("keyup", this.onKeyUp);
-    }
-  }
-);
-
-// SNIPPETS
-
-const setSnippetsEffect = StateEffect.define<Snippet[]>();
-const snippetsField = StateField.define<Snippet[]>({
+const setHighlightsEffect = StateEffect.define<Highlight[]>();
+const highlightsField = StateField.define<Highlight[]>({
   create() {
     return [];
   },
   update(snippets, tr) {
     for (let e of tr.effects) {
-      if (e.is(setSnippetsEffect)) {
+      if (e.is(setHighlightsEffect)) {
         return e.value;
       }
     }
@@ -238,24 +62,14 @@ const snippetsField = StateField.define<Snippet[]>({
 });
 
 const snippetDecorations = EditorView.decorations.compute(
-  [snippetsField, isInDragModeField],
+  [highlightsField],
   (state) => {
-    const isinDragMode: boolean = state.field(isInDragModeField);
-
     return Decoration.set(
-      state.field(snippetsField).map((snippet) => {
-        const parser = PARSER.find(({ type }) => snippet.type === type);
-        const text = state.doc.sliceString(snippet.span[0], snippet.span[1]);
-
+      state.field(highlightsField).map((snippet) => {
         return (
-          isinDragMode
-            ? Decoration.replace({
-                widget: new DraggableSnippetWidget(snippet, text),
-                side: 1,
-              })
-            : Decoration.mark({
-                class: parser!.color,
-              })
+          Decoration.mark({
+            class: 'bg-yellow-100 rounded',
+          })
         ).range(snippet.span[0], snippet.span[1]);
       }),
       true
@@ -266,8 +80,9 @@ const snippetDecorations = EditorView.decorations.compute(
 export let EDITOR_VIEW: EditorView;
 
 export const Editor = observer(
-  ({ textDocument }: { textDocument: TextDocument }) => {
+  ({ textDocumentId }: { textDocumentId: string }) => {
     const editorRef = useRef(null);
+    const textDocument = textDocumentsMobx.get(textDocumentId)!;
 
     useEffect(() => {
       const view = (EDITOR_VIEW = new EditorView({
@@ -280,11 +95,9 @@ export const Editor = observer(
             },
           }),
           EditorView.lineWrapping,
-          snippetsField,
+          highlightsField,
           snippetDecorations,
-          parserPlugin,
-          isInDragModeField,
-          draggableTokensPlugin,
+          textDocumentIdFacet.of(textDocumentId),
         ],
         parent: editorRef.current!,
         dispatch(transaction) {
@@ -301,10 +114,17 @@ export const Editor = observer(
         textEditorStateMobx.set(view.state);
       });
 
+      const unsubscribes: (() => void)[] = [
+        autorun(() => {
+          parseHighlights(view)
+        })
+      ]
+
       return () => {
+        unsubscribes.forEach((unsubscribe) => unsubscribe())
         view.destroy();
       };
-    }, []);
+    }, [textDocumentId]);
 
     return (
       <div

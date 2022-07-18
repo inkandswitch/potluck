@@ -5,9 +5,10 @@ import { FormulaColumn } from "./formulas";
 
 export type Span = [from: number, to: number];
 
-export type Snippet = {
+export type Highlight = {
   span: Span;
-  type?: string;
+  sheetConfigId?: string;
+  data: {[colId: string]: any}
 };
 
 export type SheetConfig = {
@@ -27,6 +28,14 @@ export type TextDocument = {
   text: Text;
   sheets: TextDocumentSheet[];
 };
+
+export function getSheetConfigsOfTextDocument (textDocument: TextDocument) {
+  return (
+    textDocument.sheets
+      .map((textDocumentSheet) => sheetConfigsMobx.get(textDocumentSheet.configId))
+      .filter((sheetConfig) => sheetConfig !== undefined) as SheetConfig[]
+  )
+}
 
 const WORKOUT_TEXT = `4/15 gym: run + plank
 4/17 gym: elliptical + plank
@@ -89,7 +98,7 @@ Serve the grilled pork and onions with the fresh sesame kimchi and rice on the s
 
 export const WORKOUT_DOCUMENT_ID = "workout";
 export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork"
-export const FIRST_SHEET_CONFIG_ID = nanoid()
+export const WORKOUT_SHEET_CONFIG_ID = nanoid()
 export const NUMBER_SHEET_CONFIG_ID = nanoid()
 
 export const textDocumentsMobx = observable.map<string, TextDocument>({
@@ -100,11 +109,11 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
     sheets: [
       {
         id: nanoid(),
-        configId: FIRST_SHEET_CONFIG_ID,
+        configId: NUMBER_SHEET_CONFIG_ID
       },
       {
         id: nanoid(),
-        configId: NUMBER_SHEET_CONFIG_ID
+        configId: WORKOUT_SHEET_CONFIG_ID,
       }
     ],
   },
@@ -115,23 +124,22 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
     sheets: [
       {
         id: nanoid(),
-        configId: FIRST_SHEET_CONFIG_ID,
+        configId: NUMBER_SHEET_CONFIG_ID,
       },
     ],
   }
 });
 let nextSheetIndex = 1;
 export const sheetConfigsMobx = observable.map<string, SheetConfig>({
-  [FIRST_SHEET_CONFIG_ID]: {
-    id: FIRST_SHEET_CONFIG_ID,
-    name: `sheet${nextSheetIndex++}`,
-    columns: [{ name: "col1", formula: "" }],
-  },
-
   [NUMBER_SHEET_CONFIG_ID]: {
     id: NUMBER_SHEET_CONFIG_ID,
     name: 'numbers',
     columns: [{ name: "value", formula: 'HIGHLIGHTS_OF_REGEX("[0-9]+")'}]
+  },
+  [WORKOUT_SHEET_CONFIG_ID]: {
+    id: WORKOUT_SHEET_CONFIG_ID,
+    name: 'workouts',
+    columns: [{ name: "activity", formula: 'HIGHLIGHTS_OF_REGEX("Squat|Dead")' }],
   }
 });
 export function addSheetConfig() {

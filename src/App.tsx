@@ -1,30 +1,15 @@
 import {
   Editor,
-  EDITOR_VIEW,
-  getAllSortedSnippets,
-  getParserOfType,
-  setIsInDragMode,
 } from "./Editor";
 import {
   addSheetConfig,
-  WORKOUT_DOCUMENT_ID,
   selectedTextDocumentIdBox,
   sheetConfigsMobx,
-  Snippet,
-  Span,
   TextDocument,
   textDocumentsMobx,
-  textEditorStateMobx,
 } from "./primitives";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
-import {
-  AdjacentTokenRelationshipType,
-  Column,
-  findMatches,
-  inferRelationships,
-  Match,
-} from "./rules";
 import { nanoid } from "nanoid";
 import { SheetComponent } from "./SheetComponent";
 import { action } from "mobx";
@@ -96,7 +81,7 @@ const TextDocumentComponent = observer(
       <div className="px-4">
         <TextDocumentName textDocument={textDocument} />
         <div className="flex gap-4 items-start">
-          <Editor textDocument={textDocument} />
+          <Editor textDocumentId={textDocumentId} />
           <div className="grow">
             <div className="flex flex-col gap-4">
               {textDocument.sheets.map((sheet) => {

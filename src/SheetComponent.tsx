@@ -3,9 +3,8 @@ import { isArray } from "lodash";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { getAllSortedSnippets, getParserOfType } from "./Editor";
-import { ResultRow, evaluateColumns } from "./formulas";
-import { SheetConfig, sheetConfigsMobx, TextDocument } from "./primitives";
+import { ResultRow, evaluateColumns, getAllSortedHighlights } from "./formulas";
+import { getSheetConfigsOfTextDocument, SheetConfig, sheetConfigsMobx, TextDocument } from "./primitives";
 
 let i = 1;
 function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
@@ -15,11 +14,8 @@ function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
 
   if (value && value.span) {
     const text = doc.sliceString(value.span[0], value.span[1]);
-    const parser = getParserOfType(value.type);
-    const color = parser ? parser.color : ''
-    const bgColor = parser ? parser.bgColor : 'bg-gray-100'
 
-    return <span className={`${color} ${bgColor} rounded`}>{text}</span>;
+    return <span className="bg-yellow-100 rounded">{text}</span>;
   }
 
   if (isArray(value)) {
@@ -69,26 +65,15 @@ export const SheetComponent = observer(
   }) => {
     const doc = textDocument.text;
 
-    const sortedSnippets = getAllSortedSnippets(doc.sliceString(0));
+    const sheetConfigs = getSheetConfigsOfTextDocument(textDocument)
+    const sortedHighlights = getAllSortedHighlights(doc, sheetConfigs);
 
     const [selectedFormulaIndex, setSelectedFormulaIndex] = useState<number>(0);
 
     const sheetConfig = sheetConfigsMobx.get(sheetConfigId)!;
     const columns = sheetConfig.columns;
-    // const [columns, setColumns] = useState<FormulaColumn[]>([
-    //   { name: "col1", formula: "" },
 
-    //   /* {
-    //    name: 'exercise',
-    //    formula: 'VALUES_OF_TYPE("exercise")'
-    //  },
-    //  {
-    //    name: 'numbers',
-    //    formula: 'FILTER(VALUES_OF_TYPE("number"), IS_ON_SAME_LINE_AS(exercise))'
-    //  } */
-    // ]);
-
-    const rows: ResultRow[] = evaluateColumns(columns, sortedSnippets, doc);
+    const rows: ResultRow[] = evaluateColumns(columns, sortedHighlights, doc);
 
     const changeColumnNameAt = action((changedIndex: number, name: string) => {
       sheetConfig.columns = sheetConfig.columns.map((column, index) =>

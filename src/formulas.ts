@@ -1,8 +1,6 @@
 import { SheetConfig, Highlight } from "./primitives";
 import { curry, isFunction, isArray, sortBy } from "lodash";
 import { Text } from "@codemirror/state";
-import { nanoid } from "nanoid";
-import { EditorView, ViewPlugin, ViewUpdate } from "@codemirror/view";
 
 export type FormulaColumn = {
   name: string;
@@ -25,11 +23,17 @@ function evaluateFormula(
       const docString = doc.sliceString(0);
 
       const highlights = []
-      let match
+      let match, prevIndex
       while ((match = regex.exec(docString)) != null) {
         const value = match[0];
         const from = match.index;
         const to = from + value.length;
+
+        if (from === prevIndex) {
+          throw new Error("regex causes infinite loop becase it matches empty string")
+        }
+
+        prevIndex = from
 
         highlights.push({ span: [from, to] } as Highlight)
       }

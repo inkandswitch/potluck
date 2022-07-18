@@ -100,6 +100,8 @@ export const WORKOUT_DOCUMENT_ID = "workout";
 export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork"
 export const WORKOUT_SHEET_CONFIG_ID = nanoid()
 export const NUMBER_SHEET_CONFIG_ID = nanoid()
+export const FOOD_TYPES_SHEET_CONFIG_ID = nanoid()
+export const INGREDIENTS_SHEET_CONFIG_ID = nanoid()
 
 export const textDocumentsMobx = observable.map<string, TextDocument>({
   [WORKOUT_DOCUMENT_ID]: {
@@ -114,7 +116,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: nanoid(),
         configId: WORKOUT_SHEET_CONFIG_ID,
-      }
+      },
     ],
   },
   [GOCHUJANG_PORK_DOCUMENT_ID]: {
@@ -124,8 +126,12 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
     sheets: [
       {
         id: nanoid(),
-        configId: NUMBER_SHEET_CONFIG_ID,
+        configId: FOOD_TYPES_SHEET_CONFIG_ID,
       },
+      {
+        id: nanoid(),
+        configId: INGREDIENTS_SHEET_CONFIG_ID,
+      }
     ],
   }
 });
@@ -140,6 +146,16 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     id: WORKOUT_SHEET_CONFIG_ID,
     name: 'workouts',
     columns: [{ name: "activity", formula: 'HIGHLIGHTS_OF_REGEX("Squat|Dead")' }],
+  },
+  [FOOD_TYPES_SHEET_CONFIG_ID]: {
+    id: FOOD_TYPES_SHEET_CONFIG_ID,
+    name: 'foodTypes',
+    columns: [{ name: "name", formula: '["pork", "gochugaru", "vinegar"]' }],
+  },
+  [INGREDIENTS_SHEET_CONFIG_ID]: {
+    id: INGREDIENTS_SHEET_CONFIG_ID,
+    name: 'ingredients',
+    columns: [{ name: "name", formula: 'HIGHLIGHTS_OF(["pork", "gochugaru", "vinegar"])' }],
   }
 });
 export function addSheetConfig() {
@@ -155,4 +171,4 @@ export function addSheetConfig() {
   return sheetConfig;
 }
 
-export const selectedTextDocumentIdBox = observable.box(WORKOUT_DOCUMENT_ID);
+export const selectedTextDocumentIdBox = observable.box(GOCHUJANG_PORK_DOCUMENT_ID);

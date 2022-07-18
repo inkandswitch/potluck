@@ -11,7 +11,7 @@ export type ResultRow = { [name: string]: any };
 
 function evaluateFormula(
   source: string,
-  snippets: Highlight[],
+  highlights: Highlight[],
   doc: Text,
   context: ResultRow
 ) {
@@ -41,8 +41,23 @@ function evaluateFormula(
       return highlights;
     },
 
+    // this method is not curried because it has an optional isCaseSensitive parameter
+    HIGHLIGHTS_OF: (values: string | string[], isCaseSensitive: boolean) : Highlight[] => {
+      if (!isArray(values)) {
+        values = [values]
+      }
+
+      let highlights : Highlight[] = [];
+
+      for (const value of values) {
+        highlights = highlights.concat(API.HIGHLIGHTS_OF_REGEX(value, isCaseSensitive ? "i" : ""))
+      }
+
+      return highlights
+    },
+
     VALUES_OF_TYPE: (type: string): Highlight[] => {
-      return snippets.filter((snippet) => snippet.sheetConfigId === type);
+      return highlights.filter((snippet) => snippet.sheetConfigId === type);
     },
 
     IS_ON_SAME_LINE_AS: curry((a: Highlight, b: Highlight): boolean => {

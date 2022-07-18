@@ -79,7 +79,7 @@ const TextDocumentComponent = observer(
     const textDocument = textDocumentsMobx.get(textDocumentId)!;
 
     const sheetConfigs = getSheetConfigsOfTextDocument(textDocument);
-    const { sheetsScope } = evaluateSheetConfigs(textDocument, sheetConfigs);
+    const documentValueRows = evaluateSheetConfigs(textDocument, sheetConfigs);
 
     return (
       <div className="px-4">
@@ -95,7 +95,7 @@ const TextDocumentComponent = observer(
                     textDocument={textDocument}
                     sheetConfigId={sheet.configId}
                     key={sheet.id}
-                    rows={sheetsScope[sheet.configId]}
+                    rows={documentValueRows[sheet.configId]}
                   />
                 );
               })}

@@ -7,7 +7,7 @@ import {
 import { Facet, StateEffect, StateField } from "@codemirror/state";
 import { minimalSetup } from "codemirror";
 import { useEffect, useRef } from "react";
-import { autorun, comparer, reaction, runInAction } from "mobx";
+import { autorun, comparer, computed, reaction, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   getSheetConfigsOfTextDocument,
@@ -22,28 +22,6 @@ import { evaluateSheetConfigs } from "./formulas";
 const textDocumentIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
 });
-
-// HIGHLIGHTS
-
-function parseHighlights(view: EditorView) {
-  const doc = view.state.doc;
-  const textDocumentId = view.state.facet(textDocumentIdFacet);
-
-  const textDocument = textDocumentsMobx.get(textDocumentId);
-
-  if (!textDocument) {
-    return;
-  }
-
-  const sheetConfigs: SheetConfig[] =
-    getSheetConfigsOfTextDocument(textDocument);
-
-  view.dispatch({
-    effects: setHighlightsEffect.of(
-      evaluateSheetConfigs(textDocument, sheetConfigs).highlights
-    ),
-  });
-}
 
 const setHighlightsEffect = StateEffect.define<Highlight[]>();
 const highlightsField = StateField.define<Highlight[]>({
@@ -110,8 +88,6 @@ export const Editor = observer(
         dispatch(transaction) {
           view.update([transaction]);
 
-          setTimeout(() => parseHighlights(view));
-
           runInAction(() => {
             textDocument.text = view.state.doc;
             textEditorStateMobx.set(transaction.state);
@@ -125,7 +101,27 @@ export const Editor = observer(
 
       const unsubscribes: (() => void)[] = [
         autorun(() => {
-          // parseHighlights(view)
+          const highlights = computed(
+            () => {
+              const sheetConfigs: SheetConfig[] =
+                getSheetConfigsOfTextDocument(textDocument);
+              const documentValueRows = evaluateSheetConfigs(
+                textDocument,
+                sheetConfigs
+              );
+              return Object.values(documentValueRows)
+                .map((sheetValueRows) =>
+                  sheetValueRows.filter(
+                    (r): r is Highlight => "span" in r && r.span !== undefined
+                  )
+                )
+                .flat();
+            },
+            { equals: comparer.structural }
+          ).get();
+          view.dispatch({
+            effects: setHighlightsEffect.of(highlights),
+          });
         }),
       ];
 

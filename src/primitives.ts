@@ -8,10 +8,12 @@ export type Span = [from: number, to: number];
 // this is a row in a document sheet
 export type Highlight = {
   documentId: string;
-  span: Span;
   sheetConfigId: string;
+  span: Span;
   data: { [colId: string]: any };
 };
+export type SheetValueRowWithoutSpan = Omit<Highlight, "span">;
+export type SheetValueRow = Highlight | SheetValueRowWithoutSpan;
 
 export type SheetConfig = {
   id: string;
@@ -225,7 +227,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
           // There are two layers of escaping going on here; todo: improve the situation by auto-escaping user input?
           'HIGHLIGHTS_OF_REGEX("\\\\b(cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|gram|g|milliliter|ml)s?\\\\b")',
       },
-      { name: "amount", formula: "PREV(unit, HAS_TYPE('numbers'))" },
+      { name: "amount", formula: "PREV_OF_TYPE(unit, 'numbers')" },
     ],
   },
   [WORKOUT_SHEET_CONFIG_ID]: {
@@ -247,7 +249,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
         name: "reps",
         formula: 'FILTER(VALUES_OF_TYPE("numbers"), HAS_TEXT_ON_RIGHT("x"))',
       },
-      { name: "sets", formula: 'NEXT(reps, HAS_TYPE("numbers"))' },
+      { name: "sets", formula: 'NEXT_OF_TYPE(reps, "numbers")' },
     ],
   },
   [INGREDIENTS_SHEET_CONFIG_ID]: {
@@ -261,7 +263,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
       {
         name: "quantity",
-        formula: 'PREV(name, HAS_TYPE("quantity"))',
+        formula: 'PREV_OF_TYPE(name, "quantity")',
       },
     ],
   },

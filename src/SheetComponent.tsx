@@ -145,8 +145,7 @@ export const SheetComponent = observer(
             {rows.map((row, index) => (
               <tr key={index}>
                 {columns.map((column, index) => {
-                  const value: any = row[column.name];
-
+                  const value: any = row.data[column.name];
                   return (
                     <td className="border border-gray-200 px-1" key={index}>
                       <ValueDisplay value={value} doc={doc} />

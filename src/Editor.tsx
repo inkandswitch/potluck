@@ -40,7 +40,7 @@ function parseHighlights(view: EditorView) {
 
   view.dispatch({
     effects: setHighlightsEffect.of(
-      evaluateSheetConfigs(doc, sheetConfigs).highlights
+      evaluateSheetConfigs(textDocument, sheetConfigs).highlights
     ),
   });
 }

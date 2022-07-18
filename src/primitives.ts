@@ -5,9 +5,11 @@ import { FormulaColumn } from "./formulas";
 
 export type Span = [from: number, to: number];
 
+// this is a row in a document sheet
 export type Highlight = {
+  documentId: string;
   span: Span;
-  sheetConfigId?: string;
+  sheetConfigId: string;
   data: { [colId: string]: any };
 };
 

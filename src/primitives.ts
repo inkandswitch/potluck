@@ -28,7 +28,7 @@ export type TextDocument = {
   sheets: TextDocumentSheet[];
 };
 
-const INITIAL_TEXT = `4/15 gym: run + plank
+const WORKOUT_TEXT = `4/15 gym: run + plank
 4/17 gym: elliptical + plank
 4/20 gym: 
 Squat 50 10x3
@@ -49,16 +49,53 @@ Bench 70 10 8 3 (wrist problems, weight felt good)
 `;
 
 export const textEditorStateMobx = observable.box(
-  EditorState.create({ doc: INITIAL_TEXT })
+  EditorState.create({ doc: WORKOUT_TEXT })
 );
 
-export const FIRST_TEXT_DOCUMENT_ID = "workout";
-export const FIRST_SHEET_CONFIG_ID = nanoid();
+const GOCHUJANG_PORK_TEXT = `Grilled Gochujang Pork With Fresh Sesame Kimchi
+
+Pork shoulder is often prepared as a large roast, requiring hours of cooking until it’s tender. But if you slice it thinly and pound it, the meat quickly absorbs this savory gochujang marinade and cooks up in no time. The spicy pork is balanced by a cool and crisp sesame kimchi, eaten fresh like a salad rather than fermented like traditional preparations. Baby bok choy stands in for the usual napa cabbage, and it’s coated in a vibrant sauce of garlic, ginger, gochugaru, fish sauce and nutty sesame oil. Tuck any leftover pork and kimchi into sandwiches the next day, garnished with tomatoes and mayonnaise.
+
+2 tablespoons gochugaru
+2 tablespoons distilled white vinegar
+2 tablespoons toasted sesame oil
+3 teaspoons grated garlic
+2 teaspoons grated peeled ginger
+1 teaspoon kosher salt (such as Diamond Crystal), plus more for seasoning
+½ teaspoon fish sauce
+1 tablespoon plus ½ teaspoon granulated sugar
+1½ pounds baby bok choy, quartered lengthwise
+3 scallions, halved lengthwise and thinly sliced on the diagonal
+2 tablespoons gochujang (Korean chile paste)
+2 tablespoons neutral oil, such as safflower or canola
+1 tablespoon low-sodium soy sauce
+1 teaspoon ground black pepper, plus more for seasoning
+2 pounds pork shoulder, thinly sliced crosswise and pounded ⅛-inch-thick (see Tip)
+1 large white onion, peeled and sliced into ¼-inch-thick rings
+Steamed rice, for serving
+
+Preparation
+Step 1
+In a large bowl, combine the gochugaru, vinegar, sesame oil, 1 teaspoon of the garlic, 1 teaspoon of the ginger, 1 teaspoon salt, the fish sauce and ½ teaspoon of the sugar; mix well. Add bok choy and scallions, and toss with your hands, working the sauce in between and all over the leaves.
+
+Step 2
+Heat a grill to medium-high or heat a stovetop griddle pan over medium-high. In a large bowl, combine the gochujang, neutral oil, soy sauce, 1 teaspoon black pepper and the remaining 2 teaspoons garlic, 1 teaspoon ginger and 1 tablespoon sugar; mix well. Very lightly season the pork with salt and pepper. Add pork and onion to the marinade and toss, gently massaging the marinade all over the meat (The meat does not need to rest in the marinade before it is grilled, but it can be marinated for up to 3 hours.)
+
+Step 3
+Grill the pork and onion, in batches if necessary, until nicely charred and caramelized around the edges, and the pork is cooked through, about 3 minutes per side. Transfer to a serving platter.
+
+Step 4
+Serve the grilled pork and onions with the fresh sesame kimchi and rice on the side.`
+
+export const WORKOUT_DOCUMENT_ID = "workout";
+export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork"
+export const FIRST_SHEET_CONFIG_ID = nanoid()
+
 export const textDocumentsMobx = observable.map<string, TextDocument>({
-  [FIRST_TEXT_DOCUMENT_ID]: {
-    id: FIRST_TEXT_DOCUMENT_ID,
+  [WORKOUT_DOCUMENT_ID]: {
+    id: WORKOUT_DOCUMENT_ID,
     name: "workout",
-    text: Text.of(INITIAL_TEXT.split("\n")),
+    text: Text.of(WORKOUT_TEXT.split("\n")),
     sheets: [
       {
         id: nanoid(),
@@ -66,6 +103,17 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       },
     ],
   },
+  [GOCHUJANG_PORK_DOCUMENT_ID]: {
+    id: GOCHUJANG_PORK_DOCUMENT_ID,
+    name: "gochujang pork",
+    text: Text.of(GOCHUJANG_PORK_TEXT.split("\n")),
+    sheets: [
+      {
+        id: nanoid(),
+        configId: FIRST_SHEET_CONFIG_ID,
+      },
+    ],
+  }
 });
 let nextSheetIndex = 1;
 export const sheetConfigsMobx = observable.map<string, SheetConfig>({
@@ -88,4 +136,4 @@ export function addSheetConfig() {
   return sheetConfig;
 }
 
-export const selectedTextDocumentIdBox = observable.box(FIRST_TEXT_DOCUMENT_ID);
+export const selectedTextDocumentIdBox = observable.box(WORKOUT_DOCUMENT_ID);

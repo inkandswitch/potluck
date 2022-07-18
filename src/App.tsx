@@ -7,7 +7,7 @@ import {
 } from "./Editor";
 import {
   addSheetConfig,
-  FIRST_TEXT_DOCUMENT_ID,
+  WORKOUT_DOCUMENT_ID,
   selectedTextDocumentIdBox,
   sheetConfigsMobx,
   Snippet,

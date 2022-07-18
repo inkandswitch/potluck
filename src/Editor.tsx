@@ -23,34 +23,6 @@ const textDocumentIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
 });
 
-// HIGHLIGHTS
-
-function parseHighlights(view: EditorView) {
-  const doc = view.state.doc;
-  const textDocumentId = view.state.facet(textDocumentIdFacet);
-
-  const textDocument = textDocumentsMobx.get(textDocumentId);
-
-  if (!textDocument) {
-    return;
-  }
-
-  const sheetConfigs: SheetConfig[] =
-    getSheetConfigsOfTextDocument(textDocument);
-
-  const documentValueRows = evaluateSheetConfigs(textDocument, sheetConfigs);
-  const highlights = Object.values(documentValueRows)
-    .map((sheetValueRows) =>
-      sheetValueRows.filter(
-        (r): r is Highlight => "span" in r && r.span !== undefined
-      )
-    )
-    .flat();
-  view.dispatch({
-    effects: setHighlightsEffect.of(highlights),
-  });
-}
-
 const setHighlightsEffect = StateEffect.define<Highlight[]>();
 const highlightsField = StateField.define<Highlight[]>({
   create() {
@@ -129,7 +101,6 @@ export const Editor = observer(
 
       const unsubscribes: (() => void)[] = [
         autorun(() => {
-          // parseHighlights(view)
           const highlights = computed(
             () => {
               const sheetConfigs: SheetConfig[] =

@@ -215,7 +215,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
   [NUMBER_SHEET_CONFIG_ID]: {
     id: NUMBER_SHEET_CONFIG_ID,
     name: "numbers",
-    columns: [{ name: "value", formula: 'HIGHLIGHTS_OF_REGEX("[0-9]+")' }],
+    columns: [{ name: "value", formula: 'MatchRegexp("[0-9]+")' }],
   },
   [QUANTITY_SHEET_CONFIG_ID]: {
     id: QUANTITY_SHEET_CONFIG_ID,
@@ -225,19 +225,19 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
         name: "unit",
         formula:
           // There are two layers of escaping going on here; todo: improve the situation by auto-escaping user input?
-          'HIGHLIGHTS_OF_REGEX("\\\\b(cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|gram|g|milliliter|ml)s?\\\\b")',
+          'MatchRegexp("\\\\b(cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|gram|g|milliliter|ml)s?\\\\b")',
       },
-      { name: "amount", formula: "PREV_OF_TYPE(unit, 'numbers')" },
+      { name: "amount", formula: "PrevOfType(unit, 'numbers')" },
     ],
   },
   [WORKOUT_SHEET_CONFIG_ID]: {
     id: WORKOUT_SHEET_CONFIG_ID,
     name: "workouts",
     columns: [
-      { name: "activity", formula: 'HIGHLIGHTS_OF_REGEX("Squat|Dead")' },
+      { name: "activity", formula: 'MatchRegexp("Squat|Dead")' },
       {
         name: "exercises",
-        formula: 'FILTER(VALUES_OF_TYPE("reps"), IS_ON_SAME_LINE_AS(activity))',
+        formula: 'Filter(ValuesOfType("reps"), SameLine(activity))',
       },
     ],
   },
@@ -247,9 +247,9 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     columns: [
       {
         name: "reps",
-        formula: 'FILTER(VALUES_OF_TYPE("numbers"), HAS_TEXT_ON_RIGHT("x"))',
+        formula: 'Filter(ValuesOfType("numbers"), HasTextOnRight("x"))',
       },
-      { name: "sets", formula: 'NEXT_OF_TYPE(reps, "numbers")' },
+      { name: "sets", formula: 'NextOfType(reps, "numbers")' },
     ],
   },
   [INGREDIENTS_SHEET_CONFIG_ID]: {
@@ -259,11 +259,11 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "name",
         formula:
-          'HIGHLIGHTS_OF(DATA_FROM_DOC("all ingredients", "allIngredients", "name"))',
+          'MatchString(DataFromDoc("all ingredients", "allIngredients", "name"))',
       },
       {
         name: "quantity",
-        formula: 'PREV_OF_TYPE(name, "quantity")',
+        formula: 'PrevOfType(name, "quantity")',
       },
     ],
   },
@@ -273,7 +273,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     columns: [
       {
         name: "name",
-        formula: "EACH_LINE()",
+        formula: "SplitLines()",
       },
     ],
   },

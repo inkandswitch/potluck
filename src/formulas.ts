@@ -38,7 +38,7 @@ function evaluateFormula(
   scope: Scope
 ) {
   const API = {
-    EACH_LINE: (): Highlight[] => {
+    SplitLines: (): Highlight[] => {
       // todo: there's probably a more elegant way to get lines out of CM
       const lines = textDocument.text.sliceString(0).split("\n");
       let highlights: Highlight[] = [];
@@ -58,7 +58,7 @@ function evaluateFormula(
     },
 
     // this method is not curried because it has an optional flags parameter
-    HIGHLIGHTS_OF_REGEX: (regexString: string, flags: string): Highlight[] => {
+    MatchRegexp: (regexString: string, flags: string): Highlight[] => {
       const regex = new RegExp(regexString, "g" + (flags ? flags : ""));
       const docString = textDocument.text.sliceString(0);
 
@@ -89,7 +89,7 @@ function evaluateFormula(
     },
 
     // this method is not curried because it has an optional isCaseSensitive parameter
-    HIGHLIGHTS_OF: (values: string | string[], isCaseSensitive: boolean) => {
+    MatchString: (values: string | string[], isCaseSensitive: boolean) => {
       if (!isArray(values)) {
         values = [values];
       }
@@ -99,7 +99,7 @@ function evaluateFormula(
       for (const value of values) {
         if (isString(value)) {
           highlights = highlights.concat(
-            API.HIGHLIGHTS_OF_REGEX(value, isCaseSensitive ? "i" : "")
+            API.MatchRegexp(value, isCaseSensitive ? "i" : "")
           );
         }
       }
@@ -107,7 +107,7 @@ function evaluateFormula(
       return highlights;
     },
 
-    VALUES_OF_TYPE: (type: string) => {
+    ValuesOfType: (type: string) => {
       const typeSheetConfig = Array.from(sheetConfigsMobx.values()).find(
         (sheetConfig) => sheetConfig.name === type
       );
@@ -118,7 +118,7 @@ function evaluateFormula(
       return getComputedSheetValue(textDocument.id, typeSheetConfig.id).get();
     },
 
-    NEXT_OF_TYPE: (highlight: Highlight, type: string) => {
+    NextOfType: (highlight: Highlight, type: string) => {
       const typeSheetConfig = Array.from(sheetConfigsMobx.values()).find(
         (sheetConfig) => sheetConfig.name === type
       );
@@ -137,7 +137,7 @@ function evaluateFormula(
       );
     },
 
-    PREV_OF_TYPE: (highlight: Highlight, type: string) => {
+    PrevOfType: (highlight: Highlight, type: string) => {
       const typeSheetConfig = Array.from(sheetConfigsMobx.values()).find(
         (sheetConfig) => sheetConfig.name === type
       );
@@ -158,7 +158,7 @@ function evaluateFormula(
         );
     },
 
-    HAS_TYPE: curry((type: string, highlight: Highlight) => {
+    HasType: curry((type: string, highlight: Highlight) => {
       const sheetConfig = Array.from(sheetConfigsMobx.values()).find(
         (sheetConfig) => sheetConfig.name === type
       );
@@ -170,20 +170,20 @@ function evaluateFormula(
       return sheetConfig.id === highlight.sheetConfigId;
     }),
 
-    HAS_TEXT_ON_LEFT: curry((text: string, highlight: Highlight): boolean => {
+    HasTextOnLeft: curry((text: string, highlight: Highlight): boolean => {
       const from = highlight.span[0];
       const prevText = textDocument.text.sliceString(0, from).trim();
 
       return prevText.endsWith(text);
     }),
 
-    HAS_TEXT_ON_RIGHT: curry((text: string, highlight: Highlight): boolean => {
+    HasTextOnRight: curry((text: string, highlight: Highlight): boolean => {
       const to = highlight.span[1];
       const followingText = textDocument.text.sliceString(to).trim();
       return followingText.startsWith(text);
     }),
 
-    IS_ON_SAME_LINE_AS: curry((a: Highlight, b: Highlight): boolean => {
+    SameLine: curry((a: Highlight, b: Highlight): boolean => {
       const lineStartA = textDocument.text.lineAt(a.span[0]).number;
       const lineEndA = textDocument.text.lineAt(a.span[1]).number;
       const lineStartB = textDocument.text.lineAt(b.span[0]).number;
@@ -196,7 +196,7 @@ function evaluateFormula(
       );
     }),
 
-    FILTER: curry((list: any[], condition: any): any[] => {
+    Filter: curry((list: any[], condition: any): any[] => {
       return list.filter((item: any) => {
         if (isFunction(condition)) {
           return condition(item);
@@ -205,15 +205,15 @@ function evaluateFormula(
       });
     }),
 
-    FIRST: (list: any[]): any => {
+    First: (list: any[]): any => {
       return list[0];
     },
 
-    SECOND: (list: any[]): any => {
+    Second: (list: any[]): any => {
       return list[1];
     },
 
-    DATA_FROM_DOC: (
+    DataFromDoc: (
       docName: string,
       sheetConfigName: string,
       columnName: string

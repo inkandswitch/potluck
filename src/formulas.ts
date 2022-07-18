@@ -254,7 +254,7 @@ function evaluateFormula(
   }
 }
 
-function evaluateColumns(
+export function evaluateColumns(
   textDocument: TextDocument,
   sheetConfig: SheetConfig,
   snippets: Highlight[],
@@ -287,6 +287,51 @@ function evaluateColumns(
           sheetConfig,
           column.formula,
           snippets,
+          proxiedSheetsContext,
+          { ...row }
+        );
+
+        return { ...row, [column.name]: result };
+      });
+    }
+  }
+
+  return resultRows;
+}
+
+export function evaluateSheet(
+  textDocument: TextDocument,
+  sheetConfig: SheetConfig,
+  highlights: Highlight[],
+  sheetsContext: Scope
+): Highlight[] {
+  let resultRows: Scope[] = [];
+
+  const proxiedSheetsContext = sheetsScopeProxy(sheetsContext);
+
+  for (const column of sheetConfig.columns) {
+    if (resultRows.length === 0) {
+      const result = evaluateFormula(
+        textDocument,
+        sheetConfig,
+        column.formula,
+        highlights,
+        proxiedSheetsContext,
+        {}
+      );
+
+      if (isArray(result)) {
+        result.forEach((item) => resultRows.push({ [column.name]: item }));
+      } else {
+        resultRows.push({ [column.name]: result });
+      }
+    } else {
+      resultRows = resultRows.map((row) => {
+        const result = evaluateFormula(
+          textDocument,
+          sheetConfig,
+          column.formula,
+          highlights,
           proxiedSheetsContext,
           { ...row }
         );

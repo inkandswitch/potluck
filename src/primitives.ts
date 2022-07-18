@@ -8,10 +8,12 @@ export type Span = [from: number, to: number];
 // this is a row in a document sheet
 export type Highlight = {
   documentId: string;
-  span: Span;
   sheetConfigId: string;
+  span: Span;
   data: { [colId: string]: any };
 };
+export type SheetValueRowWithoutSpan = Omit<Highlight, "span">;
+export type SheetValueRow = Highlight | SheetValueRowWithoutSpan;
 
 export type SheetConfig = {
   id: string;

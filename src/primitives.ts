@@ -39,7 +39,7 @@ export function getSheetConfigsOfTextDocument (textDocument: TextDocument) {
 
 const WORKOUT_TEXT = `
 Squat 50 10x3
-Dead 45 10x3
+Dead 45 10x3, 30 10x3
 Bench 70 776
 `;
 

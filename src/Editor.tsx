@@ -51,13 +51,17 @@ const highlightsField = StateField.define<Highlight[]>({
         return e.value;
       }
     }
-    return snippets.map((snippet) => ({
-      ...snippet,
-      span: [
-        tr.changes.mapPos(snippet.span[0]),
-        tr.changes.mapPos(snippet.span[1]),
-      ],
-    }));
+    return (
+      snippets
+        .map((highlight) => ({
+          ...highlight,
+          span: [
+            tr.changes.mapPos(highlight.span[0]),
+            tr.changes.mapPos(highlight.span[1]),
+          ],
+        }))
+        .filter((highlight) => highlight.span[0] !== highlight.span[1]) as Highlight[]
+    )
   },
 });
 

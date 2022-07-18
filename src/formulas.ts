@@ -271,7 +271,6 @@ export function evaluateSheet(
   textDocument: TextDocument,
   sheetConfig: SheetConfig
 ): SheetValueRow[] {
-  console.log("evaluateSheet", textDocument.id, sheetConfig.id);
   let resultRows: { [columnName: string]: any }[] | undefined;
 
   for (const column of sheetConfig.columns) {

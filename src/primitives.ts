@@ -69,6 +69,17 @@ export const textEditorStateMobx = observable.box(
   EditorState.create({ doc: WORKOUT_TEXT })
 );
 
+const ICE_CREAM_TEXT = `Ingredients
+1¾ cups heavy cream
+1¼ cup whole milk
+¾ cup sugar
+⅛ teaspoon fine sea salt
+1 tablespoon vanilla extract
+
+Instructions
+Pour 1 cup of the cream into a saucepan and add the sugar, salt. Scrape the seeds of the vanilla bean into the pot and then add the vanilla pod to the pot. Warm the mixture over medium heat, just until the sugar dissolves. Remove from the heat and add the remaining cream, milk, and vanilla extract (if using extract). Stir to combine and chill in the refrigerator.
+When ready to churn, remove the vanilla pod, whisk mixture again and pour into ice cream maker. Churn according to the manufacturer’s instructions. Transfer the finished ice cream to an airtight container and place in the freezer until ready to serve. Enjoy!`
+
 const GOCHUJANG_PORK_TEXT = `Grilled Gochujang Pork With Fresh Sesame Kimchi
 
 Pork shoulder is often prepared as a large roast, requiring hours of cooking until it’s tender. But if you slice it thinly and pound it, the meat quickly absorbs this savory gochujang marinade and cooks up in no time. The spicy pork is balanced by a cool and crisp sesame kimchi, eaten fresh like a salad rather than fermented like traditional preparations. Baby bok choy stands in for the usual napa cabbage, and it’s coated in a vibrant sauce of garlic, ginger, gochugaru, fish sauce and nutty sesame oil. Tuck any leftover pork and kimchi into sandwiches the next day, garnished with tomatoes and mayonnaise.
@@ -109,6 +120,7 @@ export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork"
 export const WORKOUT_SHEET_CONFIG_ID = nanoid()
 export const NUMBER_SHEET_CONFIG_ID = nanoid()
 export const FOOD_TYPES_SHEET_CONFIG_ID = nanoid()
+export const ICE_CREAM_DOCUMENT_ID = "ice cream"
 export const INGREDIENTS_SHEET_CONFIG_ID = nanoid()
 export const REPS_SHEET_CONFIG_ID = nanoid()
 
@@ -131,6 +143,12 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
         configId: WORKOUT_SHEET_CONFIG_ID,
       }
     ],
+  },
+  [ICE_CREAM_DOCUMENT_ID]: {
+    id: ICE_CREAM_DOCUMENT_ID,
+    name: "ice cream",
+    text: Text.of(ICE_CREAM_TEXT.split("\n")),
+    sheets: []
   },
   [GOCHUJANG_PORK_DOCUMENT_ID]: {
     id: GOCHUJANG_PORK_DOCUMENT_ID,
@@ -196,4 +214,4 @@ export function addSheetConfig() {
   return sheetConfig;
 }
 
-export const selectedTextDocumentIdBox = observable.box(WORKOUT_DOCUMENT_ID);
+export const selectedTextDocumentIdBox = observable.box(ICE_CREAM_DOCUMENT_ID);

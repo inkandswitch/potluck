@@ -1,5 +1,5 @@
 import { SheetConfig, Highlight, sheetConfigsMobx } from "./primitives";
-import { curry, isFunction, isArray, sortBy, isObject, map } from "lodash";
+import { curry, isFunction, isArray, sortBy, isObject, map, isString } from "lodash";
 import { Text } from "@codemirror/state";
 
 export type FormulaColumn = {
@@ -51,7 +51,9 @@ function evaluateFormula(
       let highlights : Highlight[] = [];
 
       for (const value of values) {
-        highlights = highlights.concat(API.HIGHLIGHTS_OF_REGEX(value, isCaseSensitive ? "i" : ""))
+        if (isString(value)) {
+          highlights = highlights.concat(API.HIGHLIGHTS_OF_REGEX(value, isCaseSensitive ? "i" : ""))
+        }
       }
 
       return highlights

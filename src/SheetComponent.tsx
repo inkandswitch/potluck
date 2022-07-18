@@ -78,6 +78,12 @@ export const SheetComponent = observer(
       );
     });
 
+    const changeNameAt = action((changedIndex: number, name: string) => {
+      sheetConfig.columns = sheetConfig.columns.map((column, index) =>
+        index === changedIndex ? { ...column, name } : column
+      );
+    });
+
     const addColumn = action(() => {
       sheetConfig.columns.push({
         name: `col${++i}`,
@@ -90,10 +96,17 @@ export const SheetComponent = observer(
       <div className="flex flex-col gap-2 flex-1">
         <SheetName sheetConfig={sheetConfig} />
         {selectedFormulaIndex !== undefined && (
-          <div className="flex">
-            <span>{columns[selectedFormulaIndex].name} =&nbsp;</span>
+          <div className="flex mr-[30px]">
             <input
-              className="border border-gray-200 flex-1"
+              className="pl-1 border border-gray-200"
+              value={columns[selectedFormulaIndex].name}
+              onChange={(evt) =>
+                changeNameAt(selectedFormulaIndex, evt.target.value)
+              }
+            />
+            <span>&nbsp;=&nbsp;</span>
+            <input
+              className="pl-1 border border-gray-200 flex-1"
               value={columns[selectedFormulaIndex].formula}
               onChange={(evt) =>
                 changeFormulaAt(selectedFormulaIndex, evt.target.value)

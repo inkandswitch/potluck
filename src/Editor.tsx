@@ -122,7 +122,7 @@ export const Editor = observer(
 
       const unsubscribes: (() => void)[] = [
         autorun(() => {
-          parseHighlights(view)
+          // parseHighlights(view)
         })
       ]
 

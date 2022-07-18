@@ -1,4 +1,5 @@
 import { computed, IComputedValue } from "mobx";
+import { evaluateSheet } from "./formulas";
 import {
   Highlight,
   sheetConfigsMobx,
@@ -22,7 +23,7 @@ export function getComputedSheetValue(
       if (textDocument === undefined || sheetConfig === undefined) {
         return [];
       }
-      return [];
+      return evaluateSheet(textDocument, sheetConfig, {});
     });
   }
   return computedCache[key];

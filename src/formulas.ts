@@ -111,6 +111,7 @@ function evaluateFormula(
       if (!typeSheetConfig) {
         return [];
       }
+      console.log("VALUES_OF_TYPE", typeSheetConfig);
       return getComputedSheetValue(textDocument.id, typeSheetConfig.id).get();
     },
 
@@ -228,9 +229,6 @@ function evaluateFormula(
     }
   `
     );
-    debugger;
-    console.log(fn);
-
     console.log("successfully evald", source);
     return fn(API, sheetsScope, scope);
   } catch (e) {
@@ -415,7 +413,9 @@ export function evaluateSheetConfigs(
     );
     sheetsScope[sheetConfig.id] = sheetValueRows.map((r) => r.data);
     highlights.push(
-      ...sheetValueRows.filter((r): r is Highlight => "span" in r)
+      ...sheetValueRows.filter(
+        (r): r is Highlight => "span" in r && r.span !== undefined
+      )
     );
     // const matches = evaluateColumns(
     //   textDocument,

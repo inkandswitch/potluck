@@ -4,6 +4,7 @@ import {
   sheetConfigsMobx,
   textDocumentsMobx,
   getSheetConfigsOfTextDocument,
+  TextDocument,
 } from "./primitives";
 import {
   curry,
@@ -24,23 +25,26 @@ export type FormulaColumn = {
 export type Scope = { [name: string]: any };
 
 function evaluateFormula(
+  textDocument: TextDocument,
+  sheetConfig: SheetConfig,
   source: string,
   highlights: Highlight[],
-  doc: Text,
   sheetsScope: Scope,
   scope: Scope
 ) {
   const API = {
     EACH_LINE: (): Highlight[] => {
       // todo: there's probably a more elegant way to get lines out of CM
-      const lines = doc.sliceString(0).split("\n");
+      const lines = textDocument.text.sliceString(0).split("\n");
       let highlights: Highlight[] = [];
 
       let index = 0;
       for (const line of lines) {
         highlights.push({
-          data: {},
+          documentId: textDocument.id,
+          sheetConfigId: sheetConfig.id,
           span: [index, index + line.length],
+          data: {},
         });
         index += line.length + 1;
       }
@@ -51,9 +55,9 @@ function evaluateFormula(
     // this method is not curried because it has an optional flags parameter
     HIGHLIGHTS_OF_REGEX: (regexString: string, flags: string): Highlight[] => {
       const regex = new RegExp(regexString, "g" + (flags ? flags : ""));
-      const docString = doc.sliceString(0);
+      const docString = textDocument.text.sliceString(0);
 
-      const highlights = [];
+      const highlights: Highlight[] = [];
       let match, prevIndex;
       while ((match = regex.exec(docString)) != null) {
         const value = match[0];
@@ -68,7 +72,12 @@ function evaluateFormula(
 
         prevIndex = from;
 
-        highlights.push({ span: [from, to] } as Highlight);
+        highlights.push({
+          documentId: textDocument.id,
+          sheetConfigId: sheetConfig.id,
+          span: [from, to],
+          data: {},
+        });
       }
 
       return highlights;
@@ -152,22 +161,22 @@ function evaluateFormula(
 
     HAS_TEXT_ON_LEFT: curry((text: string, highlight: Highlight): boolean => {
       const from = highlight.span[0];
-      const prevText = doc.sliceString(0, from).trim();
+      const prevText = textDocument.text.sliceString(0, from).trim();
 
       return prevText.endsWith(text);
     }),
 
     HAS_TEXT_ON_RIGHT: curry((text: string, highlight: Highlight): boolean => {
       const to = highlight.span[1];
-      const followingText = doc.sliceString(to).trim();
+      const followingText = textDocument.text.sliceString(to).trim();
       return followingText.startsWith(text);
     }),
 
     IS_ON_SAME_LINE_AS: curry((a: Highlight, b: Highlight): boolean => {
-      const lineStartA = doc.lineAt(a.span[0]).number;
-      const lineEndA = doc.lineAt(a.span[1]).number;
-      const lineStartB = doc.lineAt(b.span[0]).number;
-      const lineEndB = doc.lineAt(b.span[1]).number;
+      const lineStartA = textDocument.text.lineAt(a.span[0]).number;
+      const lineEndA = textDocument.text.lineAt(a.span[1]).number;
+      const lineStartB = textDocument.text.lineAt(b.span[0]).number;
+      const lineEndB = textDocument.text.lineAt(b.span[1]).number;
 
       return (
         lineStartA === lineEndA &&
@@ -212,7 +221,7 @@ function evaluateFormula(
       if (!sheetConfig) {
         return [];
       }
-      const { sheetsScope } = evaluateSheetConfigs(doc.text, sheetConfigs);
+      const { sheetsScope } = evaluateSheetConfigs(doc, sheetConfigs);
 
       // Fetch data from given sheet config and column, resolving spans into text
       return sheetsScope[sheetConfig.id].map((row: any) =>
@@ -245,22 +254,23 @@ function evaluateFormula(
   }
 }
 
-export function evaluateColumns(
-  columns: FormulaColumn[],
+function evaluateColumns(
+  textDocument: TextDocument,
+  sheetConfig: SheetConfig,
   snippets: Highlight[],
-  doc: Text,
   sheetsContext: Scope
 ): Scope[] {
   let resultRows: Scope[] = [];
 
   const proxiedSheetsContext = sheetsScopeProxy(sheetsContext);
 
-  for (const column of columns) {
+  for (const column of sheetConfig.columns) {
     if (resultRows.length === 0) {
       const result = evaluateFormula(
+        textDocument,
+        sheetConfig,
         column.formula,
         snippets,
-        doc,
         proxiedSheetsContext,
         {}
       );
@@ -273,9 +283,10 @@ export function evaluateColumns(
     } else {
       resultRows = resultRows.map((row) => {
         const result = evaluateFormula(
+          textDocument,
+          sheetConfig,
           column.formula,
           snippets,
-          doc,
           proxiedSheetsContext,
           { ...row }
         );
@@ -341,7 +352,7 @@ function scopeProxy(scope: Scope) {
 }
 
 export function evaluateSheetConfigs(
-  doc: Text,
+  textDocument: TextDocument,
   sheetConfigs: SheetConfig[]
 ): { highlights: Highlight[]; sheetsScope: Scope } {
   let highlights: Highlight[] = [];
@@ -350,9 +361,9 @@ export function evaluateSheetConfigs(
 
   sheetConfigs.forEach((sheetConfig) => {
     const matches = evaluateColumns(
-      sheetConfig.columns,
+      textDocument,
+      sheetConfig,
       highlights,
-      doc,
       sheetsScope
     );
 
@@ -377,6 +388,7 @@ export function evaluateSheetConfigs(
 
       if (from !== undefined && to !== undefined) {
         highlights.push({
+          documentId: textDocument.id,
           sheetConfigId: sheetConfig.id,
           span: [from, to],
           data: match,

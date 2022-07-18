@@ -79,10 +79,7 @@ const TextDocumentComponent = observer(
     const textDocument = textDocumentsMobx.get(textDocumentId)!;
 
     const sheetConfigs = getSheetConfigsOfTextDocument(textDocument);
-    const { sheetsScope } = evaluateSheetConfigs(
-      textDocument.text,
-      sheetConfigs
-    );
+    const { sheetsScope } = evaluateSheetConfigs(textDocument, sheetConfigs);
 
     return (
       <div className="px-4">

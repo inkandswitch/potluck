@@ -30,7 +30,6 @@ function evaluateFormula(
   textDocument: TextDocument,
   sheetConfig: SheetConfig,
   source: string,
-  sheetsScope: Scope,
   scope: Scope
 ) {
   const API = {
@@ -191,7 +190,6 @@ function evaluateFormula(
       sheetConfigName: string,
       columnName: string
     ): string[] => {
-      // return [];
       const doc = [...textDocumentsMobx.values()].find(
         (td) => td.name === docName
       );
@@ -205,89 +203,48 @@ function evaluateFormula(
       if (!sheetConfig) {
         return [];
       }
-      const { sheetsScope } = evaluateSheetConfigs(doc, sheetConfigs);
+      return getComputedSheetValue(doc.id, sheetConfig.id)
+        .get()
+        .flatMap((r) => {
+          if ("span" in r && r.span !== undefined) {
+            return [doc.text.sliceString(r.span[0], r.span[1])];
+          }
+          return [];
+        });
+      // const { sheetsScope } = evaluateSheetConfigs(doc, sheetConfigs);
 
-      // Fetch data from given sheet config and column, resolving spans into text
-      return sheetsScope[sheetConfig.id].map((row: any) =>
-        doc.text.sliceString(row[columnName].span[0], row[columnName].span[1])
-      );
+      // // Fetch data from given sheet config and column, resolving spans into text
+      // return sheetsScope[sheetConfig.id].map((row: any) =>
+      //   doc.text.sliceString(row[columnName].span[0], row[columnName].span[1])
+      // );
     },
   };
 
   try {
     let fn = new Function(
       "API",
-      "sheetsContext",
       "context",
       `
     with (API) {
-      with (sheetsContext) {
-        with (context) {
-          return ${source}
-        }
+      with (context) {
+        return ${source}
       }
     }
   `
     );
     console.log("successfully evald", source);
-    return fn(API, sheetsScope, scope);
+    return fn(API, scope);
   } catch (e) {
     console.error(e);
     return e;
   }
 }
 
-export function evaluateColumns(
-  textDocument: TextDocument,
-  sheetConfig: SheetConfig,
-  snippets: Highlight[],
-  sheetsContext: Scope
-): Scope[] {
-  let resultRows: Scope[] = [];
-
-  const proxiedSheetsContext = sheetsScopeProxy(sheetsContext);
-
-  for (const column of sheetConfig.columns) {
-    if (resultRows.length === 0) {
-      const result = evaluateFormula(
-        textDocument,
-        sheetConfig,
-        column.formula,
-        proxiedSheetsContext,
-        {}
-      );
-
-      if (isArray(result)) {
-        result.forEach((item) => resultRows.push({ [column.name]: item }));
-      } else {
-        resultRows.push({ [column.name]: result });
-      }
-    } else {
-      resultRows = resultRows.map((row) => {
-        const result = evaluateFormula(
-          textDocument,
-          sheetConfig,
-          column.formula,
-          proxiedSheetsContext,
-          { ...row }
-        );
-
-        return { ...row, [column.name]: result };
-      });
-    }
-  }
-
-  return resultRows;
-}
-
 export function evaluateSheet(
   textDocument: TextDocument,
-  sheetConfig: SheetConfig,
-  sheetsContext: Scope
+  sheetConfig: SheetConfig
 ): SheetValueRow[] {
   let resultRows: { [columnName: string]: any }[] | undefined;
-
-  const proxiedSheetsContext = sheetsScopeProxy(sheetsContext);
 
   for (const column of sheetConfig.columns) {
     if (resultRows === undefined) {
@@ -295,7 +252,6 @@ export function evaluateSheet(
         textDocument,
         sheetConfig,
         column.formula,
-        proxiedSheetsContext,
         {}
       );
 
@@ -310,7 +266,6 @@ export function evaluateSheet(
           textDocument,
           sheetConfig,
           column.formula,
-          proxiedSheetsContext,
           { ...row }
         );
 
@@ -343,19 +298,6 @@ export function evaluateSheet(
       data: rowData,
     };
   });
-}
-
-function sheetsScopeProxy(sheetsScope: Scope) {
-  const resolved: Scope = {};
-
-  for (const [id, rows] of Object.entries(sheetsScope)) {
-    const name = sheetConfigsMobx.get(id)?.name;
-    if (name) {
-      resolved[name] = rows;
-    }
-  }
-
-  return scopeProxy(resolved);
 }
 
 function wrapValueInProxy(value: any) {
@@ -400,62 +342,10 @@ function scopeProxy(scope: Scope) {
 export function evaluateSheetConfigs(
   textDocument: TextDocument,
   sheetConfigs: SheetConfig[]
-): { highlights: Highlight[]; sheetsScope: Scope } {
-  let highlights: Highlight[] = [];
-
-  const sheetsScope: Scope = {};
-
+): { [sheetConfigId: string]: SheetValueRow[] } {
+  const rv: { [sheetConfigId: string]: SheetValueRow[] } = {};
   sheetConfigs.forEach((sheetConfig) => {
-    const sheetValueRows = evaluateSheet(
-      textDocument,
-      sheetConfig,
-      sheetsScope
-    );
-    sheetsScope[sheetConfig.id] = sheetValueRows.map((r) => r.data);
-    highlights.push(
-      ...sheetValueRows.filter(
-        (r): r is Highlight => "span" in r && r.span !== undefined
-      )
-    );
-    // const matches = evaluateColumns(
-    //   textDocument,
-    //   sheetConfig,
-    //   highlights,
-    //   sheetsScope
-    // );
-
-    // sheetsScope[sheetConfig.id] = matches;
-
-    // for (const match of matches) {
-    //   let from, to;
-
-    //   for (const value of Object.values(match)) {
-    //     if (value && value.span) {
-    //       const [valueFrom, valueTo] = value.span;
-
-    //       if (from === undefined || valueFrom < from) {
-    //         from = valueFrom;
-    //       }
-
-    //       if (to === undefined || valueTo > to) {
-    //         to = valueTo;
-    //       }
-    //     }
-    //   }
-
-    //   if (from !== undefined && to !== undefined) {
-    //     highlights.push({
-    //       documentId: textDocument.id,
-    //       sheetConfigId: sheetConfig.id,
-    //       span: [from, to],
-    //       data: match,
-    //     });
-    //   }
-    // }
+    rv[sheetConfig.id] = evaluateSheet(textDocument, sheetConfig);
   });
-
-  return {
-    sheetsScope,
-    highlights: sortBy(highlights, ({ span }) => span[0]),
-  };
+  return rv;
 }

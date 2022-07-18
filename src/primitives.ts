@@ -143,10 +143,10 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
         id: nanoid(),
         configId: REPS_SHEET_CONFIG_ID,
       },
-      // {
-      //   id: nanoid(),
-      //   configId: WORKOUT_SHEET_CONFIG_ID,
-      // },
+      {
+        id: nanoid(),
+        configId: WORKOUT_SHEET_CONFIG_ID,
+      },
     ],
   },
   [ICE_CREAM_DOCUMENT_ID]: {

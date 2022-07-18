@@ -38,10 +38,16 @@ function parseHighlights(view: EditorView) {
   const sheetConfigs: SheetConfig[] =
     getSheetConfigsOfTextDocument(textDocument);
 
+  const documentValueRows = evaluateSheetConfigs(textDocument, sheetConfigs);
+  const highlights = Object.values(documentValueRows)
+    .map((sheetValueRows) =>
+      sheetValueRows.filter(
+        (r): r is Highlight => "span" in r && r.span !== undefined
+      )
+    )
+    .flat();
   view.dispatch({
-    effects: setHighlightsEffect.of(
-      evaluateSheetConfigs(textDocument, sheetConfigs).highlights
-    ),
+    effects: setHighlightsEffect.of(highlights),
   });
 }
 

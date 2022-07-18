@@ -8,10 +8,12 @@ export type Span = [from: number, to: number];
 // this is a row in a document sheet
 export type Highlight = {
   documentId: string;
-  span: Span;
   sheetConfigId: string;
+  span: Span;
   data: { [colId: string]: any };
 };
+export type SheetValueRowWithoutSpan = Omit<Highlight, "span">;
+export type SheetValueRow = Highlight | SheetValueRowWithoutSpan;
 
 export type SheetConfig = {
   id: string;
@@ -247,7 +249,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
         name: "reps",
         formula: 'FILTER(VALUES_OF_TYPE("numbers"), HAS_TEXT_ON_RIGHT("x"))',
       },
-      { name: "sets", formula: 'NEXT(reps, HAS_TYPE("numbers"))' },
+      { name: "sets", formula: 'NEXT_OF_TYPE(reps, "numbers")' },
     ],
   },
   [INGREDIENTS_SHEET_CONFIG_ID]: {

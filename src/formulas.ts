@@ -239,12 +239,6 @@ function evaluateFormula(
           }
           return [];
         });
-      // const { sheetsScope } = evaluateSheetConfigs(doc, sheetConfigs);
-
-      // // Fetch data from given sheet config and column, resolving spans into text
-      // return sheetsScope[sheetConfig.id].map((row: any) =>
-      //   doc.text.sliceString(row[columnName].span[0], row[columnName].span[1])
-      // );
     },
   };
 

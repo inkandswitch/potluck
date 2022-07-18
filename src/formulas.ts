@@ -25,6 +25,23 @@ function evaluateFormula(
   scope: Scope
 ) {
   const API = {
+    EACH_LINE: (): Highlight[] => {
+      // todo: there's probably a more elegant way to get lines out of CM
+      const lines = doc.sliceString(0).split("\n");
+      let highlights: Highlight[] = [];
+
+      let index = 0;
+      for (const line of lines) {
+        highlights.push({
+          data: {},
+          span: [index, index + line.length],
+        });
+        index += line.length + 1;
+      }
+
+      return highlights;
+    },
+
     // this method is not curried because it has an optional flags parameter
     HIGHLIGHTS_OF_REGEX: (regexString: string, flags: string): Highlight[] => {
       const regex = new RegExp(regexString, "g" + (flags ? flags : ""));
@@ -179,7 +196,7 @@ function evaluateFormula(
       "sheetsContext",
       "context",
       `
-    with (API) {  
+    with (API) {
       with (sheetsContext) {
         with (context) {
           return ${source}

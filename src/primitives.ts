@@ -117,12 +117,14 @@ Serve the grilled pork and onions with the fresh sesame kimchi and rice on the s
 
 export const WORKOUT_DOCUMENT_ID = "workout";
 export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork";
+export const INGREDIENTS_DOCUMENT_ID = "all ingredients";
 export const WORKOUT_SHEET_CONFIG_ID = nanoid();
 export const NUMBER_SHEET_CONFIG_ID = nanoid();
 export const FOOD_TYPES_SHEET_CONFIG_ID = nanoid();
 export const ICE_CREAM_DOCUMENT_ID = "ice cream";
 export const INGREDIENTS_SHEET_CONFIG_ID = nanoid();
 export const REPS_SHEET_CONFIG_ID = nanoid();
+export const ALL_INGREDIENTS_SHEET_CONFIG_ID = nanoid();
 
 export const textDocumentsMobx = observable.map<string, TextDocument>({
   [WORKOUT_DOCUMENT_ID]: {
@@ -162,6 +164,24 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: nanoid(),
         configId: INGREDIENTS_SHEET_CONFIG_ID,
+      },
+    ],
+  },
+  [INGREDIENTS_DOCUMENT_ID]: {
+    id: INGREDIENTS_DOCUMENT_ID,
+    name: "all ingredients",
+    text: Text.of([
+      "pork",
+      "gochugaru",
+      "vinegar",
+      "apples",
+      "bananas",
+      "salt",
+    ]),
+    sheets: [
+      {
+        id: nanoid(),
+        configId: ALL_INGREDIENTS_SHEET_CONFIG_ID,
       },
     ],
   },
@@ -207,6 +227,16 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "name",
         formula: 'HIGHLIGHTS_OF(["pork", "gochugaru", "vinegar"])',
+      },
+    ],
+  },
+  [ALL_INGREDIENTS_SHEET_CONFIG_ID]: {
+    id: ALL_INGREDIENTS_SHEET_CONFIG_ID,
+    name: "allIngredients",
+    columns: [
+      {
+        name: "name",
+        formula: "EACH_LINE()",
       },
     ],
   },

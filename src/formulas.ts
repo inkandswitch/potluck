@@ -1,4 +1,10 @@
-import { SheetConfig, Highlight, sheetConfigsMobx } from "./primitives";
+import {
+  SheetConfig,
+  Highlight,
+  sheetConfigsMobx,
+  textDocumentsMobx,
+  getSheetConfigsOfTextDocument,
+} from "./primitives";
 import {
   curry,
   isFunction,
@@ -148,8 +154,6 @@ function evaluateFormula(
       const from = highlight.span[0];
       const prevText = doc.sliceString(0, from).trim();
 
-      console.log(prevText);
-
       return prevText.endsWith(text);
     }),
 
@@ -188,6 +192,33 @@ function evaluateFormula(
     SECOND: (list: any[]): any => {
       return list[1];
     },
+
+    DATA_FROM_DOC: (
+      docName: string,
+      sheetConfigName: string,
+      columnName: string
+    ): string[] => {
+      // return [];
+      const doc = [...textDocumentsMobx.values()].find(
+        (td) => td.name === docName
+      );
+      if (doc === undefined) {
+        return [];
+      }
+      const sheetConfigs = getSheetConfigsOfTextDocument(doc);
+      const sheetConfig = sheetConfigs.find(
+        (sc) => sc.name === sheetConfigName
+      );
+      if (!sheetConfig) {
+        return [];
+      }
+      const { sheetsScope } = evaluateSheetConfigs(doc.text, sheetConfigs);
+
+      // Fetch data from given sheet config and column, resolving spans into text
+      return sheetsScope[sheetConfig.id].map((row: any) =>
+        doc.text.sliceString(row[columnName].span[0], row[columnName].span[1])
+      );
+    },
   };
 
   try {
@@ -206,6 +237,7 @@ function evaluateFormula(
   `
     );
 
+    console.log("successfully evald", source);
     return fn(API, sheetsScope, scope);
   } catch (e) {
     console.error(e);

@@ -120,7 +120,6 @@ export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork";
 export const INGREDIENTS_DOCUMENT_ID = "all ingredients";
 export const WORKOUT_SHEET_CONFIG_ID = nanoid();
 export const NUMBER_SHEET_CONFIG_ID = nanoid();
-export const FOOD_TYPES_SHEET_CONFIG_ID = nanoid();
 export const ICE_CREAM_DOCUMENT_ID = "ice cream";
 export const INGREDIENTS_SHEET_CONFIG_ID = nanoid();
 export const REPS_SHEET_CONFIG_ID = nanoid();
@@ -157,10 +156,6 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
     name: "gochujang pork",
     text: Text.of(GOCHUJANG_PORK_TEXT.split("\n")),
     sheets: [
-      {
-        id: nanoid(),
-        configId: FOOD_TYPES_SHEET_CONFIG_ID,
-      },
       {
         id: nanoid(),
         configId: INGREDIENTS_SHEET_CONFIG_ID,
@@ -215,18 +210,14 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       { name: "sets", formula: 'NEXT(reps, HAS_TYPE("numbers"))' },
     ],
   },
-  [FOOD_TYPES_SHEET_CONFIG_ID]: {
-    id: FOOD_TYPES_SHEET_CONFIG_ID,
-    name: "foodTypes",
-    columns: [{ name: "name", formula: '["pork", "gochugaru", "vinegar"]' }],
-  },
   [INGREDIENTS_SHEET_CONFIG_ID]: {
     id: INGREDIENTS_SHEET_CONFIG_ID,
     name: "ingredients",
     columns: [
       {
         name: "name",
-        formula: 'HIGHLIGHTS_OF(["pork", "gochugaru", "vinegar"])',
+        formula:
+          'HIGHLIGHTS_OF(DATA_FROM_DOC("all ingredients", "allIngredients", "name"))',
       },
     ],
   },

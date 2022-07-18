@@ -23,7 +23,7 @@ export function getComputedSheetValue(
       if (textDocument === undefined || sheetConfig === undefined) {
         return [];
       }
-      return evaluateSheet(textDocument, sheetConfig, {});
+      return evaluateSheet(textDocument, sheetConfig);
     });
   }
   return computedCache[key];

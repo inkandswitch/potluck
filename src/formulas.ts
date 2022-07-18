@@ -115,7 +115,6 @@ function evaluateFormula(
       if (!typeSheetConfig) {
         return [];
       }
-      console.log("VALUES_OF_TYPE", typeSheetConfig);
       return getComputedSheetValue(textDocument.id, typeSheetConfig.id).get();
     },
 
@@ -272,6 +271,7 @@ export function evaluateSheet(
   textDocument: TextDocument,
   sheetConfig: SheetConfig
 ): SheetValueRow[] {
+  console.log("evaluateSheet", textDocument.id, sheetConfig.id);
   let resultRows: { [columnName: string]: any }[] | undefined;
 
   for (const column of sheetConfig.columns) {
@@ -373,7 +373,10 @@ export function evaluateSheetConfigs(
 ): { [sheetConfigId: string]: SheetValueRow[] } {
   const rv: { [sheetConfigId: string]: SheetValueRow[] } = {};
   sheetConfigs.forEach((sheetConfig) => {
-    rv[sheetConfig.id] = evaluateSheet(textDocument, sheetConfig);
+    rv[sheetConfig.id] = getComputedSheetValue(
+      textDocument.id,
+      sheetConfig.id
+    ).get();
   });
   return rv;
 }

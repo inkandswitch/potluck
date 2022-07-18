@@ -80,7 +80,6 @@ const TextDocumentComponent = observer(
 
     const sheetConfigs = getSheetConfigsOfTextDocument(textDocument);
     const documentValueRows = evaluateSheetConfigs(textDocument, sheetConfigs);
-    console.log(documentValueRows);
 
     return (
       <div className="px-4">

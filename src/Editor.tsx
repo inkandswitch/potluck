@@ -7,7 +7,7 @@ import {
 import { Facet, StateEffect, StateField } from "@codemirror/state";
 import { minimalSetup } from "codemirror";
 import { useEffect, useRef } from "react";
-import { autorun, comparer, reaction, runInAction } from "mobx";
+import { autorun, comparer, computed, reaction, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   getSheetConfigsOfTextDocument,
@@ -116,8 +116,6 @@ export const Editor = observer(
         dispatch(transaction) {
           view.update([transaction]);
 
-          setTimeout(() => parseHighlights(view));
-
           runInAction(() => {
             textDocument.text = view.state.doc;
             textEditorStateMobx.set(transaction.state);
@@ -132,6 +130,27 @@ export const Editor = observer(
       const unsubscribes: (() => void)[] = [
         autorun(() => {
           // parseHighlights(view)
+          const highlights = computed(
+            () => {
+              const sheetConfigs: SheetConfig[] =
+                getSheetConfigsOfTextDocument(textDocument);
+              const documentValueRows = evaluateSheetConfigs(
+                textDocument,
+                sheetConfigs
+              );
+              return Object.values(documentValueRows)
+                .map((sheetValueRows) =>
+                  sheetValueRows.filter(
+                    (r): r is Highlight => "span" in r && r.span !== undefined
+                  )
+                )
+                .flat();
+            },
+            { equals: comparer.structural }
+          ).get();
+          view.dispatch({
+            effects: setHighlightsEffect.of(highlights),
+          });
         }),
       ];
 

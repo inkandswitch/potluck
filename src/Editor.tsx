@@ -133,7 +133,7 @@ export const Editor = observer(
 
     return (
       <div
-        className="text-lg h-[500px] w-[500px] bg-white border-black border-2 rounded-lg overflow-auto flex-shrink-0"
+        className="text-lg h-[800px] w-[600px] bg-white border-black border-2 rounded-lg overflow-auto flex-shrink-0"
         ref={editorRef}
       />
     );

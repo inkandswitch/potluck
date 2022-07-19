@@ -1,16 +1,19 @@
 import { Text } from "@codemirror/state";
+import classNames from "classnames";
 import { isArray } from "lodash";
-import { action } from "mobx";
+import { action, comparer, computed } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { Scope } from "./formulas";
 import {
   hoverHighlightsMobx,
   SheetConfig,
   sheetConfigsMobx,
   SheetValueRow,
+  Span,
   TextDocument,
+  textEditorStateMobx,
 } from "./primitives";
+import { doSpansOverlap } from "./utils";
 
 let i = 1;
 function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
@@ -61,6 +64,11 @@ const SheetName = observer(({ sheetConfig }: { sheetConfig: SheetConfig }) => {
   );
 });
 
+const textEditorSelectionSpanComputed = computed<Span>(() => {
+  const selectionRange = textEditorStateMobx.get().selection.asSingle().main;
+  return [selectionRange.from, selectionRange.to] as Span;
+});
+
 export const SheetComponent = observer(
   ({
     textDocument,
@@ -97,6 +105,17 @@ export const SheetComponent = observer(
       });
       setSelectedFormulaIndex(columns.length - 1);
     });
+
+    const hoverHighlights = computed(
+      () =>
+        rows.filter(
+          (row) =>
+            "span" in row &&
+            row.span !== undefined &&
+            doSpansOverlap(row.span, textEditorSelectionSpanComputed.get())
+        ),
+      { equals: comparer.shallow }
+    ).get();
 
     return (
       <div className="flex flex-col gap-2 flex-1">
@@ -158,7 +177,10 @@ export const SheetComponent = observer(
                 onMouseLeave={action(() => {
                   hoverHighlightsMobx.clear();
                 })}
-                className="hover:bg-blue-50"
+                className={classNames(
+                  "hover:bg-blue-50",
+                  hoverHighlights.includes(row) ? "bg-blue-100" : undefined
+                )}
                 key={index}
               >
                 {columns.map((column, index) => {

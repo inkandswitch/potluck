@@ -1,4 +1,4 @@
-import { observable, runInAction } from "mobx";
+import { computed, observable, runInAction } from "mobx";
 import { EditorState, Text } from "@codemirror/state";
 import { nanoid } from "nanoid";
 import { FormulaColumn } from "./formulas";

@@ -57,7 +57,7 @@ Gym 3/20/22
 Dead 50lb 10x3
 
 Gym 3/22/22
- 
+
 Squat 50 10x3
 Dead 50 10x3
 
@@ -288,6 +288,10 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
         name: "quantity",
         formula: 'PrevOfType(name, "quantity", 20)',
       },
+      {
+        name: "normalized",
+        formula: "NormalizeFoodName(name)",
+      },
     ],
   },
   [ALL_INGREDIENTS_SHEET_CONFIG_ID]: {
@@ -315,7 +319,9 @@ export function addSheetConfig() {
   return sheetConfig;
 }
 
-export const selectedTextDocumentIdBox = observable.box(WORKOUT_DOCUMENT_ID);
+export const selectedTextDocumentIdBox = observable.box(
+  GOCHUJANG_PORK_DOCUMENT_ID
+);
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({

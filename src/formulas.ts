@@ -18,6 +18,13 @@ import {
 } from "lodash";
 import { getComputedSheetValue, getHighlightsUntilSheet } from "./compute";
 import { doSpansOverlap } from "./utils";
+import { OFFICIAL_FOODS } from "./data/officialFoods";
+// @ts-ignore
+import FuzzySet from "fuzzyset";
+const foodNameMatchSet = new FuzzySet(
+  OFFICIAL_FOODS.map((food: any) => food.description),
+  false
+);
 
 export type FormulaColumn = {
   name: string;
@@ -295,6 +302,21 @@ function evaluateFormula(
           }
           return [];
         });
+    },
+
+    // TODO: can we make formulas take in strings instead of highlights directly?
+    NormalizeFoodName: (foodName: Highlight) => {
+      const text = textDocument.text.sliceString(
+        foodName.span[0],
+        foodName.span[1]
+      );
+      const fuzzySetResult = foodNameMatchSet.get(text);
+      const result = fuzzySetResult[0];
+      const normalizedName = result[1];
+      // TODO: we often get back multiple options here;
+      // we could allow the user to pick one and encode that as a mapping in the allIngredients list?
+      // const confidenceScore = Math.round(result[0] * 100);
+      return normalizedName;
     },
   };
 

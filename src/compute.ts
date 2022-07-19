@@ -1,8 +1,9 @@
-import { computed, IComputedValue } from "mobx";
+import { comparer, computed, IComputedValue } from "mobx";
 import { evaluateSheet } from "./formulas";
 import {
   getSheetConfigsOfTextDocument,
   Highlight,
+  selectedTextDocumentIdBox,
   SheetConfig,
   sheetConfigsMobx,
   SheetValueRow,
@@ -10,6 +11,7 @@ import {
   TextDocumentSheet,
   textDocumentsMobx,
 } from "./primitives";
+import { isValueRowHighlight } from "./utils";
 
 const getDocumentSheetKey = (textDocumentId: string, sheetConfigId: string) =>
   `${textDocumentId}:${sheetConfigId}`;
@@ -57,6 +59,23 @@ export function getComputedDocumentValues(
   }
   return documentValueCache[textDocumentId];
 }
+
+export const editorSelectionHighlightsComputed = computed(
+  () => {
+    const textDocumentId = selectedTextDocumentIdBox.get();
+    const textDocument = textDocumentsMobx.get(textDocumentId);
+    if (textDocument === undefined) {
+      return [];
+    }
+    const documentValueRows = getComputedDocumentValues(textDocumentId).get();
+    return Object.values(documentValueRows)
+      .map((sheetValueRows) =>
+        sheetValueRows.filter((r): r is Highlight => isValueRowHighlight(r))
+      )
+      .flat();
+  },
+  { equals: comparer.structural }
+);
 
 // we cheat a little here, for the sheetConfigId we only eval the first column to avoid
 // circular dependencies, this is necessary for the formula like NextValuesUntil(activity, HasType("workouts"))

@@ -12,10 +12,15 @@ import { observer } from "mobx-react-lite";
 import {
   Highlight,
   hoverHighlightsMobx,
+  Span,
   textDocumentsMobx,
   textEditorStateMobx,
 } from "./primitives";
-import { getComputedDocumentValues } from "./compute";
+import {
+  editorSelectionHighlightsComputed,
+  getComputedDocumentValues,
+} from "./compute";
+import { doSpansOverlap, isValueRowHighlight } from "./utils";
 
 const textDocumentIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
@@ -74,15 +79,34 @@ const hoverHighlightsField = StateField.define<Highlight[]>({
 const highlightDecorations = EditorView.decorations.compute(
   [highlightsField, hoverHighlightsField],
   (state) => {
+    const selectionRange = state.selection.asSingle().main;
+    const selectionSpan: Span = [selectionRange.from, selectionRange.to];
+    const highlights = state.field(highlightsField);
+    const selectionHighlights = highlights.filter(
+      (highlight) =>
+        isValueRowHighlight(highlight) &&
+        doSpansOverlap(highlight.span, selectionSpan)
+    );
     const hoverHighlights = state.field(hoverHighlightsField);
     return Decoration.set(
       [
+        ...selectionHighlights.flatMap((highlight) => {
+          return Object.values(highlight.data).flatMap((columnValue) =>
+            isValueRowHighlight(columnValue)
+              ? [
+                  Decoration.mark({
+                    class: "cm-highlight-hover",
+                  }).range(columnValue.span[0], columnValue.span[1]),
+                ]
+              : []
+          );
+        }),
         ...hoverHighlights.map((highlight) => {
           return Decoration.mark({
             class: "cm-highlight-hover",
           }).range(highlight.span[0], highlight.span[1]);
         }),
-        ...state.field(highlightsField).map((highlight) => {
+        ...highlights.map((highlight) => {
           return Decoration.mark({
             class: "cm-highlight",
           }).range(highlight.span[0], highlight.span[1]);
@@ -139,20 +163,7 @@ export const Editor = observer(
 
       const unsubscribes: (() => void)[] = [
         autorun(() => {
-          const highlights = computed(
-            () => {
-              const documentValueRows =
-                getComputedDocumentValues(textDocumentId).get();
-              return Object.values(documentValueRows)
-                .map((sheetValueRows) =>
-                  sheetValueRows.filter(
-                    (r): r is Highlight => "span" in r && r.span !== undefined
-                  )
-                )
-                .flat();
-            },
-            { equals: comparer.structural }
-          ).get();
+          const highlights = editorSelectionHighlightsComputed.get();
           view.dispatch({
             effects: setHighlightsEffect.of(highlights),
           });

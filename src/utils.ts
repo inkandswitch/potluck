@@ -23,10 +23,10 @@ export function getTextForHighlight(highlight: Highlight) {
   return textDocument?.text.sliceString(highlight.span[0], highlight.span[1]);
 }
 
-export function isValueRowHighlight(
-  valueRow: SheetValueRow | undefined
-): valueRow is Highlight {
+export function isValueRowHighlight(valueRow: any): valueRow is Highlight {
   return (
-    valueRow !== undefined && "span" in valueRow && valueRow.span !== undefined
+    typeof valueRow === "object" &&
+    "span" in valueRow &&
+    valueRow.span !== undefined
   );
 }

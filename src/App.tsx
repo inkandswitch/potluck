@@ -11,7 +11,7 @@ import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
 import { nanoid } from "nanoid";
 import { SheetComponent } from "./SheetComponent";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
 import { Text } from "@codemirror/state";
 import classNames from "classnames";
 import { evaluateSheetConfigs } from "./formulas";
@@ -142,6 +142,29 @@ const TextDocumentSelector = observer(() => {
         ))}
         <option value={NEW_OPTION_ID}>New text document</option>
       </select>
+      <button
+        className="ml-4 text-gray-400 hover:text-gray-600"
+        onClick={() => {
+          runInAction(() => {
+            const currentDoc = textDocumentsMobx.get(
+              selectedTextDocumentIdBox.get()
+            )!;
+            const newDocumentId = nanoid();
+            textDocumentsMobx.set(newDocumentId, {
+              id: newDocumentId,
+              name: `Copy of ${currentDoc.name}`,
+              text: Text.empty,
+              sheets: currentDoc.sheets.map((sheet) => ({
+                ...sheet,
+                highlightSearchRange: undefined,
+              })),
+            });
+            selectedTextDocumentIdBox.set(newDocumentId);
+          });
+        }}
+      >
+        <span className="text-xl">⎘</span> copy as template
+      </button>
     </div>
   );
 });

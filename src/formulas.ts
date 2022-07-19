@@ -62,7 +62,7 @@ function evaluateFormula(
 
         if (from === prevIndex) {
           throw new Error(
-            "regex causes infinite loop becase it matches empty string"
+            "regex causes infinite loop because it matches empty string"
           );
         }
 
@@ -72,7 +72,7 @@ function evaluateFormula(
           documentId: textDocument.id,
           sheetConfigId: sheetConfig.id,
           span: [from, to],
-          data: {},
+          data: { groups: match.slice(1) },
         });
       }
 

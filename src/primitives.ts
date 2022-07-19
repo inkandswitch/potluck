@@ -43,11 +43,11 @@ export function getSheetConfigsOfTextDocument(textDocument: TextDocument) {
     .filter((sheetConfig) => sheetConfig !== undefined) as SheetConfig[];
 }
 
-const WORKOUT_TEXT = `Gym 3/16
+const WORKOUT_TEXT = `Gym 3/16/22
 
 Dead 40lb Squat 50lb, Maintain next time.
 
-Gym 3/20
+Gym 3/20/22
 
 Dead 50lb 10x3
 
@@ -57,42 +57,20 @@ Squat 50 10x3
 Dead 50 10x3
 
 
-Gym 3/24
+Gym 3/24/22
 
 Squat 50 10x3
 Dead 50 10x3
 
-4/15 gym: run + plank
+4/15/22 gym: run + plank
 
-4/17 gym: elliptical + plank
+4/17/22 gym: elliptical + plank
 
-4/20 gym:
+4/20/22 gym:
 
 Squat 50 10x3
 Dead 50 10x3
 Bench 70 776`;
-
-/*
-`4/15 gym: run + plank
-4/17 gym: elliptical + plank
-4/20 gym:
-Squat 50 10x3
-Dead 45 10x3
-Bench 70 776
-
-Next time:
-
-Maintain all weights, better form and intensity
-Squad dead bench farmer lat
-
-5/4 gym
-
-Squat 50 10x3
-Dead 50 10x3, 40 10x3
-Pullups 2x3 in between (Next time 3x3)
-Bench 70 10 8 3 (wrist problems, weight felt good)
-`;
-*/
 
 export const textEditorStateMobx = observable.box(
   EditorState.create({ doc: WORKOUT_TEXT })
@@ -154,6 +132,8 @@ export const ICE_CREAM_DOCUMENT_ID = "ice cream";
 export const INGREDIENTS_SHEET_CONFIG_ID = nanoid();
 export const REPS_SHEET_CONFIG_ID = nanoid();
 export const ALL_INGREDIENTS_SHEET_CONFIG_ID = nanoid();
+export const DATE_SHEET_CONFIG_ID = nanoid();
+export const DATE_SHEET_IN_WORKOUT_ID = nanoid();
 
 export const textDocumentsMobx = observable.map<string, TextDocument>({
   [WORKOUT_DOCUMENT_ID]: {
@@ -164,6 +144,10 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: nanoid(),
         configId: NUMBER_SHEET_CONFIG_ID,
+      },
+      {
+        id: DATE_SHEET_IN_WORKOUT_ID,
+        configId: DATE_SHEET_CONFIG_ID
       },
       {
         id: nanoid(),
@@ -192,7 +176,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: nanoid(),
         configId: QUANTITY_SHEET_CONFIG_ID,
-      },
+      }
     ],
   },
   [GOCHUJANG_PORK_DOCUMENT_ID]: {
@@ -233,6 +217,16 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     id: NUMBER_SHEET_CONFIG_ID,
     name: "numbers",
     columns: [{ name: "value", formula: 'MatchRegexp("[0-9]+")' }],
+  },
+  [DATE_SHEET_CONFIG_ID]: {
+    id: DATE_SHEET_CONFIG_ID,
+    name: "date",
+    columns: [
+      {name: "date", formula: 'MatchRegexp("([0-9]{1,2})/([0-9]{1,2})/([0-9]{2})")'},
+      {name: "day", formula: 'parseInt(date.data.groups[0])'},
+      {name: "month", formula: 'parseInt(date.data.groups[1])'},
+      {name: "year", formula: 'parseInt(date.data.groups[2])'}
+    ]
   },
   [QUANTITY_SHEET_CONFIG_ID]: {
     id: QUANTITY_SHEET_CONFIG_ID,
@@ -312,4 +306,6 @@ export function addSheetConfig() {
 export const selectedTextDocumentIdBox = observable.box(WORKOUT_DOCUMENT_ID);
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
 
-export const isSheetExpandedMobx = observable.map<string, boolean>({});
+export const isSheetExpandedMobx = observable.map<string, boolean>({
+  [DATE_SHEET_IN_WORKOUT_ID]: true
+});

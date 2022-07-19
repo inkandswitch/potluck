@@ -18,6 +18,7 @@ import { doSpansOverlap } from "./utils";
 let i = 1;
 
 function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
+
   if (value instanceof Error) {
     return <span className="text-red-500">#Err</span>;
   }
@@ -192,7 +193,7 @@ export const SheetComponent = observer(
             </div>
           )}
 
-          <table>
+          <table className="max-h-[200px] overflow-auto">
             <thead>
               <tr>
                 {columns.map((column, index) => {

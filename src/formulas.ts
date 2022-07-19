@@ -7,7 +7,7 @@ import {
   TextDocument,
   SheetValueRow,
 } from "./primitives";
-import { curry, isFunction, isArray, isObject, isString } from "lodash";
+import { curry, isFunction, isArray, isObject, isString, sortBy } from "lodash";
 import { getComputedSheetValue } from "./compute";
 import { doSpansOverlap } from "./utils";
 
@@ -90,7 +90,10 @@ function evaluateFormula(
       for (const value of values) {
         if (isString(value)) {
           highlights = highlights.concat(
-            API.MatchRegexp(value, isCaseSensitive === false ? "" : "i")
+            API.MatchRegexp(
+              `\\b${value}s?\\b`,
+              isCaseSensitive === false ? "" : "i"
+            )
           );
         }
       }
@@ -289,6 +292,7 @@ export function evaluateSheet(
               doSpansOverlap(textDocumentSheet.highlightSearchRange!, item.span)
           );
         }
+        resultRows = sortBy(resultRows, (r) => r.span[0]);
         resultRows = resultRows.map((item) => ({ [column.name]: item }));
       } else {
         resultRows = [{ [column.name]: result }];

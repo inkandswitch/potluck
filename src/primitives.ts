@@ -22,6 +22,11 @@ export type SheetConfig = {
   columns: FormulaColumn[];
 };
 
+export enum SheetView {
+  Table,
+  Calendar,
+}
+
 export type TextDocumentSheet = {
   id: string;
   configId: string;
@@ -146,7 +151,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       },
       {
         id: DATE_SHEET_IN_WORKOUT_ID,
-        configId: DATE_SHEET_CONFIG_ID
+        configId: DATE_SHEET_CONFIG_ID,
       },
       {
         id: WORKOUT_SHEET_IN_WORKOUT_ID,
@@ -171,7 +176,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: nanoid(),
         configId: QUANTITY_SHEET_CONFIG_ID,
-      }
+      },
     ],
   },
   [GOCHUJANG_PORK_DOCUMENT_ID]: {
@@ -217,11 +222,14 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     id: DATE_SHEET_CONFIG_ID,
     name: "dates",
     columns: [
-      {name: "date", formula: 'MatchRegexp("([0-9]{1,2})/([0-9]{1,2})/([0-9]{2})")'},
-      {name: "day", formula: 'ParseInt(Second(date.data.groups))'},
-      {name: "month", formula: 'ParseInt(First(date.data.groups))'},
-      {name: "year", formula: 'ParseInt(Third(date.data.groups))'}
-    ]
+      {
+        name: "date",
+        formula: 'MatchRegexp("([0-9]{1,2})/([0-9]{1,2})/([0-9]{2})")',
+      },
+      { name: "day", formula: "ParseInt(Second(date.data.groups))" },
+      { name: "month", formula: "ParseInt(First(date.data.groups))" },
+      { name: "year", formula: "ParseInt(Third(date.data.groups))" },
+    ],
   },
   [QUANTITY_SHEET_CONFIG_ID]: {
     id: QUANTITY_SHEET_CONFIG_ID,
@@ -240,27 +248,31 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     id: WORKOUT_SHEET_CONFIG_ID,
     name: "workouts",
     columns: [
-      { name: "activity", formula: 'MatchRegexp("squat|dead|run|plank|elliptical", "i")' },
+      {
+        name: "activity",
+        formula: 'MatchRegexp("squat|dead|run|plank|elliptical", "i")',
+      },
       {
         name: "numbers",
-        formula: 'Filter(NextValuesUntil(activity, HasType("workouts")), SameLine(activity))',
+        formula:
+          'Filter(NextValuesUntil(activity, HasType("workouts")), SameLine(activity))',
       },
       {
         name: "weight",
-        formula: 'First(numbers)'
+        formula: "First(numbers)",
       },
       {
         name: "reps",
-        formula: 'Second(numbers)'
+        formula: "Second(numbers)",
       },
       {
         name: "sets",
-        formula: 'Third(numbers)'
+        formula: "Third(numbers)",
       },
       {
         name: "date",
-        formula: 'PrevOfType(activity, "dates")'
-      }
+        formula: 'PrevOfType(activity, "dates")',
+      },
     ],
   },
   [INGREDIENTS_SHEET_CONFIG_ID]: {
@@ -308,5 +320,5 @@ export const hoverHighlightsMobx = observable.array<Highlight>([]);
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({
   [DATE_SHEET_IN_WORKOUT_ID]: true,
-  [WORKOUT_SHEET_IN_WORKOUT_ID]: true
+  [WORKOUT_SHEET_IN_WORKOUT_ID]: true,
 });

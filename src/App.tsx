@@ -102,7 +102,9 @@ const TextDocumentComponent = observer(
               })}
             </div>
             <div
-              className={classNames({ "mt-8": textDocument.sheets.length > 0 })}
+              className={classNames("mb-8", {
+                "mt-8": textDocument.sheets.length > 0,
+              })}
             >
               <AddNewDocumentSheet textDocument={textDocument} />
             </div>

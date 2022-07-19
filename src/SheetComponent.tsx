@@ -10,12 +10,15 @@ import {
   SheetConfig,
   sheetConfigsMobx,
   SheetValueRow,
+  SheetView,
   Span,
   TextDocument,
   textEditorStateMobx,
 } from "./primitives";
 import { doSpansOverlap } from "./utils";
 import { FormulaColumn } from "./formulas";
+import { SheetCalendar } from "./SheetCalendar";
+import { CalendarIcon, TableIcon } from "@radix-ui/react-icons";
 
 let i = 1;
 
@@ -213,6 +216,8 @@ export const SheetComponent = observer(
     sheetConfigId: string;
     rows: SheetValueRow[];
   }) => {
+    const [sheetView, setSheetView] = useState(SheetView.Table);
+
     const textDocumentSheet = textDocument.sheets.find(
       (sheet) => sheet.configId === sheetConfigId
     )!;
@@ -242,43 +247,86 @@ export const SheetComponent = observer(
 
         {isExpanded && (
           <>
-            <div className="text-sm text-gray-500">
-              Highlighting in:{" "}
-              {textDocumentSheet.highlightSearchRange === undefined
-                ? "whole document"
-                : `chars ${textDocumentSheet.highlightSearchRange[0]} to ${textDocumentSheet.highlightSearchRange[1]}`}
-              <button
-                className="ml-4"
-                onClick={() =>
-                  runInAction(() => {
-                    textDocumentSheet.highlightSearchRange = undefined;
-                  })
-                }
-              >
-                Clear
-              </button>
-              <button
-                className="ml-4"
-                onClick={() =>
-                  runInAction(() => {
-                    const editorState = textEditorStateMobx.get();
-                    const from = editorState.selection.main.from;
-                    const to = editorState.selection.main.to;
-                    if (from !== to) {
-                      textDocumentSheet.highlightSearchRange = [from, to];
-                    }
-                  })
-                }
-              >
-                Update
-              </button>
+            <div className="flex justify-between">
+              <div className="text-sm text-gray-500">
+                Highlighting in:{" "}
+                {textDocumentSheet.highlightSearchRange === undefined
+                  ? "whole document"
+                  : `chars ${textDocumentSheet.highlightSearchRange[0]} to ${textDocumentSheet.highlightSearchRange[1]}`}
+                <button
+                  className="ml-4"
+                  onClick={() =>
+                    runInAction(() => {
+                      textDocumentSheet.highlightSearchRange = undefined;
+                    })
+                  }
+                >
+                  Clear
+                </button>
+                <button
+                  className="ml-4"
+                  onClick={() =>
+                    runInAction(() => {
+                      const editorState = textEditorStateMobx.get();
+                      const from = editorState.selection.main.from;
+                      const to = editorState.selection.main.to;
+                      if (from !== to) {
+                        textDocumentSheet.highlightSearchRange = [from, to];
+                      }
+                    })
+                  }
+                >
+                  Update
+                </button>
+              </div>
+              <div className="flex gap-2 pr-2">
+                <button
+                  onClick={() => {
+                    setSheetView(SheetView.Table);
+                  }}
+                  className={classNames(
+                    "transition",
+                    sheetView !== SheetView.Table
+                      ? "opacity-40 hover:opacity-100"
+                      : undefined
+                  )}
+                >
+                  <TableIcon />
+                </button>
+                {sheetConfig.columns.some(
+                  (column) => column.name === "date"
+                ) ? (
+                  <button
+                    onClick={() => {
+                      setSheetView(SheetView.Calendar);
+                    }}
+                    className={classNames(
+                      "transition",
+                      sheetView !== SheetView.Calendar
+                        ? "opacity-40 hover:opacity-100"
+                        : undefined
+                    )}
+                  >
+                    <CalendarIcon />
+                  </button>
+                ) : null}
+              </div>
             </div>
-            <SheetTable
-              textDocument={textDocument}
-              sheetConfig={sheetConfig}
-              columns={columns}
-              rows={rows}
-            />
+            {sheetView === SheetView.Calendar ? (
+              <SheetCalendar
+                textDocument={textDocument}
+                sheetConfig={sheetConfig}
+                columns={columns}
+                rows={rows}
+              />
+            ) : (
+              <SheetTable
+                textDocument={textDocument}
+                sheetConfig={sheetConfig}
+                columns={columns}
+                rows={rows}
+              />
+            )}
           </>
         )}
       </div>

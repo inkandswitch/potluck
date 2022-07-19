@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { isArray } from "lodash";
 import { action, comparer, computed, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { FC, useState } from "react";
 import {
   Highlight,
   hoverHighlightsMobx,
@@ -19,10 +19,18 @@ import {
 import { doSpansOverlap, isValueRowHighlight } from "./utils";
 import { FormulaColumn } from "./formulas";
 import { SheetCalendar } from "./SheetCalendar";
-import { CalendarIcon, TableIcon } from "@radix-ui/react-icons";
 import { HighlightHoverCard } from "./HighlightHoverCard";
+import { CalendarIcon, TableIcon, CookieIcon } from "@radix-ui/react-icons";
+import { NutritionLabel } from "./NutritionLabel";
 
 let i = 1;
+
+export type SheetViewProps = {
+  textDocument: TextDocument;
+  sheetConfig: SheetConfig;
+  columns: FormulaColumn[];
+  rows: SheetValueRow[];
+};
 
 function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
   if (value instanceof Error) {
@@ -108,7 +116,9 @@ export const SheetTable = observer(
     columns: FormulaColumn[];
     rows: SheetValueRow[];
   }) => {
-    const [selectedFormulaIndex, setSelectedFormulaIndex] = useState<number|undefined>(undefined);
+    const [selectedFormulaIndex, setSelectedFormulaIndex] = useState<
+      number | undefined
+    >(undefined);
     const hoverHighlights = computed(
       () =>
         rows.filter(
@@ -162,71 +172,80 @@ export const SheetTable = observer(
         )}
 
         <div className="max-h-[250px] overflow-auto relative w-full flex border border-gray-200 ">
-
-        <table className="flex-1">
-          <thead>
-            <tr className="sticky top-0 border" style={{outline: "1px solid  rgb(229 231 235)"}}>
-              {columns.map((column, index) => {
-                return (
-                  <th
-                    key={index}
-                    className={`text-left font-normal px-1 border ${
-                      selectedFormulaIndex === index
-                        ? "bg-blue-100"
-                        : "bg-gray-100"
-                    }`}
-                    onClick={() => setSelectedFormulaIndex(index)}
-                  >
-                    {column.name}
-                  </th>
-                );
-              })}
-              <th className="w-[30px] bg-white">
-                <button
-                  className="icon icon-plus bg-gray-500"
-                  onClick={() => addColumn()}
-                />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, rowIndex) => (
+          <table className="flex-1">
+            <thead>
               <tr
-                onMouseEnter={action(() => {
-                  const childrenHighlights = Object.values(row.data).flatMap(
-                    (columnData) =>
-                      isValueRowHighlight(columnData) ? [columnData] : []
-                  );
-                  hoverHighlightsMobx.replace(
-                    childrenHighlights.length > 0
-                      ? childrenHighlights
-                      : isValueRowHighlight(row)
-                      ? [row]
-                      : []
-                  );
-                })}
-                onMouseLeave={action(() => {
-                  hoverHighlightsMobx.clear();
-                })}
-                className={classNames(
-                  "hover:bg-blue-50",
-                  hoverHighlights.includes(row) ? "bg-blue-100" : undefined
-                )}
-                key={rowIndex}
+                className="sticky top-0 border"
+                style={{ outline: "1px solid  rgb(229 231 235)" }}
               >
                 {columns.map((column, index) => {
-                  const value: any = row.data[column.name];
-
                   return (
-                    <td className={`border border-gray-200 px-1 ${(rowIndex !== (rows.length - 1)) ? 'border-l-0' : 'border-l-0 border-b-0'}`} key={index}>
-                      <ValueDisplay value={value} doc={textDocument.text} />
-                    </td>
+                    <th
+                      key={index}
+                      className={`text-left font-normal px-1 border ${
+                        selectedFormulaIndex === index
+                          ? "bg-blue-100"
+                          : "bg-gray-100"
+                      }`}
+                      onClick={() => setSelectedFormulaIndex(index)}
+                    >
+                      {column.name}
+                    </th>
                   );
                 })}
+                <th className="w-[30px] bg-white">
+                  <button
+                    className="icon icon-plus bg-gray-500"
+                    onClick={() => addColumn()}
+                  />
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((row, rowIndex) => (
+                <tr
+                  onMouseEnter={action(() => {
+                    const childrenHighlights = Object.values(row.data).flatMap(
+                      (columnData) =>
+                        isValueRowHighlight(columnData) ? [columnData] : []
+                    );
+                    hoverHighlightsMobx.replace(
+                      childrenHighlights.length > 0
+                        ? childrenHighlights
+                        : isValueRowHighlight(row)
+                        ? [row]
+                        : []
+                    );
+                  })}
+                  onMouseLeave={action(() => {
+                    hoverHighlightsMobx.clear();
+                  })}
+                  className={classNames(
+                    "hover:bg-blue-50",
+                    hoverHighlights.includes(row) ? "bg-blue-100" : undefined
+                  )}
+                  key={rowIndex}
+                >
+                  {columns.map((column, index) => {
+                    const value: any = row.data[column.name];
+
+                    return (
+                      <td
+                        className={`border border-gray-200 px-1 ${
+                          rowIndex !== rows.length - 1
+                            ? "border-l-0"
+                            : "border-l-0 border-b-0"
+                        }`}
+                        key={index}
+                      >
+                        <ValueDisplay value={value} doc={textDocument.text} />
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </>
     );
@@ -259,6 +278,12 @@ export const SheetComponent = observer(
     const toggleIsExpanded = action(() => {
       isSheetExpandedMobx.set(id, !isExpanded);
     });
+
+    const SheetViewComponent: FC<SheetViewProps> = {
+      [SheetView.Table]: SheetTable,
+      [SheetView.Calendar]: SheetCalendar,
+      [SheetView.NutritionLabel]: NutritionLabel,
+    }[sheetView]!;
 
     return (
       <div className="flex flex-col gap-2 flex-1">
@@ -339,23 +364,29 @@ export const SheetComponent = observer(
                     <CalendarIcon />
                   </button>
                 ) : null}
+                {sheetConfig.name === "ingredients" ? (
+                  <button
+                    onClick={() => {
+                      setSheetView(SheetView.NutritionLabel);
+                    }}
+                    className={classNames(
+                      "transition",
+                      sheetView !== SheetView.NutritionLabel
+                        ? "opacity-40 hover:opacity-100"
+                        : undefined
+                    )}
+                  >
+                    <CookieIcon />
+                  </button>
+                ) : null}
               </div>
             </div>
-            {sheetView === SheetView.Calendar ? (
-              <SheetCalendar
-                textDocument={textDocument}
-                sheetConfig={sheetConfig}
-                columns={columns}
-                rows={rows}
-              />
-            ) : (
-              <SheetTable
-                textDocument={textDocument}
-                sheetConfig={sheetConfig}
-                columns={columns}
-                rows={rows}
-              />
-            )}
+            <SheetViewComponent
+              textDocument={textDocument}
+              sheetConfig={sheetConfig}
+              columns={columns}
+              rows={rows}
+            />
           </>
         )}
       </div>

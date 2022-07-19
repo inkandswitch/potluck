@@ -1,6 +1,7 @@
 import {
   Highlight,
   sheetConfigsMobx,
+  SheetValueRow,
   Span,
   textDocumentsMobx,
 } from "./primitives";
@@ -20,4 +21,12 @@ export function doesSpanContainsPosition(span: Span, position: number) {
 export function getTextForHighlight(highlight: Highlight) {
   const textDocument = textDocumentsMobx.get(highlight.documentId);
   return textDocument?.text.sliceString(highlight.span[0], highlight.span[1]);
+}
+
+export function isValueRowHighlight(
+  valueRow: SheetValueRow | undefined
+): valueRow is Highlight {
+  return (
+    valueRow !== undefined && "span" in valueRow && valueRow.span !== undefined
+  );
 }

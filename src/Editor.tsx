@@ -86,19 +86,11 @@ const highlightDecorations = EditorView.decorations.compute(
             class: "cm-highlight-hover",
           }).range(highlight.span[0], highlight.span[1]);
         }),
-        ...state
-          .field(highlightsField)
-          .filter(
-            (highlight) =>
-              !hoverHighlights.some((h) =>
-                doesSpanContainOtherSpan(h.span, highlight.span)
-              )
-          )
-          .map((highlight) => {
-            return Decoration.mark({
-              class: "cm-highlight",
-            }).range(highlight.span[0], highlight.span[1]);
-          }),
+        ...state.field(highlightsField).map((highlight) => {
+          return Decoration.mark({
+            class: "cm-highlight",
+          }).range(highlight.span[0], highlight.span[1]);
+        }),
       ],
       true
     );

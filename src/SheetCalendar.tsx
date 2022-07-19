@@ -15,7 +15,7 @@ import {
 } from "./primitives";
 import { FormulaColumn } from "./formulas";
 import { useMemo, useState } from "react";
-import { getTextForHighlight } from "./utils";
+import { getTextForHighlight, isValueRowHighlight } from "./utils";
 import addDays from "date-fns/addDays";
 import { action } from "mobx";
 
@@ -43,7 +43,12 @@ function CalendarMonthEvent({
   return (
     <div
       onMouseEnter={action(() => {
-        hoverHighlightsMobx.replace([event.highlight]);
+        const childrenHighlights = Object.values(event.highlight.data).flatMap(
+          (columnData) => (isValueRowHighlight(columnData) ? [columnData] : [])
+        );
+        hoverHighlightsMobx.replace(
+          childrenHighlights.length > 0 ? childrenHighlights : [event.highlight]
+        );
       })}
       onMouseLeave={action(() => {
         hoverHighlightsMobx.clear();

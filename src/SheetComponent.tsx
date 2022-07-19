@@ -5,6 +5,7 @@ import { action, comparer, computed, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import {
+  Highlight,
   hoverHighlightsMobx,
   isSheetExpandedMobx,
   SheetConfig,
@@ -15,7 +16,7 @@ import {
   TextDocument,
   textEditorStateMobx,
 } from "./primitives";
-import { doSpansOverlap } from "./utils";
+import { doSpansOverlap, isValueRowHighlight } from "./utils";
 import { FormulaColumn } from "./formulas";
 import { SheetCalendar } from "./SheetCalendar";
 import { CalendarIcon, TableIcon } from "@radix-ui/react-icons";
@@ -186,9 +187,17 @@ export const SheetTable = observer(
             {rows.map((row, index) => (
               <tr
                 onMouseEnter={action(() => {
-                  if ("span" in row && row.span !== undefined) {
-                    hoverHighlightsMobx.replace([row]);
-                  }
+                  const childrenHighlights = Object.values(row.data).flatMap(
+                    (columnData) =>
+                      isValueRowHighlight(columnData) ? [columnData] : []
+                  );
+                  hoverHighlightsMobx.replace(
+                    childrenHighlights.length > 0
+                      ? childrenHighlights
+                      : isValueRowHighlight(row)
+                      ? [row]
+                      : []
+                  );
                 })}
                 onMouseLeave={action(() => {
                   hoverHighlightsMobx.clear();

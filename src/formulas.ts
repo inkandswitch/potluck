@@ -20,7 +20,7 @@ export type Scope = { [name: string]: any };
 
 // This is a default distance limit built into prev/next to limit the search.
 // TODO: make this dynamic as an argument? (not sure how that intersects with currying)
-const PREV_NEXT_DISTANCE_LIMIT = 10;
+const PREV_NEXT_DISTANCE_LIMIT = 20;
 
 function evaluateFormula(
   textDocument: TextDocument,

@@ -160,7 +160,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: nanoid(),
         configId: INGREDIENTS_SHEET_CONFIG_ID,
-        highlightSearchRange: [0, 100],
+        highlightSearchRange: [12, 117],
       },
       {
         id: nanoid(),
@@ -180,6 +180,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: nanoid(),
         configId: INGREDIENTS_SHEET_CONFIG_ID,
+        highlightSearchRange: [662, 1430],
       },
       {
         id: nanoid(),

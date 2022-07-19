@@ -25,6 +25,7 @@ export type SheetConfig = {
 export enum SheetView {
   Table,
   Calendar,
+  NutritionLabel,
 }
 
 export type TextDocumentSheet = {
@@ -138,6 +139,7 @@ export const ALL_INGREDIENTS_SHEET_CONFIG_ID = nanoid();
 export const DATE_SHEET_CONFIG_ID = nanoid();
 export const DATE_SHEET_IN_WORKOUT_ID = nanoid();
 export const WORKOUT_SHEET_IN_WORKOUT_ID = nanoid();
+export const INGREDIENTS_SHEET_IN_GOCHUJANG_ID = nanoid();
 
 export const textDocumentsMobx = observable.map<string, TextDocument>({
   [WORKOUT_DOCUMENT_ID]: {
@@ -185,7 +187,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
     text: Text.of(GOCHUJANG_PORK_TEXT.split("\n")),
     sheets: [
       {
-        id: nanoid(),
+        id: INGREDIENTS_SHEET_IN_GOCHUJANG_ID,
         configId: INGREDIENTS_SHEET_CONFIG_ID,
         highlightSearchRange: [662, 1430],
       },
@@ -327,4 +329,5 @@ export const hoverHighlightsMobx = observable.array<Highlight>([]);
 export const isSheetExpandedMobx = observable.map<string, boolean>({
   [DATE_SHEET_IN_WORKOUT_ID]: true,
   [WORKOUT_SHEET_IN_WORKOUT_ID]: true,
+  [INGREDIENTS_SHEET_IN_GOCHUJANG_ID]: true,
 });

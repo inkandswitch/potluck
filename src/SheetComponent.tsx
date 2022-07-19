@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { isArray } from "lodash";
 import { action, comparer, computed, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { FC, useState } from "react";
 import {
   Highlight,
   hoverHighlightsMobx,
@@ -19,9 +19,17 @@ import {
 import { doSpansOverlap, isValueRowHighlight } from "./utils";
 import { FormulaColumn } from "./formulas";
 import { SheetCalendar } from "./SheetCalendar";
-import { CalendarIcon, TableIcon } from "@radix-ui/react-icons";
+import { CalendarIcon, TableIcon, CookieIcon } from "@radix-ui/react-icons";
+import { NutritionLabel } from "./NutritionLabel";
 
 let i = 1;
+
+export type SheetViewProps = {
+  textDocument: TextDocument;
+  sheetConfig: SheetConfig;
+  columns: FormulaColumn[];
+  rows: SheetValueRow[];
+};
 
 function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
   if (value instanceof Error) {
@@ -251,6 +259,12 @@ export const SheetComponent = observer(
       isSheetExpandedMobx.set(id, !isExpanded);
     });
 
+    const SheetViewComponent: FC<SheetViewProps> = {
+      [SheetView.Table]: SheetTable,
+      [SheetView.Calendar]: SheetCalendar,
+      [SheetView.NutritionLabel]: NutritionLabel,
+    }[sheetView]!;
+
     return (
       <div className="flex flex-col gap-2 flex-1">
         <div className="flex gap-1">
@@ -330,23 +344,29 @@ export const SheetComponent = observer(
                     <CalendarIcon />
                   </button>
                 ) : null}
+                {sheetConfig.name === "ingredients" ? (
+                  <button
+                    onClick={() => {
+                      setSheetView(SheetView.NutritionLabel);
+                    }}
+                    className={classNames(
+                      "transition",
+                      sheetView !== SheetView.NutritionLabel
+                        ? "opacity-40 hover:opacity-100"
+                        : undefined
+                    )}
+                  >
+                    <CookieIcon />
+                  </button>
+                ) : null}
               </div>
             </div>
-            {sheetView === SheetView.Calendar ? (
-              <SheetCalendar
-                textDocument={textDocument}
-                sheetConfig={sheetConfig}
-                columns={columns}
-                rows={rows}
-              />
-            ) : (
-              <SheetTable
-                textDocument={textDocument}
-                sheetConfig={sheetConfig}
-                columns={columns}
-                rows={rows}
-              />
-            )}
+            <SheetViewComponent
+              textDocument={textDocument}
+              sheetConfig={sheetConfig}
+              columns={columns}
+              rows={rows}
+            />
           </>
         )}
       </div>

@@ -18,6 +18,7 @@ import { useMemo, useState } from "react";
 import { getTextForHighlight, isValueRowHighlight } from "./utils";
 import addDays from "date-fns/addDays";
 import { action } from "mobx";
+import { SheetViewProps } from "./SheetComponent";
 
 function getDateForRow(row: SheetValueRow) {
   const { day, month, year } =
@@ -60,17 +61,7 @@ function CalendarMonthEvent({
 }
 
 export const SheetCalendar = observer(
-  ({
-    textDocument,
-    sheetConfig,
-    columns,
-    rows,
-  }: {
-    textDocument: TextDocument;
-    sheetConfig: SheetConfig;
-    columns: FormulaColumn[];
-    rows: SheetValueRow[];
-  }) => {
+  ({ textDocument, sheetConfig, columns, rows }: SheetViewProps) => {
     const localizer = dateFnsLocalizer({
       format,
       parse,

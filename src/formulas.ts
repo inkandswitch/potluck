@@ -159,7 +159,6 @@ function evaluateFormula(
       type: string,
       distanceLimit?: number
     ) => {
-      console.log(distanceLimit);
       const typeSheetConfig = Array.from(sheetConfigsMobx.values()).find(
         (sheetConfig) => sheetConfig.name === type
       );

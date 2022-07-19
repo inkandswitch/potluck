@@ -43,11 +43,34 @@ export function getSheetConfigsOfTextDocument(textDocument: TextDocument) {
     .filter((sheetConfig) => sheetConfig !== undefined) as SheetConfig[];
 }
 
-const WORKOUT_TEXT = `
+const WORKOUT_TEXT = `Gym 3/16
+
+Dead 40lb Squat 50lb, Maintain next time.
+
+Gym 3/20
+
+Dead 50lb 10x3
+
+Gym 3/22
+ 
 Squat 50 10x3
-Dead 45 10x3, 30 10x3
-Bench 70 776
-`;
+Dead 50 10x3
+
+
+Gym 3/24
+
+Squat 50 10x3
+Dead 50 10x3
+
+4/15 gym: run + plank
+
+4/17 gym: elliptical + plank
+
+4/20 gym:
+
+Squat 50 10x3
+Dead 50 10x3
+Bench 70 776`;
 
 /*
 `4/15 gym: run + plank
@@ -286,5 +309,5 @@ export function addSheetConfig() {
   return sheetConfig;
 }
 
-export const selectedTextDocumentIdBox = observable.box(ICE_CREAM_DOCUMENT_ID);
+export const selectedTextDocumentIdBox = observable.box(WORKOUT_DOCUMENT_ID);
 export const hoverHighlightsMobx = observable.array<Highlight>([]);

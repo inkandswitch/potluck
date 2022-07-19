@@ -41,3 +41,7 @@
 .cm-highlight-hover {
   @apply bg-blue-500 text-white rounded;
 }
+
+.cm-content {
+  @apply font-serif;
+}

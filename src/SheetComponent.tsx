@@ -58,20 +58,32 @@ function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
   return <span>{JSON.stringify(value)}</span>;
 }
 
-const SheetName = observer(({ sheetConfig }: { sheetConfig: SheetConfig }) => {
-  return (
-    <div className="flex-1">
-      <input
-        type="text"
-        value={sheetConfig.name}
-        onChange={action((e) => {
-          sheetConfig.name = e.target.value;
-        })}
-        className="font-medium text-lg border-b border-gray-200 w-full mb-2 outline-none focus:border-gray-400"
-      />
-    </div>
-  );
-});
+const SheetName = observer(
+  ({
+    sheetConfig,
+    rowsCount,
+  }: {
+    sheetConfig: SheetConfig;
+    rowsCount: number;
+  }) => {
+    return (
+      <div className="flex-1 flex border-gray-200 w-full mb-2  focus:border-gray-400">
+        <input
+          type="text"
+          value={sheetConfig.name}
+          onChange={action((e) => {
+            sheetConfig.name = e.target.value;
+          })}
+          className="font-medium inline text-md border-b outline-none text-gray-600"
+        />
+        <div className="ml-2 py-1 px-2 rounded-lg bg-gray-50 text-sm text-gray-400">
+          <span className="font-medium text-gray-500">{rowsCount}</span>{" "}
+          highlights
+        </div>
+      </div>
+    );
+  }
+);
 
 const textEditorSelectionSpanComputed = computed<Span>(() => {
   const selectionRange = textEditorStateMobx.get().selection.asSingle().main;
@@ -242,7 +254,7 @@ export const SheetComponent = observer(
             />
           </button>
 
-          <SheetName sheetConfig={sheetConfig} />
+          <SheetName sheetConfig={sheetConfig} rowsCount={rows.length} />
         </div>
 
         {isExpanded && (

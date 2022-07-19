@@ -25,6 +25,7 @@ export type SheetConfig = {
 export type TextDocumentSheet = {
   id: string;
   configId: string;
+  highlightSearchRange?: Span;
 };
 
 export type TextDocument = {
@@ -158,15 +159,16 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
     sheets: [
       {
         id: nanoid(),
+        configId: INGREDIENTS_SHEET_CONFIG_ID,
+        highlightSearchRange: [0, 100],
+      },
+      {
+        id: nanoid(),
         configId: NUMBER_SHEET_CONFIG_ID,
       },
       {
         id: nanoid(),
         configId: QUANTITY_SHEET_CONFIG_ID,
-      },
-      {
-        id: nanoid(),
-        configId: INGREDIENTS_SHEET_CONFIG_ID,
       },
     ],
   },
@@ -177,15 +179,15 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
     sheets: [
       {
         id: nanoid(),
+        configId: INGREDIENTS_SHEET_CONFIG_ID,
+      },
+      {
+        id: nanoid(),
         configId: NUMBER_SHEET_CONFIG_ID,
       },
       {
         id: nanoid(),
         configId: QUANTITY_SHEET_CONFIG_ID,
-      },
-      {
-        id: nanoid(),
-        configId: INGREDIENTS_SHEET_CONFIG_ID,
       },
     ],
   },

@@ -133,6 +133,14 @@ export const Editor = observer(
           runInAction(() => {
             textDocument.text = view.state.doc;
             textEditorStateMobx.set(transaction.state);
+            for (const sheet of textDocument.sheets) {
+              if (sheet.highlightSearchRange !== undefined) {
+                sheet.highlightSearchRange = [
+                  transaction.changes.mapPos(sheet.highlightSearchRange[0]),
+                  transaction.changes.mapPos(sheet.highlightSearchRange[1]),
+                ];
+              }
+            }
           });
         },
       });

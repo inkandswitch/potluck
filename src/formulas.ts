@@ -7,18 +7,9 @@ import {
   TextDocument,
   SheetValueRow,
 } from "./primitives";
-import {
-  curry,
-  isFunction,
-  isArray,
-  sortBy,
-  isObject,
-  map,
-  isString,
-  clone,
-} from "lodash";
-import { Text } from "@codemirror/state";
+import { curry, isFunction, isArray, isObject, isString } from "lodash";
 import { getComputedSheetValue } from "./compute";
+import { doSpansOverlap } from "./utils";
 
 export type FormulaColumn = {
   name: string;
@@ -267,6 +258,19 @@ export function evaluateSheet(
 ): SheetValueRow[] {
   let resultRows: { [columnName: string]: any }[] | undefined;
 
+  // TODO: this arbitrarily picks between sheets of same config on same text doc, is that OK?
+  const textDocumentSheet = textDocument.sheets.find(
+    (sheet) => sheet.configId === sheetConfig.id
+  );
+  if (textDocumentSheet === undefined) {
+    throw new Error(
+      "expected to find sheet of type " +
+        sheetConfig.name +
+        " in text document " +
+        textDocument.name
+    );
+  }
+
   for (const column of sheetConfig.columns) {
     if (resultRows === undefined) {
       const result = evaluateFormula(
@@ -277,7 +281,15 @@ export function evaluateSheet(
       );
 
       if (isArray(result)) {
-        resultRows = result.map((item) => ({ [column.name]: item }));
+        resultRows = result;
+        if (textDocumentSheet.highlightSearchRange !== undefined) {
+          resultRows = result.filter(
+            (item) =>
+              item.span === undefined ||
+              doSpansOverlap(textDocumentSheet.highlightSearchRange!, item.span)
+          );
+        }
+        resultRows = resultRows.map((item) => ({ [column.name]: item }));
       } else {
         resultRows = [{ [column.name]: result }];
       }

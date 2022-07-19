@@ -1,7 +1,7 @@
 import { Text } from "@codemirror/state";
 import classNames from "classnames";
 import { isArray } from "lodash";
-import { action, comparer, computed } from "mobx";
+import { action, comparer, computed, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import {
@@ -80,6 +80,9 @@ export const SheetComponent = observer(
     rows: SheetValueRow[];
   }) => {
     const doc = textDocument.text;
+    const textDocumentSheet = textDocument.sheets.find(
+      (sheet) => sheet.configId === sheetConfigId
+    )!;
 
     const [selectedFormulaIndex, setSelectedFormulaIndex] = useState<number>(0);
 
@@ -120,6 +123,37 @@ export const SheetComponent = observer(
     return (
       <div className="flex flex-col gap-2 flex-1">
         <SheetName sheetConfig={sheetConfig} />
+        <div className="text-sm text-gray-500">
+          Highlighting in:{" "}
+          {textDocumentSheet.highlightSearchRange === undefined
+            ? "whole document"
+            : `chars ${textDocumentSheet.highlightSearchRange[0]} to ${textDocumentSheet.highlightSearchRange[1]}`}
+          <button
+            className="ml-4"
+            onClick={() =>
+              runInAction(() => {
+                textDocumentSheet.highlightSearchRange = undefined;
+              })
+            }
+          >
+            Clear
+          </button>
+          <button
+            className="ml-4"
+            onClick={() =>
+              runInAction(() => {
+                const editorState = textEditorStateMobx.get();
+                const from = editorState.selection.main.from;
+                const to = editorState.selection.main.to;
+                if (from !== to) {
+                  textDocumentSheet.highlightSearchRange = [from, to];
+                }
+              })
+            }
+          >
+            Update
+          </button>
+        </div>
         {selectedFormulaIndex !== undefined && (
           <div className="flex mr-[30px]">
             <input

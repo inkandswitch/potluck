@@ -20,7 +20,9 @@ import {
 import { SheetViewProps } from "./SheetComponent";
 
 type FoodWithNutrition = OfficialFood & {
-  calories: number | undefined;
+  calories: number;
+  fat: number;
+  protein: number;
   nutrients: { nutrient: string; unit: string; amount: string }[];
 };
 
@@ -43,27 +45,55 @@ export const NutritionLabel = observer(
           );
           return {
             nutrient: nutrient?.name,
+            nutrient_id: nutrient?.id,
             unit: nutrient?.unit_name,
             amount: foodNutrient.amount,
           };
         });
-      const calories = nutrients.find(
-        (nutrient) => nutrient.nutrient === "Energy" && nutrient.unit === "KCAL"
-      )?.amount;
+      const calories = parseInt(
+        nutrients.find(
+          (nutrient) =>
+            nutrient.nutrient === "Energy" && nutrient.unit === "KCAL"
+        )?.amount ?? "0"
+      );
+      const fat = parseInt(
+        nutrients.find(
+          (nutrient) =>
+            nutrient.nutrient === "Total lipid (fat)" && nutrient.unit === "G"
+        )?.amount ?? "0"
+      );
+      const protein = parseInt(
+        nutrients.find(
+          (nutrient) => nutrient.nutrient === "Protein" && nutrient.unit === "G"
+        )?.amount ?? "0"
+      );
+      console.log({ food, nutrients, calories, fat, protein });
       return {
         ...food,
         nutrients,
         calories,
+        fat,
+        protein,
       };
     });
+
+    const totals: { calories: number; fat: number; protein: number } =
+      foodsWithNutrition.reduce(
+        (prev, food) => ({
+          calories: prev.calories + food.calories,
+          fat: prev.fat + food.fat,
+          protein: prev.fat + food.protein,
+        }),
+        { calories: 0, fat: 0, protein: 0 }
+      );
+
     return (
       <div>
-        <div>Nutrition is good!</div>
-        {foodsWithNutrition.map((food) => (
-          <div>
-            {food?.description ?? "unknown"} ({food.calories} cal)
-          </div>
-        ))}
+        <div className="text-md font-bold">Nutrition Facts</div>
+        <div className="text-sm text-gray-400">For total recipe</div>
+        <div>Calories: {totals.calories} kcal</div>
+        <div>Fat: {totals.fat} g</div>
+        <div>Protein: {totals.protein} g</div>
       </div>
     );
   }

@@ -5,7 +5,7 @@ import nutrients from "./nutrient.csv";
 // @ts-ignore
 import measureUnits from "./measure_unit.csv";
 // @ts-ignore
-import foodNutrients from "./food_nutrient.csv";
+import foodNutrients from "./food_nutrient_filtered.csv";
 
 export type OfficialFood = {
   fdc_id: string;

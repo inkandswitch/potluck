@@ -1,6 +1,5 @@
 export const ALL_INGREDIENTS_TEXT = `ground chuck beef
 onion powder
-salt
 garlic powder
 ipa beer
 tomato sauce/puree

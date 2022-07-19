@@ -51,7 +51,7 @@ Gym 3/20/22
 
 Dead 50lb 10x3
 
-Gym 3/22
+Gym 3/22/22
  
 Squat 50 10x3
 Dead 50 10x3
@@ -69,8 +69,7 @@ Dead 50 10x3
 4/20/22 gym:
 
 Squat 50 10x3
-Dead 50 10x3
-Bench 70 776`;
+Dead 50 10x3`;
 
 export const textEditorStateMobx = observable.box(
   EditorState.create({ doc: WORKOUT_TEXT })
@@ -130,10 +129,10 @@ export const NUMBER_SHEET_CONFIG_ID = nanoid();
 export const QUANTITY_SHEET_CONFIG_ID = nanoid();
 export const ICE_CREAM_DOCUMENT_ID = "ice cream";
 export const INGREDIENTS_SHEET_CONFIG_ID = nanoid();
-export const REPS_SHEET_CONFIG_ID = nanoid();
 export const ALL_INGREDIENTS_SHEET_CONFIG_ID = nanoid();
 export const DATE_SHEET_CONFIG_ID = nanoid();
 export const DATE_SHEET_IN_WORKOUT_ID = nanoid();
+export const WORKOUT_SHEET_IN_WORKOUT_ID = nanoid();
 
 export const textDocumentsMobx = observable.map<string, TextDocument>({
   [WORKOUT_DOCUMENT_ID]: {
@@ -150,11 +149,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
         configId: DATE_SHEET_CONFIG_ID
       },
       {
-        id: nanoid(),
-        configId: REPS_SHEET_CONFIG_ID,
-      },
-      {
-        id: nanoid(),
+        id: WORKOUT_SHEET_IN_WORKOUT_ID,
         configId: WORKOUT_SHEET_CONFIG_ID,
       },
     ],
@@ -220,12 +215,12 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
   },
   [DATE_SHEET_CONFIG_ID]: {
     id: DATE_SHEET_CONFIG_ID,
-    name: "date",
+    name: "dates",
     columns: [
       {name: "date", formula: 'MatchRegexp("([0-9]{1,2})/([0-9]{1,2})/([0-9]{2})")'},
-      {name: "day", formula: 'parseInt(date.data.groups[0])'},
-      {name: "month", formula: 'parseInt(date.data.groups[1])'},
-      {name: "year", formula: 'parseInt(date.data.groups[2])'}
+      {name: "day", formula: 'ParseInt(Second(date.data.groups))'},
+      {name: "month", formula: 'ParseInt(First(date.data.groups))'},
+      {name: "year", formula: 'ParseInt(Third(date.data.groups))'}
     ]
   },
   [QUANTITY_SHEET_CONFIG_ID]: {
@@ -238,29 +233,34 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
           // There are two layers of escaping going on here; todo: improve the situation by auto-escaping user input?
           'MatchRegexp("\\\\b(cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|gram|g|milliliter|ml)s?\\\\b")',
       },
-      { name: "amount", formula: "PrevOfType(unit, 'numbers')" },
+      { name: "amount", formula: "PrevOfType(unit, 'numbers', 20)" },
     ],
   },
   [WORKOUT_SHEET_CONFIG_ID]: {
     id: WORKOUT_SHEET_CONFIG_ID,
     name: "workouts",
     columns: [
-      { name: "activity", formula: 'MatchRegexp("Squat|Dead")' },
+      { name: "activity", formula: 'MatchRegexp("squat|dead|run|plank|elliptical", "i")' },
       {
-        name: "exercises",
-        formula: 'Filter(ValuesOfType("reps"), SameLine(activity))',
+        name: "numbers",
+        formula: 'Filter(NextValuesUntil(activity, HasType("workouts")), SameLine(activity))',
       },
-    ],
-  },
-  [REPS_SHEET_CONFIG_ID]: {
-    id: REPS_SHEET_CONFIG_ID,
-    name: "reps",
-    columns: [
+      {
+        name: "weight",
+        formula: 'First(numbers)'
+      },
       {
         name: "reps",
-        formula: 'Filter(ValuesOfType("numbers"), HasTextOnRight("x"))',
+        formula: 'Second(numbers)'
       },
-      { name: "sets", formula: 'NextOfType(reps, "numbers")' },
+      {
+        name: "sets",
+        formula: 'Third(numbers)'
+      },
+      {
+        name: "date",
+        formula: 'PrevOfType(activity, "dates")'
+      }
     ],
   },
   [INGREDIENTS_SHEET_CONFIG_ID]: {
@@ -274,7 +274,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
       {
         name: "quantity",
-        formula: 'PrevOfType(name, "quantity")',
+        formula: 'PrevOfType(name, "quantity", 20)',
       },
     ],
   },
@@ -307,5 +307,6 @@ export const selectedTextDocumentIdBox = observable.box(WORKOUT_DOCUMENT_ID);
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({
-  [DATE_SHEET_IN_WORKOUT_ID]: true
+  [DATE_SHEET_IN_WORKOUT_ID]: true,
+  [WORKOUT_SHEET_IN_WORKOUT_ID]: true
 });

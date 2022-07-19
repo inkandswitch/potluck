@@ -34,6 +34,7 @@ function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
 
     return (
       <span>
+        <span className="text-gray-400">[</span>
         {value.map((item, index) =>
           index === lastIndex ? (
             <ValueDisplay value={item} doc={doc} key={index} />
@@ -44,6 +45,8 @@ function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
             </span>
           )
         )}
+
+        <span className="text-gray-400">]</span>
       </span>
     );
   }
@@ -135,7 +138,7 @@ export const SheetComponent = observer(
       <div className="flex flex-col gap-2 flex-1">
         <div className="flex gap-1">
           <button onClick={() => toggleIsExpanded()}>
-            <span className={`icon icon-expandable bg-gray-500 ${isExpanded ? 'is-expanded' : ''}`}/>
+            <span className={`icon icon-expandable bg-gray-500 ${isExpanded ? 'is-expanded' : ''}`} />
           </button>
 
           <SheetName sheetConfig={sheetConfig} />

@@ -1,9 +1,11 @@
 import { computed, IComputedValue } from "mobx";
-import { evaluateSheet } from "./formulas";
+import { evaluateSheet, evaluateSheetConfigs } from "./formulas";
 import {
+  getSheetConfigsOfTextDocument,
   Highlight,
+  SheetConfig,
   sheetConfigsMobx,
-  SheetValueRow,
+  SheetValueRow, TextDocument, TextDocumentSheet,
   textDocumentsMobx,
 } from "./primitives";
 
@@ -27,4 +29,30 @@ export function getComputedSheetValue(
     });
   }
   return computedCache[key];
+}
+
+// we cheat a little here, for the sheetConfigId we only eval the first column to avoid
+// circular dependencies, this is necessary for the formula like NextValuesUntil(activity, HasType("workouts"))
+// here we reference workouts in the workout table
+export function getHighlightsUntilSheet(textDocument: TextDocument, sheetConfigId: string) {
+  return computed(() => {
+    let highlights: Highlight[] = []
+
+    for (const sheet of textDocument.sheets) {
+      if (sheet.configId === sheetConfigId) {
+        return highlights.concat(
+          evaluateSheet(textDocument, sheetConfigsMobx.get(sheet.configId)!, true)
+            .filter((row: SheetValueRow) => "span" in row && row.span !== undefined) as Highlight[]
+        )
+
+      }
+
+      highlights = highlights.concat(
+        evaluateSheet(textDocument, sheetConfigsMobx.get(sheet.configId)!)
+          .filter((row: SheetValueRow) => "span" in row && row.span !== undefined) as Highlight[]
+      )
+    }
+
+    return highlights
+  })
 }

@@ -108,8 +108,7 @@ export const SheetTable = observer(
       () =>
         rows.filter(
           (row) =>
-            "span" in row &&
-            row.span !== undefined &&
+            isValueRowHighlight(row) &&
             doSpansOverlap(row.span, textEditorSelectionSpanComputed.get())
         ),
       { equals: comparer.shallow }

@@ -7,19 +7,15 @@ import {
 import { Facet, StateEffect, StateField } from "@codemirror/state";
 import { minimalSetup } from "codemirror";
 import { useEffect, useRef } from "react";
-import { autorun, comparer, computed, reaction, runInAction, toJS } from "mobx";
+import { autorun, comparer, computed, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
-  getSheetConfigsOfTextDocument,
   Highlight,
   hoverHighlightsMobx,
-  SheetConfig,
-  sheetConfigsMobx,
   textDocumentsMobx,
   textEditorStateMobx,
 } from "./primitives";
-import { evaluateSheetConfigs } from "./formulas";
-import { doesSpanContainOtherSpan, doSpansOverlap } from "./utils";
+import { getComputedDocumentValues } from "./compute";
 
 const textDocumentIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
@@ -145,12 +141,8 @@ export const Editor = observer(
         autorun(() => {
           const highlights = computed(
             () => {
-              const sheetConfigs: SheetConfig[] =
-                getSheetConfigsOfTextDocument(textDocument);
-              const documentValueRows = evaluateSheetConfigs(
-                textDocument,
-                sheetConfigs
-              );
+              const documentValueRows =
+                getComputedDocumentValues(textDocumentId).get();
               return Object.values(documentValueRows)
                 .map((sheetValueRows) =>
                   sheetValueRows.filter(

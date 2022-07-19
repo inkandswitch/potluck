@@ -14,7 +14,7 @@ import { SheetComponent } from "./SheetComponent";
 import { action, runInAction } from "mobx";
 import { Text } from "@codemirror/state";
 import classNames from "classnames";
-import { evaluateSheetConfigs } from "./formulas";
+import { getComputedDocumentValues } from "./compute";
 
 const NEW_OPTION_ID = "new";
 const AddNewDocumentSheet = observer(
@@ -77,9 +77,7 @@ const TextDocumentName = observer(
 const TextDocumentComponent = observer(
   ({ textDocumentId }: { textDocumentId: string }) => {
     const textDocument = textDocumentsMobx.get(textDocumentId)!;
-
-    const sheetConfigs = getSheetConfigsOfTextDocument(textDocument);
-    const documentValueRows = evaluateSheetConfigs(textDocument, sheetConfigs);
+    const documentValueRows = getComputedDocumentValues(textDocumentId).get();
 
     return (
       <div className="px-4">

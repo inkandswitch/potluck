@@ -7,7 +7,15 @@ import {
   TextDocument,
   SheetValueRow,
 } from "./primitives";
-import { curry, isFunction, isArray, isObject, isString, sortBy, parseInt } from "lodash";
+import {
+  curry,
+  isFunction,
+  isArray,
+  isObject,
+  isString,
+  sortBy,
+  parseInt,
+} from "lodash";
 import { getComputedSheetValue, getHighlightsUntilSheet } from "./compute";
 import { doSpansOverlap } from "./utils";
 
@@ -18,7 +26,7 @@ export type FormulaColumn = {
 
 export type Scope = { [name: string]: any };
 
-function evalCondition (condition: any, item: any) : any {
+function evalCondition(condition: any, item: any): any {
   if (isFunction(condition)) {
     return condition(item);
   }
@@ -115,7 +123,11 @@ function evaluateFormula(
       return getComputedSheetValue(textDocument.id, typeSheetConfig.id).get();
     },
 
-    NextOfType: (highlight: Highlight, type: string, distanceLimit?: number) => {
+    NextOfType: (
+      highlight: Highlight,
+      type: string,
+      distanceLimit?: number
+    ) => {
       const typeSheetConfig = Array.from(sheetConfigsMobx.values()).find(
         (sheetConfig) => sheetConfig.name === type
       );
@@ -130,12 +142,17 @@ function evaluateFormula(
         (r) =>
           "span" in r &&
           r.span[0] > highlight.span[1] &&
-          (distanceLimit === undefined || (r.span[0] - highlight.span[1] < distanceLimit))
+          (distanceLimit === undefined ||
+            r.span[0] - highlight.span[1] < distanceLimit)
       );
     },
 
-    PrevOfType: (highlight: Highlight, type: string, distanceLimit?: number) => {
-      console.log(distanceLimit)
+    PrevOfType: (
+      highlight: Highlight,
+      type: string,
+      distanceLimit?: number
+    ) => {
+      console.log(distanceLimit);
       const typeSheetConfig = Array.from(sheetConfigsMobx.values()).find(
         (sheetConfig) => sheetConfig.name === type
       );
@@ -151,43 +168,46 @@ function evaluateFormula(
         .find(
           (r) =>
             "span" in r &&
-            r.span[1] < highlight.span[0]
-
-            && (distanceLimit === undefined || (highlight.span[0] - r.span[1] < distanceLimit))
+            r.span[1] < highlight.span[0] &&
+            (distanceLimit === undefined ||
+              highlight.span[0] - r.span[1] < distanceLimit)
         );
     },
 
-    NextValuesUntil: (highlight: Highlight, stopCondition: any): Highlight[] => {
-      const textDocument = textDocumentsMobx.get(highlight.documentId)
+    NextValuesUntil: (
+      highlight: Highlight,
+      stopCondition: any
+    ): Highlight[] => {
+      const textDocument = textDocumentsMobx.get(highlight.documentId);
 
       if (!textDocument) {
-        return []
+        return [];
       }
 
-      const sortedHighlights = sortBy(getHighlightsUntilSheet(textDocument, highlight.sheetConfigId).get(), ({span}) => span[0])
+      const sortedHighlights = sortBy(
+        getHighlightsUntilSheet(textDocument, highlight.sheetConfigId).get(),
+        ({ span }) => span[0]
+      );
 
-      let result : Highlight[] = []
+      let result: Highlight[] = [];
 
       for (const otherHighlight of sortedHighlights) {
-        if(otherHighlight.span[0] > highlight.span[1]) {
-
-          if(evalCondition(stopCondition, otherHighlight)) {
-            return result
+        if (otherHighlight.span[0] > highlight.span[1]) {
+          if (evalCondition(stopCondition, otherHighlight)) {
+            return result;
           }
 
-          result.push(otherHighlight)
+          result.push(otherHighlight);
         }
       }
 
-      return result
+      return result;
     },
-
 
     HasType: curry((type: string, highlight: Highlight) => {
       const sheetConfig = Array.from(sheetConfigsMobx.values()).find(
         (sheetConfig) => sheetConfig.name === type
       );
-
 
       if (!sheetConfig) {
         return false;
@@ -228,10 +248,10 @@ function evaluateFormula(
 
     Not: (value: any) => {
       if (isFunction(value)) {
-        return (...args: any[]) => !value(...args)
+        return (...args: any[]) => !value(...args);
       }
 
-      return !value
+      return !value;
     },
 
     First: (list: any[]): any => {
@@ -301,7 +321,7 @@ function evaluateFormula(
 export function evaluateSheet(
   textDocument: TextDocument,
   sheetConfig: SheetConfig,
-  evalOnlyFirstColumn?: boolean, // this is necessary for the nextUntil formula, to avoid circular dependencies
+  evalOnlyFirstColumn?: boolean // this is necessary for the nextUntil formula, to avoid circular dependencies
 ): SheetValueRow[] {
   let resultRows: { [columnName: string]: any }[] | undefined;
 
@@ -338,13 +358,12 @@ export function evaluateSheet(
         }
         resultRows = sortBy(resultRows, (r) => r.span[0]);
         resultRows = resultRows.map((item) => ({ [column.name]: item }));
-
       } else {
         resultRows = [{ [column.name]: result }];
       }
 
       if (evalOnlyFirstColumn) {
-        break
+        break;
       }
     } else {
       resultRows = resultRows.map((row) => {
@@ -423,18 +442,4 @@ function scopeProxy(scope: Scope) {
   };
 
   return new Proxy(scope, handler);
-}
-
-export function evaluateSheetConfigs(
-  textDocument: TextDocument,
-  sheetConfigs: SheetConfig[]
-): { [sheetConfigId: string]: SheetValueRow[] } {
-  const rv: { [sheetConfigId: string]: SheetValueRow[] } = {};
-  sheetConfigs.forEach((sheetConfig) => {
-    rv[sheetConfig.id] = getComputedSheetValue(
-      textDocument.id,
-      sheetConfig.id
-    ).get();
-  });
-  return rv;
 }

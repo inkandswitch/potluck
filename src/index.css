@@ -23,3 +23,11 @@
 .button {
   @apply px-3 py-1 bg-blue-500 text-white rounded;
 }
+
+.cm-highlight {
+  @apply bg-yellow-100 rounded;
+}
+
+.cm-highlight-hover {
+  @apply bg-blue-500 text-white rounded;
+}

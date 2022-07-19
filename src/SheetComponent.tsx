@@ -4,7 +4,13 @@ import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { Scope } from "./formulas";
-import { SheetConfig, sheetConfigsMobx, TextDocument } from "./primitives";
+import {
+  hoverHighlightsMobx,
+  SheetConfig,
+  sheetConfigsMobx,
+  SheetValueRow,
+  TextDocument,
+} from "./primitives";
 
 let i = 1;
 function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
@@ -63,7 +69,7 @@ export const SheetComponent = observer(
   }: {
     textDocument: TextDocument;
     sheetConfigId: string;
-    rows: Scope[];
+    rows: SheetValueRow[];
   }) => {
     const doc = textDocument.text;
 
@@ -143,7 +149,18 @@ export const SheetComponent = observer(
           </thead>
           <tbody>
             {rows.map((row, index) => (
-              <tr key={index}>
+              <tr
+                onMouseEnter={action(() => {
+                  if ("span" in row && row.span !== undefined) {
+                    hoverHighlightsMobx.replace([row]);
+                  }
+                })}
+                onMouseLeave={action(() => {
+                  hoverHighlightsMobx.clear();
+                })}
+                className="hover:bg-blue-50"
+                key={index}
+              >
                 {columns.map((column, index) => {
                   const value: any = row.data[column.name];
                   return (

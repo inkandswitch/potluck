@@ -284,3 +284,4 @@ export function addSheetConfig() {
 }
 
 export const selectedTextDocumentIdBox = observable.box(ICE_CREAM_DOCUMENT_ID);
+export const hoverHighlightsMobx = observable.array<Highlight>([]);

@@ -7,17 +7,19 @@ import {
 import { Facet, StateEffect, StateField } from "@codemirror/state";
 import { minimalSetup } from "codemirror";
 import { useEffect, useRef } from "react";
-import { autorun, comparer, computed, reaction, runInAction } from "mobx";
+import { autorun, comparer, computed, reaction, runInAction, toJS } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   getSheetConfigsOfTextDocument,
   Highlight,
+  hoverHighlightsMobx,
   SheetConfig,
   sheetConfigsMobx,
   textDocumentsMobx,
   textEditorStateMobx,
 } from "./primitives";
 import { evaluateSheetConfigs } from "./formulas";
+import { doesSpanContainOtherSpan, doSpansOverlap } from "./utils";
 
 const textDocumentIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
@@ -28,41 +30,80 @@ const highlightsField = StateField.define<Highlight[]>({
   create() {
     return [];
   },
-  update(snippets, tr) {
+  update(highlights, tr) {
     for (let e of tr.effects) {
       if (e.is(setHighlightsEffect)) {
         return e.value;
       }
     }
-    return snippets
-      .map((highlight) => ({
-        ...highlight,
-        span: [
-          tr.changes.mapPos(highlight.span[0]),
-          tr.changes.mapPos(highlight.span[1]),
-        ],
-      }))
-      .filter(
-        (highlight) => highlight.span[0] !== highlight.span[1]
-      ) as Highlight[];
+    return highlights
+      .map(
+        (highlight): Highlight => ({
+          ...highlight,
+          span: [
+            tr.changes.mapPos(highlight.span[0]),
+            tr.changes.mapPos(highlight.span[1]),
+          ],
+        })
+      )
+      .filter((highlight) => highlight.span[0] !== highlight.span[1]);
   },
 });
 
-const snippetDecorations = EditorView.decorations.compute(
-  [highlightsField],
+const setHoverHighlightsEffect = StateEffect.define<Highlight[]>();
+const hoverHighlightsField = StateField.define<Highlight[]>({
+  create() {
+    return [];
+  },
+  update(highlights, tr) {
+    for (let e of tr.effects) {
+      if (e.is(setHoverHighlightsEffect)) {
+        return e.value;
+      }
+    }
+    return highlights
+      .map(
+        (highlight): Highlight => ({
+          ...highlight,
+          span: [
+            tr.changes.mapPos(highlight.span[0]),
+            tr.changes.mapPos(highlight.span[1]),
+          ],
+        })
+      )
+      .filter((highlight) => highlight.span[0] !== highlight.span[1]);
+  },
+});
+
+const highlightDecorations = EditorView.decorations.compute(
+  [highlightsField, hoverHighlightsField],
   (state) => {
+    const hoverHighlights = state.field(hoverHighlightsField);
     return Decoration.set(
-      state.field(highlightsField).map((snippet) => {
-        return Decoration.mark({
-          class: "bg-yellow-100 rounded",
-        }).range(snippet.span[0], snippet.span[1]);
-      }),
+      [
+        ...hoverHighlights.map((highlight) => {
+          return Decoration.mark({
+            class: "cm-highlight-hover",
+          }).range(highlight.span[0], highlight.span[1]);
+        }),
+        ...state
+          .field(highlightsField)
+          .filter(
+            (highlight) =>
+              !hoverHighlights.some((h) =>
+                doesSpanContainOtherSpan(h.span, highlight.span)
+              )
+          )
+          .map((highlight) => {
+            return Decoration.mark({
+              class: "cm-highlight",
+            }).range(highlight.span[0], highlight.span[1]);
+          }),
+      ],
       true
     );
   }
 );
-
-export let EDITOR_VIEW: EditorView;
 
 export const Editor = observer(
   ({ textDocumentId }: { textDocumentId: string }) => {
@@ -70,7 +111,7 @@ export const Editor = observer(
     const textDocument = textDocumentsMobx.get(textDocumentId)!;
 
     useEffect(() => {
-      const view = (EDITOR_VIEW = new EditorView({
+      const view = new EditorView({
         doc: textDocument.text,
         extensions: [
           minimalSetup,
@@ -81,7 +122,8 @@ export const Editor = observer(
           }),
           EditorView.lineWrapping,
           highlightsField,
-          snippetDecorations,
+          highlightDecorations,
+          hoverHighlightsField,
           textDocumentIdFacet.of(textDocumentId),
         ],
         parent: editorRef.current!,
@@ -93,7 +135,7 @@ export const Editor = observer(
             textEditorStateMobx.set(transaction.state);
           });
         },
-      }));
+      });
 
       runInAction(() => {
         textEditorStateMobx.set(view.state);
@@ -121,6 +163,11 @@ export const Editor = observer(
           ).get();
           view.dispatch({
             effects: setHighlightsEffect.of(highlights),
+          });
+        }),
+        autorun(() => {
+          view.dispatch({
+            effects: setHoverHighlightsEffect.of(hoverHighlightsMobx.toJSON()),
           });
         }),
       ];

@@ -311,3 +311,5 @@ export function addSheetConfig() {
 
 export const selectedTextDocumentIdBox = observable.box(WORKOUT_DOCUMENT_ID);
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
+
+export const isSheetExpandedMobx = observable.map<string, boolean>({});

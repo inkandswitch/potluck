@@ -92,6 +92,7 @@ const TextDocumentComponent = observer(
               {textDocument.sheets.map((sheet) => {
                 return (
                   <SheetComponent
+                    id={sheet.id}
                     textDocument={textDocument}
                     sheetConfigId={sheet.configId}
                     key={sheet.id}

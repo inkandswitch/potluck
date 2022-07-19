@@ -20,6 +20,16 @@
   -webkit-mask-image: url("plus-icon.svg");
 }
 
+.icon-expandable {
+  transition: transform 100ms ease-in-out;
+  mask-image: url('chevron-forward.svg');
+  -webkit-mask-image: url('chevron-forward.svg');
+}
+
+.icon-expandable.is-expanded {
+  transform: rotate(90deg);
+}
+
 .button {
   @apply px-3 py-1 bg-blue-500 text-white rounded;
 }

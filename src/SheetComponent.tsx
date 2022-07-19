@@ -5,7 +5,7 @@ import { action, comparer, computed, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import {
-  hoverHighlightsMobx,
+  hoverHighlightsMobx, isSheetExpandedMobx,
   SheetConfig,
   sheetConfigsMobx,
   SheetValueRow,
@@ -16,6 +16,7 @@ import {
 import { doSpansOverlap } from "./utils";
 
 let i = 1;
+
 function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
   if (value instanceof Error) {
     return <span className="text-red-500">#Err</span>;
@@ -51,7 +52,7 @@ function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
 
 const SheetName = observer(({ sheetConfig }: { sheetConfig: SheetConfig }) => {
   return (
-    <div>
+    <div className="flex-1">
       <input
         type="text"
         value={sheetConfig.name}
@@ -71,10 +72,12 @@ const textEditorSelectionSpanComputed = computed<Span>(() => {
 
 export const SheetComponent = observer(
   ({
+    id,
     textDocument,
     sheetConfigId,
     rows,
   }: {
+    id: string,
     textDocument: TextDocument;
     sheetConfigId: string;
     rows: SheetValueRow[];
@@ -120,115 +123,131 @@ export const SheetComponent = observer(
       { equals: comparer.shallow }
     ).get();
 
+
+    const isExpanded = isSheetExpandedMobx.get(id)
+
+    const toggleIsExpanded = action(() => {
+      isSheetExpandedMobx.set(id, !isExpanded)
+    })
+
     return (
       <div className="flex flex-col gap-2 flex-1">
-        <SheetName sheetConfig={sheetConfig} />
-        <div className="text-sm text-gray-500">
-          Highlighting in:{" "}
-          {textDocumentSheet.highlightSearchRange === undefined
-            ? "whole document"
-            : `chars ${textDocumentSheet.highlightSearchRange[0]} to ${textDocumentSheet.highlightSearchRange[1]}`}
-          <button
-            className="ml-4"
-            onClick={() =>
-              runInAction(() => {
-                textDocumentSheet.highlightSearchRange = undefined;
-              })
-            }
-          >
-            Clear
+        <div className="flex gap-1">
+          <button onClick={() => toggleIsExpanded()}>
+            <span className={`icon icon-expandable bg-gray-500 ${isExpanded ? 'is-expanded' : ''}`}/>
           </button>
-          <button
-            className="ml-4"
-            onClick={() =>
-              runInAction(() => {
-                const editorState = textEditorStateMobx.get();
-                const from = editorState.selection.main.from;
-                const to = editorState.selection.main.to;
-                if (from !== to) {
-                  textDocumentSheet.highlightSearchRange = [from, to];
-                }
-              })
-            }
-          >
-            Update
-          </button>
-        </div>
-        {selectedFormulaIndex !== undefined && (
-          <div className="flex mr-[30px]">
-            <input
-              className="pl-1 border border-gray-200"
-              value={columns[selectedFormulaIndex].name}
-              onChange={(evt) =>
-                changeNameAt(selectedFormulaIndex, evt.target.value)
-              }
-            />
-            <span>&nbsp;=&nbsp;</span>
-            <input
-              className="pl-1 border border-gray-200 flex-1"
-              value={columns[selectedFormulaIndex].formula}
-              onChange={(evt) =>
-                changeFormulaAt(selectedFormulaIndex, evt.target.value)
-              }
-            />
-          </div>
-        )}
 
-        <table>
-          <thead>
-            <tr>
-              {columns.map((column, index) => {
-                return (
-                  <th
-                    key={index}
-                    className={`text-left font-normal px-1 bg-gray-100 border ${
-                      selectedFormulaIndex === index
-                        ? "border-blue-300"
-                        : "border-gray-200"
-                    }`}
-                    onClick={() => setSelectedFormulaIndex(index)}
-                  >
-                    {column.name}
-                  </th>
-                );
-              })}
-              <th className="w-[30px]">
-                <button
-                  className="icon icon-plus bg-gray-500"
-                  onClick={() => addColumn()}
-                />
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, index) => (
-              <tr
-                onMouseEnter={action(() => {
-                  if ("span" in row && row.span !== undefined) {
-                    hoverHighlightsMobx.replace([row]);
+          <SheetName sheetConfig={sheetConfig} />
+        </div>
+
+        {isExpanded && (<>
+          <div className="text-sm text-gray-500">
+            Highlighting in:{" "}
+            {textDocumentSheet.highlightSearchRange === undefined
+              ? "whole document"
+              : `chars ${textDocumentSheet.highlightSearchRange[0]} to ${textDocumentSheet.highlightSearchRange[1]}`}
+            <button
+              className="ml-4"
+              onClick={() =>
+                runInAction(() => {
+                  textDocumentSheet.highlightSearchRange = undefined;
+                })
+              }
+            >
+              Clear
+            </button>
+            <button
+              className="ml-4"
+              onClick={() =>
+                runInAction(() => {
+                  const editorState = textEditorStateMobx.get();
+                  const from = editorState.selection.main.from;
+                  const to = editorState.selection.main.to;
+                  if (from !== to) {
+                    textDocumentSheet.highlightSearchRange = [from, to];
                   }
-                })}
-                onMouseLeave={action(() => {
-                  hoverHighlightsMobx.clear();
-                })}
-                className={classNames(
-                  "hover:bg-blue-50",
-                  hoverHighlights.includes(row) ? "bg-blue-100" : undefined
-                )}
-                key={index}
-              >
+                })
+              }
+            >
+              Update
+            </button>
+          </div>
+          {selectedFormulaIndex !== undefined && (
+            <div className="flex mr-[30px]">
+              <input
+                className="pl-1 border border-gray-200"
+                value={columns[selectedFormulaIndex].name}
+                onChange={(evt) =>
+                  changeNameAt(selectedFormulaIndex, evt.target.value)
+                }
+              />
+              <span>&nbsp;=&nbsp;</span>
+              <input
+                className="pl-1 border border-gray-200 flex-1"
+                value={columns[selectedFormulaIndex].formula}
+                onChange={(evt) =>
+                  changeFormulaAt(selectedFormulaIndex, evt.target.value)
+                }
+              />
+            </div>
+          )}
+
+          <table>
+            <thead>
+              <tr>
                 {columns.map((column, index) => {
-                  const value: any = row.data[column.name];
                   return (
-                    <td className="border border-gray-200 px-1" key={index}>
-                      <ValueDisplay value={value} doc={doc} />
-                    </td>
+                    <th
+                      key={index}
+                      className={`text-left font-normal px-1 bg-gray-100 border ${
+                        selectedFormulaIndex === index
+                          ? "border-blue-300"
+                          : "border-gray-200"
+                      }`}
+                      onClick={() => setSelectedFormulaIndex(index)}
+                    >
+                      {column.name}
+                    </th>
                   );
                 })}
+                <th className="w-[30px]">
+                  <button
+                    className="icon icon-plus bg-gray-500"
+                    onClick={() => addColumn()}
+                  />
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rows.map((row, index) => (
+                <tr
+                  onMouseEnter={action(() => {
+                    if ("span" in row && row.span !== undefined) {
+                      hoverHighlightsMobx.replace([row]);
+                    }
+                  })}
+                  onMouseLeave={action(() => {
+                    hoverHighlightsMobx.clear();
+                  })}
+                  className={classNames(
+                    "hover:bg-blue-50",
+                    hoverHighlights.includes(row) ? "bg-blue-100" : undefined
+                  )}
+                  key={index}
+                >
+                  {columns.map((column, index) => {
+                    const value: any = row.data[column.name];
+                    return (
+                      <td className="border border-gray-200 px-1" key={index}>
+                        <ValueDisplay value={value} doc={doc} />
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>)}
       </div>
     );
   }

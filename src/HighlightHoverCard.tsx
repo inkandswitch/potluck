@@ -2,6 +2,7 @@ import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { Highlight, textDocumentsMobx } from "./primitives";
 import { getTextForHighlight } from "./utils";
+import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
 
 export const HighlightHoverCardContent = observer(
   ({ highlight }: { highlight: Highlight }) => {
@@ -49,3 +50,27 @@ export const HighlightHoverCardContent = observer(
     );
   }
 );
+
+export function HighlightHoverCard({
+  children,
+  highlight,
+}: {
+  children: React.ReactNode;
+  highlight: Highlight;
+}) {
+  return (
+    <HoverCardPrimitive.Root openDelay={500}>
+      <HoverCardPrimitive.Trigger asChild={true}>
+        {children}
+      </HoverCardPrimitive.Trigger>
+      <HoverCardPrimitive.Content
+        side="top"
+        sideOffset={2}
+        className="bg-white font-serif p-4 rounded-lg shadow-lg"
+      >
+        <HoverCardPrimitive.Arrow className="fill-white" />
+        <HighlightHoverCardContent highlight={highlight} />
+      </HoverCardPrimitive.Content>
+    </HoverCardPrimitive.Root>
+  );
+}

@@ -20,6 +20,7 @@ import { doSpansOverlap, isValueRowHighlight } from "./utils";
 import { FormulaColumn } from "./formulas";
 import { SheetCalendar } from "./SheetCalendar";
 import { CalendarIcon, TableIcon } from "@radix-ui/react-icons";
+import { HighlightHoverCard } from "./HighlightHoverCard";
 
 let i = 1;
 
@@ -28,10 +29,14 @@ function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
     return <span className="text-red-500">#Err</span>;
   }
 
-  if (value && value.span) {
+  if (isValueRowHighlight(value)) {
     const text = doc.sliceString(value.span[0], value.span[1]);
 
-    return <span className="bg-yellow-100 rounded">{text}</span>;
+    return (
+      <HighlightHoverCard highlight={value}>
+        <span className="bg-yellow-100 rounded">{text}</span>
+      </HighlightHoverCard>
+    );
   }
 
   if (isArray(value)) {

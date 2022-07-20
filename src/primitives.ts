@@ -291,12 +291,16 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
         formula: "name.data.matchedHighlight",
       },
       {
+        name: "quantity",
+        formula: 'PrevOfType(name, ["quantity", "numbers"], 20)',
+      },
+      {
         name: "normalized",
         formula: "NormalizeFoodName(name)",
       },
       {
         name: "quantity",
-        formula: 'PrevOfType(name, "quantity", 20)',
+        formula: 'PrevOfType(name, ["quantity", "numbers"], 20)',
       },
     ],
   },

@@ -50,14 +50,36 @@ const quantityInGrams = (ingredient: Ingredient): number | undefined => {
   return conversionRatio * ingredient.quantity.amount;
 };
 
-export const NutritionLabel = observer(({ rows }: SheetViewProps) => {
+export const NutritionLabel = observer(({ rows, textDocument }: SheetViewProps) => {
   const ingredients: Ingredient[] = rows
     .map((row) => {
       const unitHighlight = row.data?.quantity?.data?.unit;
       const amountHighlight = row.data?.quantity?.data?.amount;
-
+      const numberHighlight = row.data?.quantity?.data?.value;
+      
       let quantity;
-      if (unitHighlight === undefined || amountHighlight === undefined) {
+      if (numberHighlight) {
+
+        // manually hack to add a unit for unitless ingredients in smoothie
+
+        const count = parseFloat(getTextForHighlight(numberHighlight) || "0")
+
+        switch (getTextForHighlight(row.data?.name)?.toLowerCase()) {
+          case "avocados":
+          case "avocado":
+            quantity = { amount: count * 215, unit: "g" }
+            break;
+
+          case "banana":
+          case "bananas":
+            quantity = { amount: count * 120, unit: "g" }
+            break;
+
+          default:
+            quantity = { amount: 0, unit: "" };
+        }
+
+      } else if (unitHighlight === undefined || amountHighlight === undefined) {
         quantity = { amount: 0, unit: "" };
       } else {
         quantity = {
@@ -65,6 +87,7 @@ export const NutritionLabel = observer(({ rows }: SheetViewProps) => {
           amount: parseFloat(getTextForHighlight(amountHighlight) ?? "0"),
         };
       }
+
 
       return {
         food: OFFICIAL_FOODS.find(

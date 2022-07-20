@@ -25,6 +25,7 @@ import { doSpansOverlap, getTextForHighlight } from "./utils";
 import { OFFICIAL_FOODS } from "./data/officialFoods";
 // @ts-ignore
 import FuzzySet from "fuzzyset";
+
 const foodNameMatchSet = new FuzzySet(
   OFFICIAL_FOODS.map((food: any) => food.description),
   false
@@ -173,19 +174,27 @@ function evaluateFormula(
 
     NextOfType: (
       highlight: Highlight,
-      type: string,
+      type: string | string[],
       distanceLimit?: number
     ) => {
-      const typeSheetConfig = Array.from(sheetConfigsMobx.values()).find(
-        (sheetConfig) => sheetConfig.name === type
+      const typeSheetConfigs = Array.from(sheetConfigsMobx.values()).filter(
+        (sheetConfig) => (
+          isString(type)
+            ? sheetConfig.name === type
+            : type.includes(sheetConfig.name)
+        )
       );
-      if (!typeSheetConfig) {
-        return;
-      }
-      const sheetValueRows = getComputedSheetValue(
-        textDocument.id,
-        typeSheetConfig.id
-      ).get();
+
+      const sheetValueRows = sortBy(
+        typeSheetConfigs.flatMap((typeSheetConfig) => (
+          getComputedSheetValue(
+            textDocument.id,
+            typeSheetConfig.id
+          ).get()
+        ))
+          .filter(row => "span" in row) as Highlight[],
+        ({ span }) => span[0])
+      
       return sheetValueRows.find(
         (r) =>
           "span" in r &&
@@ -197,19 +206,28 @@ function evaluateFormula(
 
     PrevOfType: (
       highlight: Highlight,
-      type: string,
+      type: string | string[],
       distanceLimit?: number
     ) => {
-      const typeSheetConfig = Array.from(sheetConfigsMobx.values()).find(
-        (sheetConfig) => sheetConfig.name === type
+      const typeSheetConfigs = Array.from(sheetConfigsMobx.values()).filter(
+        (sheetConfig) => (
+          isString(type)
+            ? sheetConfig.name === type
+            : type.includes(sheetConfig.name)
+        )
       );
-      if (!typeSheetConfig) {
-        return;
-      }
-      const sheetValueRows = getComputedSheetValue(
-        textDocument.id,
-        typeSheetConfig.id
-      ).get();
+
+      const sheetValueRows = sortBy(
+        typeSheetConfigs.flatMap((typeSheetConfig) => (
+          getComputedSheetValue(
+            textDocument.id,
+            typeSheetConfig.id
+          ).get()
+        ))
+          .filter(row => "span" in row) as Highlight[],
+        ({ span }) => span[0])
+
+
       return [...sheetValueRows]
         .reverse()
         .find(
@@ -407,9 +425,9 @@ export function evaluateSheet(
   if (textDocumentSheet === undefined) {
     throw new Error(
       "expected to find sheet of type " +
-        sheetConfig.name +
-        " in text document " +
-        textDocument.name
+      sheetConfig.name +
+      " in text document " +
+      textDocument.name
     );
   }
 

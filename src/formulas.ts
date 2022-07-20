@@ -153,8 +153,6 @@ function evaluateFormula(
         highlights = highlights.concat(newHighlights);
       }
 
-      console.log({ highlights });
-
       return highlights;
     },
 
@@ -346,7 +344,7 @@ function evaluateFormula(
         foodName.span[1]
       );
       const fuzzySetResult = foodNameMatchSet.get(text);
-      if (fuzzySetResult.length === 0) {
+      if (fuzzySetResult === null) {
         return undefined;
       }
       const result = fuzzySetResult[0];
@@ -438,11 +436,18 @@ export function evaluateSheet(
     }
   }
 
+  // Stretch the bounds of this Highlight so it contains all the highlights in its row.
+  // Need to be careful to only consider child Highlights which are in this doc, not other docs
   return (resultRows ?? []).map((rowData) => {
     let from, to;
 
     for (const value of Object.values(rowData)) {
-      if (value && value.span) {
+      if (
+        value &&
+        value.span &&
+        value.documentId &&
+        value.documentId === textDocument.id //
+      ) {
         const [valueFrom, valueTo] = value.span;
 
         if (from === undefined || valueFrom < from) {

@@ -108,7 +108,7 @@ export const SheetTable = observer(
     columns: FormulaColumn[];
     rows: SheetValueRow[];
   }) => {
-    const [selectedFormulaIndex, setSelectedFormulaIndex] = useState<number>(0);
+    const [selectedFormulaIndex, setSelectedFormulaIndex] = useState<number|undefined>(undefined);
     const hoverHighlights = computed(
       () =>
         rows.filter(
@@ -165,7 +165,7 @@ export const SheetTable = observer(
 
         <table className="flex-1">
           <thead>
-            <tr className="sticky top-0 border" style={{outline: "1px solid rgb(229 231 235)"}}>
+            <tr className="sticky top-0 border" style={{outline: "1px solid  rgb(229 231 235)"}}>
               {columns.map((column, index) => {
                 return (
                   <th

@@ -12,12 +12,15 @@ import {
   SheetConfig,
   SheetValueRow,
   TextDocument,
+  textDocumentsMobx,
 } from "./primitives";
 import { FormulaColumn } from "./formulas";
 import { useMemo, useState } from "react";
 import { getTextForHighlight, isValueRowHighlight } from "./utils";
 import addDays from "date-fns/addDays";
 import { action } from "mobx";
+import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
+import { HighlightHoverCardContent } from "./HighlightHoverCard";
 
 function getDateForRow(row: SheetValueRow) {
   const { day, month, year } =
@@ -41,21 +44,37 @@ function CalendarMonthEvent({
   title: string;
 }) {
   return (
-    <div
-      onMouseEnter={action(() => {
-        const childrenHighlights = Object.values(event.highlight.data).flatMap(
-          (columnData) => (isValueRowHighlight(columnData) ? [columnData] : [])
-        );
-        hoverHighlightsMobx.replace(
-          childrenHighlights.length > 0 ? childrenHighlights : [event.highlight]
-        );
-      })}
-      onMouseLeave={action(() => {
-        hoverHighlightsMobx.clear();
-      })}
-    >
-      {title}
-    </div>
+    <HoverCardPrimitive.Root openDelay={300}>
+      <HoverCardPrimitive.Trigger asChild={true}>
+        <div
+          onMouseEnter={action(() => {
+            const childrenHighlights = Object.values(
+              event.highlight.data
+            ).flatMap((columnData) =>
+              isValueRowHighlight(columnData) ? [columnData] : []
+            );
+            hoverHighlightsMobx.replace(
+              childrenHighlights.length > 0
+                ? childrenHighlights
+                : [event.highlight]
+            );
+          })}
+          onMouseLeave={action(() => {
+            hoverHighlightsMobx.clear();
+          })}
+        >
+          {title}
+        </div>
+      </HoverCardPrimitive.Trigger>
+      <HoverCardPrimitive.Content
+        side="top"
+        sideOffset={2}
+        className="bg-white font-serif p-4 rounded-lg shadow-lg"
+      >
+        <HoverCardPrimitive.Arrow className="fill-white" />
+        <HighlightHoverCardContent highlight={event.highlight} />
+      </HoverCardPrimitive.Content>
+    </HoverCardPrimitive.Root>
   );
 }
 

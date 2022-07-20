@@ -51,7 +51,7 @@ function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
   }
 
   if (isValueRowHighlight(value)) {
-    const text = getTextForHighlight(value);
+    const text = doc.sliceString(value.span[0], value.span[1]);
 
     return (
       <HighlightHoverCard highlight={value}>

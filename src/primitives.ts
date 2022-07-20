@@ -284,19 +284,15 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "name",
         formula:
-          'MatchHighlight(DataFromDoc("all ingredients", "allIngredients", "name"))',
-      },
-      {
-        name: "matched",
-        formula: "name.data.matchedHighlight",
-      },
-      {
-        name: "normalized",
-        formula: "NormalizeFoodName(name)",
+          'MatchString(DataFromDoc("all ingredients", "allIngredients", "name"))',
       },
       {
         name: "quantity",
         formula: 'PrevOfType(name, "quantity", 20)',
+      },
+      {
+        name: "normalized",
+        formula: "NormalizeFoodName(name)",
       },
     ],
   },
@@ -306,11 +302,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     columns: [
       {
         name: "name",
-        formula: 'SplitLines(",")',
-      },
-      {
-        name: "officialName",
-        formula: 'First(Filter(MatchRegexp("USDA: (.*),?"), SameLine(name)))',
+        formula: "SplitLines()",
       },
     ],
   },

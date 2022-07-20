@@ -17,7 +17,7 @@ import {
   parseInt,
 } from "lodash";
 import { getComputedSheetValue, getHighlightsUntilSheet } from "./compute";
-import { doSpansOverlap, getTextForHighlight } from "./utils";
+import { doSpansOverlap } from "./utils";
 import { OFFICIAL_FOODS } from "./data/officialFoods";
 // @ts-ignore
 import FuzzySet from "fuzzyset";
@@ -47,22 +47,17 @@ function evaluateFormula(
   scope: Scope
 ) {
   const API = {
-    SplitLines: (until?: string): Highlight[] => {
+    SplitLines: (): Highlight[] => {
       // todo: there's probably a more elegant way to get lines out of CM
       const lines = textDocument.text.sliceString(0).split("\n");
       let highlights: Highlight[] = [];
 
       let index = 0;
       for (const line of lines) {
-        const indexOfDelimiter = until ? line.indexOf(until) : -1;
-        const endOfSpan =
-          indexOfDelimiter !== -1
-            ? index + indexOfDelimiter
-            : index + line.length;
         highlights.push({
           documentId: textDocument.id,
           sheetConfigId: sheetConfig.id,
-          span: [index, endOfSpan],
+          span: [index, index + line.length],
           data: {},
         });
         index += line.length + 1;
@@ -103,10 +98,7 @@ function evaluateFormula(
     },
 
     // this method is not curried because it has an optional isCaseSensitive parameter
-    MatchString: (
-      values: string | string[] | Highlight[],
-      isCaseSensitive: boolean
-    ) => {
+    MatchString: (values: string | string[], isCaseSensitive: boolean) => {
       if (!isArray(values)) {
         values = [values];
       }
@@ -114,46 +106,20 @@ function evaluateFormula(
       let highlights: Highlight[] = [];
 
       for (const value of values) {
-        const text = isString(value) ? value : getTextForHighlight(value);
-        const newHighlights = API.MatchRegexp(
-          `\\b${text}s?\\b`,
-          isCaseSensitive === false ? "" : "i"
-        ).filter(
-          (newHighlight) =>
-            !highlights.some((old) =>
-              doSpansOverlap(newHighlight.span, old.span)
-            )
-        );
-
-        highlights = highlights.concat(newHighlights);
-      }
-
-      return highlights;
-    },
-
-    MatchHighlight: (values: Highlight[], isCaseSensitive: boolean) => {
-      let highlights: Highlight[] = [];
-
-      for (const value of values) {
-        const newHighlights = API.MatchRegexp(
-          `\\b${getTextForHighlight(value)}s?\\b`,
-          isCaseSensitive === false ? "" : "i"
-        )
-          .filter(
+        if (isString(value)) {
+          const newHighlights = API.MatchRegexp(
+            `\\b${value}s?\\b`,
+            isCaseSensitive === false ? "" : "i"
+          ).filter(
             (newHighlight) =>
               !highlights.some((old) =>
                 doSpansOverlap(newHighlight.span, old.span)
               )
-          )
-          .map((newHighlight) => ({
-            ...newHighlight,
-            data: { ...newHighlight.data, matchedHighlight: value },
-          }));
+          );
 
-        highlights = highlights.concat(newHighlights);
+          highlights = highlights.concat(newHighlights);
+        }
       }
-
-      console.log({ highlights });
 
       return highlights;
     },
@@ -319,7 +285,7 @@ function evaluateFormula(
       docName: string,
       sheetConfigName: string,
       columnName: string
-    ): any[] => {
+    ): string[] => {
       const doc = [...textDocumentsMobx.values()].find(
         (td) => td.name === docName
       );
@@ -333,10 +299,14 @@ function evaluateFormula(
       if (!sheetConfig) {
         return [];
       }
-      const result = getComputedSheetValue(doc.id, sheetConfig.id)
+      return getComputedSheetValue(doc.id, sheetConfig.id)
         .get()
-        .map((r) => r.data[columnName]);
-      return result;
+        .flatMap((r) => {
+          if ("span" in r && r.span !== undefined) {
+            return [doc.text.sliceString(r.span[0], r.span[1])];
+          }
+          return [];
+        });
     },
 
     // TODO: can we make formulas take in strings instead of highlights directly?

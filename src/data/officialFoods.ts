@@ -1,5 +1,5 @@
 // @ts-ignore
-import officialFoods from "./officialFoodIdsFiltered.csv";
+import officialFoods from "./officialFoodIds.csv";
 // @ts-ignore
 import nutrients from "./nutrient.csv";
 // @ts-ignore

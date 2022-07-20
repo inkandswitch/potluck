@@ -11,16 +11,16 @@ export const HighlightHoverCardContent = observer(
     if (textDocument === undefined) {
       return null;
     }
-    const highlightLineNumber = textDocument.text.lineAt(
-      highlight.span[1]
+    const highlightLineStart = textDocument.text.lineAt(
+      highlight.span[0]
     ).number;
+    const startPosOfHighlightLine =
+      textDocument.text.line(highlightLineStart).from;
+    const highlightLineEnd = textDocument.text.lineAt(highlight.span[1]).number;
     const extraContextText = textDocument.text.sliceString(
       highlight.span[1],
       textDocument.text.line(
-        Math.min(
-          highlightLineNumber + extraLinesToShow,
-          textDocument.text.lines
-        )
+        Math.min(highlightLineEnd + extraLinesToShow, textDocument.text.lines)
       ).to
     );
     return (
@@ -29,13 +29,21 @@ export const HighlightHoverCardContent = observer(
           {highlight.documentId}[{highlight.span[0]}-{highlight.span[1]}]
         </div>
         <div className="whitespace-pre-wrap">
+          {highlight.span[0] > startPosOfHighlightLine ? (
+            <span>
+              {textDocument.text.sliceString(
+                startPosOfHighlightLine,
+                highlight.span[0]
+              )}
+            </span>
+          ) : null}
           <span className="bg-yellow-100">
             {getTextForHighlight(highlight)}
           </span>
           {extraContextText.length > 0 ? <span>{extraContextText}</span> : null}
         </div>
         <div>
-          {highlightLineNumber + extraLinesToShow < textDocument.text.lines ? (
+          {highlightLineEnd + extraLinesToShow < textDocument.text.lines ? (
             <button
               onClick={() => {
                 setExtraLinesToShow((lines) => lines + 3);

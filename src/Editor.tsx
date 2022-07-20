@@ -130,6 +130,7 @@ export const Editor = observer(
           EditorView.theme({
             "&": {
               height: "100%",
+              padding: "4px",
             },
           }),
           EditorView.lineWrapping,
@@ -183,7 +184,7 @@ export const Editor = observer(
 
     return (
       <div
-        className="text-lg h-[800px] w-[600px] bg-white border-black border-2 rounded-lg overflow-auto flex-shrink-0"
+        className="text-lg h-full bg-white border-black border-2 rounded-lg overflow-auto"
         ref={editorRef}
       />
     );

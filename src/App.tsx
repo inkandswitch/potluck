@@ -70,7 +70,7 @@ const TextDocumentName = observer(
           onChange={action((e) => {
             textDocument.name = e.target.value;
           })}
-          className="text-xl border-b border-gray-200 w-[500px] mb-2 outline-none focus:border-gray-400"
+          className="text-xl border-b border-gray-200 w-full mb-4 pb-1 outline-none focus:border-gray-400"
         />
       </div>
     );
@@ -80,36 +80,12 @@ const TextDocumentName = observer(
 const TextDocumentComponent = observer(
   ({ textDocumentId }: { textDocumentId: string }) => {
     const textDocument = textDocumentsMobx.get(textDocumentId)!;
-    const documentValueRows = getComputedDocumentValues(textDocumentId).get();
 
     return (
-      <div className="px-4">
+      <div className="grow flex flex-col overflow-hidden">
         <TextDocumentName textDocument={textDocument} />
-        <div className="flex gap-4 items-start">
+        <div className="grow pb-4 overflow-hidden">
           <Editor textDocumentId={textDocumentId} />
-
-          <div className="grow">
-            <div className="flex flex-col gap-4">
-              {textDocument.sheets.map((sheet) => {
-                return (
-                  <SheetComponent
-                    id={sheet.id}
-                    textDocument={textDocument}
-                    sheetConfigId={sheet.configId}
-                    key={sheet.id}
-                    rows={documentValueRows[sheet.configId]}
-                  />
-                );
-              })}
-            </div>
-            <div
-              className={classNames("mb-8", {
-                "mt-8": textDocument.sheets.length > 0,
-              })}
-            >
-              <AddNewDocumentSheet textDocument={textDocument} />
-            </div>
-          </div>
         </div>
       </div>
     );
@@ -118,7 +94,7 @@ const TextDocumentComponent = observer(
 
 const TextDocumentSelector = observer(() => {
   return (
-    <div className="p-4">
+    <div className="pt-4 pb-2">
       <select
         onChange={action((e) => {
           let newDocumentId = e.target.value;
@@ -170,15 +146,51 @@ const TextDocumentSelector = observer(() => {
   );
 });
 
+const DocumentSheets = observer(
+  ({ textDocumentId }: { textDocumentId: string }) => {
+    const textDocument = textDocumentsMobx.get(textDocumentId)!;
+    const documentValueRows = getComputedDocumentValues(textDocumentId).get();
+    return (
+      <>
+        <div className="flex flex-col gap-4">
+          {textDocument.sheets.map((sheet) => {
+            return (
+              <SheetComponent
+                id={sheet.id}
+                textDocument={textDocument}
+                sheetConfigId={sheet.configId}
+                key={sheet.id}
+                rows={documentValueRows[sheet.configId]}
+              />
+            );
+          })}
+        </div>
+        <div
+          className={classNames("mb-8", {
+            "mt-8": textDocument.sheets.length > 0,
+          })}
+        >
+          <AddNewDocumentSheet textDocument={textDocument} />
+        </div>
+      </>
+    );
+  }
+);
+
 const App = observer(() => {
   const textDocumentId = selectedTextDocumentIdBox.get();
   return (
-    <div>
-      <TextDocumentSelector />
-      <TextDocumentComponent
-        textDocumentId={textDocumentId}
-        key={textDocumentId}
-      />
+    <div className="h-screen flex pl-4">
+      <div className="w-1/2 max-w-lg flex flex-col">
+        <TextDocumentSelector />
+        <TextDocumentComponent
+          textDocumentId={textDocumentId}
+          key={textDocumentId}
+        />
+      </div>
+      <div className="grow h-full overflow-auto pl-8 pr-6 pt-24">
+        <DocumentSheets textDocumentId={textDocumentId} />
+      </div>
     </div>
   );
 });

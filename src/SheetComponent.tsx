@@ -20,7 +20,12 @@ import { doSpansOverlap, isValueRowHighlight } from "./utils";
 import { FormulaColumn } from "./formulas";
 import { SheetCalendar } from "./SheetCalendar";
 import { HighlightHoverCard } from "./HighlightHoverCard";
-import { CalendarIcon, TableIcon, CookieIcon } from "@radix-ui/react-icons";
+import {
+  CalendarIcon,
+  TableIcon,
+  CookieIcon,
+  SectionIcon,
+} from "@radix-ui/react-icons";
 import { NutritionLabel } from "./NutritionLabel";
 
 let i = 1;
@@ -302,13 +307,69 @@ export const SheetComponent = observer(
         {isExpanded && (
           <>
             <div className="flex justify-between">
-              <div className="text-sm text-gray-500">
-                Highlighting in:{" "}
-                {textDocumentSheet.highlightSearchRange === undefined
-                  ? "whole document"
-                  : `chars ${textDocumentSheet.highlightSearchRange[0]} to ${textDocumentSheet.highlightSearchRange[1]}`}
+              <div></div>
+              <div className="flex gap-2 pr-2">
                 <button
-                  className="ml-4"
+                  onClick={() => {
+                    setSheetView(SheetView.Table);
+                  }}
+                  className={classNames(
+                    "transition text-sm",
+                    sheetView !== SheetView.Table
+                      ? "opacity-40 hover:opacity-100"
+                      : undefined
+                  )}
+                >
+                  <TableIcon className="inline" /> Table
+                </button>
+                {sheetConfig.columns.some(
+                  (column) => column.name === "date"
+                ) ? (
+                  <button
+                    onClick={() => {
+                      setSheetView(SheetView.Calendar);
+                    }}
+                    className={classNames(
+                      "transition text-sm",
+                      sheetView !== SheetView.Calendar
+                        ? "opacity-40 hover:opacity-100"
+                        : undefined
+                    )}
+                  >
+                    <CalendarIcon className="inline" /> Calendar
+                  </button>
+                ) : null}
+                {sheetConfig.name === "ingredients" ? (
+                  <button
+                    onClick={() => {
+                      setSheetView(SheetView.NutritionLabel);
+                    }}
+                    className={classNames(
+                      "transition text-sm",
+                      sheetView !== SheetView.NutritionLabel
+                        ? "opacity-40 hover:opacity-100"
+                        : undefined
+                    )}
+                  >
+                    <CookieIcon className="inline" /> Nutrition
+                  </button>
+                ) : null}
+              </div>
+            </div>
+            <SheetViewComponent
+              textDocument={textDocument}
+              sheetConfig={sheetConfig}
+              columns={columns}
+              rows={rows}
+            />
+            <div className="text-sm text-gray-500">
+              <SectionIcon className="inline" /> Highlighting{" "}
+              {textDocumentSheet.highlightSearchRange === undefined
+                ? "whole document"
+                : "limited range"}
+              {textDocumentSheet.highlightSearchRange !== undefined && (
+                <button
+                  className="ml-4 underline"
                   onClick={() =>
                     runInAction(() => {
                       textDocumentSheet.highlightSearchRange = undefined;
@@ -317,8 +378,10 @@ export const SheetComponent = observer(
                 >
                   Clear
                 </button>
+              )}
+              {textDocumentSheet.highlightSearchRange === undefined && (
                 <button
-                  className="ml-4"
+                  className="ml-4 underline"
                   onClick={() =>
                     runInAction(() => {
                       const editorState = textEditorStateMobx.get();
@@ -330,63 +393,13 @@ export const SheetComponent = observer(
                     })
                   }
                 >
-                  Update
-                </button>
-              </div>
-              <div className="flex gap-2 pr-2">
-                <button
-                  onClick={() => {
-                    setSheetView(SheetView.Table);
-                  }}
-                  className={classNames(
-                    "transition",
-                    sheetView !== SheetView.Table
-                      ? "opacity-40 hover:opacity-100"
-                      : undefined
+                  {textEditorStateMobx.get().selection.main.from !==
+                    textEditorStateMobx.get().selection.main.to && (
+                    <span>Limit range to selection</span>
                   )}
-                >
-                  <TableIcon />
                 </button>
-                {sheetConfig.columns.some(
-                  (column) => column.name === "date"
-                ) ? (
-                  <button
-                    onClick={() => {
-                      setSheetView(SheetView.Calendar);
-                    }}
-                    className={classNames(
-                      "transition",
-                      sheetView !== SheetView.Calendar
-                        ? "opacity-40 hover:opacity-100"
-                        : undefined
-                    )}
-                  >
-                    <CalendarIcon />
-                  </button>
-                ) : null}
-                {sheetConfig.name === "ingredients" ? (
-                  <button
-                    onClick={() => {
-                      setSheetView(SheetView.NutritionLabel);
-                    }}
-                    className={classNames(
-                      "transition",
-                      sheetView !== SheetView.NutritionLabel
-                        ? "opacity-40 hover:opacity-100"
-                        : undefined
-                    )}
-                  >
-                    <CookieIcon />
-                  </button>
-                ) : null}
-              </div>
+              )}
             </div>
-            <SheetViewComponent
-              textDocument={textDocument}
-              sheetConfig={sheetConfig}
-              columns={columns}
-              rows={rows}
-            />
           </>
         )}
       </div>

@@ -152,7 +152,7 @@ const DocumentSheets = observer(
     const documentValueRows = getComputedDocumentValues(textDocumentId).get();
     return (
       <>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-6">
           {textDocument.sheets.map((sheet) => {
             return (
               <SheetComponent

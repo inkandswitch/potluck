@@ -161,17 +161,19 @@ export const SheetTable = observer(
           </div>
         )}
 
-        <table className="max-h-[200px] overflow-auto">
+        <div className="max-h-[250px] overflow-auto relative w-full flex border border-gray-200 ">
+
+        <table className="flex-1">
           <thead>
-            <tr>
+            <tr className="sticky top-0 border" style={{outline: "1px solid rgb(229 231 235)"}}>
               {columns.map((column, index) => {
                 return (
                   <th
                     key={index}
-                    className={`text-left font-normal px-1 bg-gray-100 border ${
+                    className={`text-left font-normal px-1 border ${
                       selectedFormulaIndex === index
-                        ? "border-blue-300"
-                        : "border-gray-200"
+                        ? "bg-blue-100"
+                        : "bg-gray-100"
                     }`}
                     onClick={() => setSelectedFormulaIndex(index)}
                   >
@@ -179,7 +181,7 @@ export const SheetTable = observer(
                   </th>
                 );
               })}
-              <th className="w-[30px]">
+              <th className="w-[30px] bg-white">
                 <button
                   className="icon icon-plus bg-gray-500"
                   onClick={() => addColumn()}
@@ -188,7 +190,7 @@ export const SheetTable = observer(
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, index) => (
+            {rows.map((row, rowIndex) => (
               <tr
                 onMouseEnter={action(() => {
                   const childrenHighlights = Object.values(row.data).flatMap(
@@ -210,12 +212,13 @@ export const SheetTable = observer(
                   "hover:bg-blue-50",
                   hoverHighlights.includes(row) ? "bg-blue-100" : undefined
                 )}
-                key={index}
+                key={rowIndex}
               >
                 {columns.map((column, index) => {
                   const value: any = row.data[column.name];
+
                   return (
-                    <td className="border border-gray-200 px-1" key={index}>
+                    <td className={`border border-gray-200 px-1 ${(rowIndex !== (rows.length - 1)) ? 'border-l-0' : 'border-l-0 border-b-0'}`} key={index}>
                       <ValueDisplay value={value} doc={textDocument.text} />
                     </td>
                   );
@@ -224,6 +227,7 @@ export const SheetTable = observer(
             ))}
           </tbody>
         </table>
+        </div>
       </>
     );
   }

@@ -10,12 +10,12 @@ import {
 } from "./primitives";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
-import { nanoid } from "nanoid";
 import { SheetComponent } from "./SheetComponent";
 import { action, runInAction } from "mobx";
 import { Text } from "@codemirror/state";
 import classNames from "classnames";
 import { getComputedDocumentValues } from "./compute";
+import { generateNanoid } from "./utils";
 
 const NEW_OPTION_ID = "new";
 const AddNewDocumentSheet = observer(
@@ -31,7 +31,7 @@ const AddNewDocumentSheet = observer(
             const sheetConfig = addSheetConfig();
             sheetConfigId = sheetConfig.id;
           }
-          const textDocumentSheetId = nanoid();
+          const textDocumentSheetId = generateNanoid();
           textDocument.sheets.push({
             id: textDocumentSheetId,
             configId: sheetConfigId,
@@ -99,7 +99,7 @@ const TextDocumentSelector = observer(() => {
         onChange={action((e) => {
           let newDocumentId = e.target.value;
           if (newDocumentId === NEW_OPTION_ID) {
-            newDocumentId = nanoid();
+            newDocumentId = generateNanoid();
             textDocumentsMobx.set(newDocumentId, {
               id: newDocumentId,
               name: "Untitled",
@@ -126,7 +126,7 @@ const TextDocumentSelector = observer(() => {
             const currentDoc = textDocumentsMobx.get(
               selectedTextDocumentIdBox.get()
             )!;
-            const newDocumentId = nanoid();
+            const newDocumentId = generateNanoid();
             textDocumentsMobx.set(newDocumentId, {
               id: newDocumentId,
               name: `Copy of ${currentDoc.name}`,

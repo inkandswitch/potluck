@@ -14,6 +14,7 @@
     "@radix-ui/react-hover-card": "^0.1.5",
     "@radix-ui/react-icons": "^1.1.1",
     "@rollup/plugin-dsv": "^2.0.3",
+    "@types/nanoid-dictionary": "^4.2.0",
     "classnames": "^2.3.1",
     "codemirror": "^6.0.1",
     "date-fns": "^2.28.0",
@@ -22,6 +23,7 @@
     "mobx": "^6.6.1",
     "mobx-react-lite": "^3.4.0",
     "nanoid": "^4.0.0",
+    "nanoid-dictionary": "^4.3.0",
     "react": "^18.0.0",
     "react-big-calendar": "^1.5.0",
     "react-dom": "^18.0.0"

@@ -1,8 +1,8 @@
-import { computed, observable, runInAction } from "mobx";
+import { observable, runInAction } from "mobx";
 import { EditorState, Text } from "@codemirror/state";
-import { nanoid } from "nanoid";
 import { FormulaColumn } from "./formulas";
 import { ALL_INGREDIENTS_TEXT } from "./data/all_ingredients";
+import { generateNanoid } from "./utils";
 
 export type Span = [from: number, to: number];
 
@@ -130,16 +130,16 @@ Serve the grilled pork and onions with the fresh sesame kimchi and rice on the s
 export const WORKOUT_DOCUMENT_ID = "workout";
 export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork";
 export const ALL_INGREDIENTS_DOCUMENT_ID = "all ingredients";
-export const WORKOUT_SHEET_CONFIG_ID = nanoid();
-export const NUMBER_SHEET_CONFIG_ID = nanoid();
-export const QUANTITY_SHEET_CONFIG_ID = nanoid();
+export const WORKOUT_SHEET_CONFIG_ID = generateNanoid();
+export const NUMBER_SHEET_CONFIG_ID = generateNanoid();
+export const QUANTITY_SHEET_CONFIG_ID = generateNanoid();
 export const ICE_CREAM_DOCUMENT_ID = "ice cream";
-export const INGREDIENTS_SHEET_CONFIG_ID = nanoid();
-export const ALL_INGREDIENTS_SHEET_CONFIG_ID = nanoid();
-export const DATE_SHEET_CONFIG_ID = nanoid();
-export const DATE_SHEET_IN_WORKOUT_ID = nanoid();
-export const WORKOUT_SHEET_IN_WORKOUT_ID = nanoid();
-export const INGREDIENTS_SHEET_IN_GOCHUJANG_ID = nanoid();
+export const INGREDIENTS_SHEET_CONFIG_ID = generateNanoid();
+export const ALL_INGREDIENTS_SHEET_CONFIG_ID = generateNanoid();
+export const DATE_SHEET_CONFIG_ID = generateNanoid();
+export const DATE_SHEET_IN_WORKOUT_ID = generateNanoid();
+export const WORKOUT_SHEET_IN_WORKOUT_ID = generateNanoid();
+export const INGREDIENTS_SHEET_IN_GOCHUJANG_ID = generateNanoid();
 
 export const textDocumentsMobx = observable.map<string, TextDocument>({
   [WORKOUT_DOCUMENT_ID]: {
@@ -148,7 +148,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
     text: Text.of(WORKOUT_TEXT.split("\n")),
     sheets: [
       {
-        id: nanoid(),
+        id: generateNanoid(),
         configId: NUMBER_SHEET_CONFIG_ID,
       },
       {
@@ -167,16 +167,16 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
     text: Text.of(ICE_CREAM_TEXT.split("\n")),
     sheets: [
       {
-        id: nanoid(),
+        id: generateNanoid(),
         configId: INGREDIENTS_SHEET_CONFIG_ID,
         highlightSearchRange: [12, 117],
       },
       {
-        id: nanoid(),
+        id: generateNanoid(),
         configId: NUMBER_SHEET_CONFIG_ID,
       },
       {
-        id: nanoid(),
+        id: generateNanoid(),
         configId: QUANTITY_SHEET_CONFIG_ID,
       },
     ],
@@ -192,11 +192,11 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
         highlightSearchRange: [662, 1430],
       },
       {
-        id: nanoid(),
+        id: generateNanoid(),
         configId: NUMBER_SHEET_CONFIG_ID,
       },
       {
-        id: nanoid(),
+        id: generateNanoid(),
         configId: QUANTITY_SHEET_CONFIG_ID,
       },
     ],
@@ -207,7 +207,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
     text: Text.of(ALL_INGREDIENTS_TEXT.split("\n")),
     sheets: [
       {
-        id: nanoid(),
+        id: generateNanoid(),
         configId: ALL_INGREDIENTS_SHEET_CONFIG_ID,
       },
     ],
@@ -309,7 +309,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
 });
 
 export function addSheetConfig() {
-  const id = nanoid();
+  const id = generateNanoid();
   const sheetConfig = {
     id,
     name: `sheet${nextSheetIndex++}`,

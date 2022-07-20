@@ -181,7 +181,7 @@ const App = observer(() => {
   const textDocumentId = selectedTextDocumentIdBox.get();
   return (
     <div className="h-screen flex pl-4">
-      <div className="w-1/2 max-w-lg flex flex-col">
+      <div className="w-1/2 max-w-lg flex flex-col flex-shrink-0">
         <TextDocumentSelector />
         <TextDocumentComponent
           textDocumentId={textDocumentId}

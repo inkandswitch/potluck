@@ -16,12 +16,20 @@ import {
   TextDocument,
   textEditorStateMobx,
 } from "./primitives";
-import { doSpansOverlap, isValueRowHighlight } from "./utils";
+import {
+  doSpansOverlap,
+  getTextForHighlight,
+  isNumericish,
+  isValueRowHighlight,
+} from "./utils";
 import { FormulaColumn } from "./formulas";
 import { SheetCalendar } from "./SheetCalendar";
 import { HighlightHoverCard } from "./HighlightHoverCard";
 import {
+  ArrowDownIcon,
+  ArrowUpIcon,
   CalendarIcon,
+  PlusIcon,
   TableIcon,
   CookieIcon,
   SectionIcon,
@@ -109,6 +117,56 @@ const textEditorSelectionSpanComputed = computed<Span>(() => {
   return [selectionRange.from, selectionRange.to] as Span;
 });
 
+enum SortMethod {
+  Date,
+  Alphabetical,
+  Numeric,
+}
+
+function compareColumnValues(
+  a: SheetValueRow,
+  b: SheetValueRow,
+  columnName: string,
+  sortMethod: SortMethod,
+  direction: "asc" | "desc"
+) {
+  const aValue = isValueRowHighlight(a.data[columnName])
+    ? getTextForHighlight(a.data[columnName])
+    : a.data[columnName];
+  const bValue = isValueRowHighlight(b.data[columnName])
+    ? getTextForHighlight(b.data[columnName])
+    : b.data[columnName];
+  let rv = 0;
+  if (aValue === undefined) {
+    rv = bValue === undefined ? 0 : 1;
+  } else if (bValue === undefined) {
+    rv = -1;
+  } else {
+    switch (sortMethod) {
+      case SortMethod.Date: {
+        rv = new Date(aValue).getTime() - new Date(bValue).getTime();
+        break;
+      }
+      case SortMethod.Numeric: {
+        rv = parseFloat(aValue) - parseFloat(bValue);
+        break;
+      }
+      case SortMethod.Alphabetical: {
+        rv = String(aValue).localeCompare(bValue);
+        break;
+      }
+    }
+  }
+  if (direction === "desc") {
+    rv = -rv;
+  }
+  return rv === 0
+    ? isValueRowHighlight(a) && isValueRowHighlight(b)
+      ? a.span[0] - b.span[0]
+      : 0
+    : rv;
+}
+
 export const SheetTable = observer(
   ({
     textDocument,
@@ -121,6 +179,9 @@ export const SheetTable = observer(
     columns: FormulaColumn[];
     rows: SheetValueRow[];
   }) => {
+    const [sortBy, setSortBy] = useState<
+      { columnName: string; direction: "asc" | "desc" } | undefined
+    >(undefined);
     const [selectedFormulaIndex, setSelectedFormulaIndex] = useState<
       number | undefined
     >(undefined);
@@ -153,6 +214,24 @@ export const SheetTable = observer(
         index === changedIndex ? { ...column, name } : column
       );
     });
+
+    let sortedRows = rows;
+    if (sortedRows.length > 0 && sortBy !== undefined) {
+      const { columnName, direction } = sortBy;
+      const firstRow = sortedRows[0];
+      const firstRowColumnValue = isValueRowHighlight(firstRow.data[columnName])
+        ? getTextForHighlight(firstRow.data[columnName])
+        : firstRow.data[columnName];
+      const sortMethod =
+        columnName === "date"
+          ? SortMethod.Date
+          : isNumericish(firstRowColumnValue)
+          ? SortMethod.Numeric
+          : SortMethod.Alphabetical;
+      sortedRows = [...rows].sort((a, b) =>
+        compareColumnValues(a, b, columnName, sortMethod, direction)
+      );
+    }
 
     return (
       <>
@@ -194,20 +273,74 @@ export const SheetTable = observer(
                       }`}
                       onClick={() => setSelectedFormulaIndex(index)}
                     >
-                      {column.name}
+                      <div className="flex justify-between">
+                        {column.name}
+                        <div className="flex">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (
+                                sortBy?.columnName === column.name &&
+                                sortBy.direction === "asc"
+                              ) {
+                                setSortBy(undefined);
+                              } else {
+                                setSortBy({
+                                  columnName: column.name,
+                                  direction: "asc",
+                                });
+                              }
+                            }}
+                            className={classNames(
+                              sortBy?.columnName === column.name &&
+                                sortBy.direction === "asc"
+                                ? "opacity-100"
+                                : "opacity-20 hover:opacity-60"
+                            )}
+                          >
+                            <ArrowDownIcon />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (
+                                sortBy?.columnName === column.name &&
+                                sortBy.direction === "desc"
+                              ) {
+                                setSortBy(undefined);
+                              } else {
+                                setSortBy({
+                                  columnName: column.name,
+                                  direction: "desc",
+                                });
+                              }
+                            }}
+                            className={classNames(
+                              sortBy?.columnName === column.name &&
+                                sortBy.direction === "desc"
+                                ? "opacity-100"
+                                : "opacity-20 hover:opacity-60"
+                            )}
+                          >
+                            <ArrowUpIcon />
+                          </button>
+                        </div>
+                      </div>
                     </th>
                   );
                 })}
-                <th className="w-[30px] bg-white">
+                <th className="bg-white w-[28px]">
                   <button
-                    className="icon icon-plus bg-gray-500"
                     onClick={() => addColumn()}
-                  />
+                    className="flex h-[25px] items-center justify-center w-full opacity-50 hover:opacity-100"
+                  >
+                    <PlusIcon />
+                  </button>
                 </th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, rowIndex) => (
+              {sortedRows.map((row, rowIndex) => (
                 <tr
                   onMouseEnter={action(() => {
                     const childrenHighlights = Object.values(row.data).flatMap(

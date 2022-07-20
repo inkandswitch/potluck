@@ -30,3 +30,10 @@ export function isValueRowHighlight(valueRow: any): valueRow is Highlight {
     valueRow.span !== undefined
   );
 }
+
+export function isNumericish(value: any): boolean {
+  return (
+    typeof value === "number" ||
+    (typeof value === "string" && /^([\d\.])+$/.test(value))
+  );
+}

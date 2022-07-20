@@ -2,6 +2,7 @@ import { Editor } from "./Editor";
 import {
   addSheetConfig,
   getSheetConfigsOfTextDocument,
+  isSheetExpandedMobx,
   selectedTextDocumentIdBox,
   sheetConfigsMobx,
   TextDocument,
@@ -23,19 +24,21 @@ const AddNewDocumentSheet = observer(
 
     return (
       <form
-        onSubmit={(e) => {
+        onSubmit={action((e) => {
           e.preventDefault();
           let sheetConfigId = sheetConfigSelectRef.current!.value;
           if (sheetConfigId === NEW_OPTION_ID) {
             const sheetConfig = addSheetConfig();
             sheetConfigId = sheetConfig.id;
           }
+          const textDocumentSheetId = nanoid();
           textDocument.sheets.push({
-            id: nanoid(),
+            id: textDocumentSheetId,
             configId: sheetConfigId,
           });
           sheetConfigSelectRef.current!.value = NEW_OPTION_ID;
-        }}
+          isSheetExpandedMobx.set(textDocumentSheetId, true);
+        })}
         className="flex gap-4"
       >
         <select

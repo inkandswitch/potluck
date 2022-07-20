@@ -146,7 +146,7 @@ export const NutritionLabel = observer(({ rows }: SheetViewProps) => {
       (prev, food) => ({
         calories: prev.calories + food.calories,
         fat: prev.fat + food.fat,
-        protein: prev.fat + food.protein,
+        protein: prev.protein + food.protein,
       }),
       { calories: 0, fat: 0, protein: 0 }
     );
@@ -159,12 +159,19 @@ export const NutritionLabel = observer(({ rows }: SheetViewProps) => {
   };
 
   return (
-    <div>
-      <div className="text-md font-bold">Nutrition Facts</div>
+    <div className="border-black border-4 p-2">
+      <div className="text-xl font-extrabold border-b-2">Nutrition Facts</div>
       <div className="text-sm text-gray-400">For total recipe</div>
-      <div>Calories: {totals.calories} kcal</div>
-      <div>Fat: {totals.fat} g</div>
-      <div>Protein: {totals.protein} g</div>
+      <div className="border-b-8 border-black"></div>
+      <div className="text-lg font-bold border-b-4 border-black">
+        Calories <span className="float-right text-xl">{totals.calories}</span>
+      </div>
+      <div className="border-b-2">
+        <span className="font-bold">Total Fat</span> {totals.fat} g
+      </div>
+      <div>
+        <span className="font-bold">Total Protein</span> {totals.protein} g
+      </div>
     </div>
   );
 });

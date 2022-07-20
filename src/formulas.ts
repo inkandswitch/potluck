@@ -107,12 +107,17 @@ function evaluateFormula(
 
       for (const value of values) {
         if (isString(value)) {
-          highlights = highlights.concat(
-            API.MatchRegexp(
-              `\\b${value}s?\\b`,
-              isCaseSensitive === false ? "" : "i"
-            )
+          const newHighlights = API.MatchRegexp(
+            `\\b${value}s?\\b`,
+            isCaseSensitive === false ? "" : "i"
+          ).filter(
+            (newHighlight) =>
+              !highlights.some((old) =>
+                doSpansOverlap(newHighlight.span, old.span)
+              )
           );
+
+          highlights = highlights.concat(newHighlights);
         }
       }
 
@@ -305,12 +310,15 @@ function evaluateFormula(
     },
 
     // TODO: can we make formulas take in strings instead of highlights directly?
-    NormalizeFoodName: (foodName: Highlight) => {
+    NormalizeFoodName: (foodName: Highlight): string | undefined => {
       const text = textDocument.text.sliceString(
         foodName.span[0],
         foodName.span[1]
       );
       const fuzzySetResult = foodNameMatchSet.get(text);
+      if (fuzzySetResult.length === 0) {
+        return undefined;
+      }
       const result = fuzzySetResult[0];
       const normalizedName = result[1];
       // TODO: we often get back multiple options here;

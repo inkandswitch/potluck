@@ -75,7 +75,7 @@ Black pepper
 Black tea
 Blackberries
 Blueberries
-Bok choy
+Bok choy, USDA: Cabbage, Chinese, pak choi
 Boysenberries
 Brazil nuts
 Bread
@@ -304,7 +304,7 @@ Sausages
 Scallions
 Scallops
 Seaweed
-Sesame oil
+Sesame oil, USDA: Oil, sesame
 Sesame seeds
 Shallots
 Shellfish

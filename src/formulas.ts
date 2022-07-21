@@ -16,7 +16,11 @@ import {
   sortBy,
   parseInt,
 } from "lodash";
-import { getComputedSheetValue, getHighlightsUntilSheet } from "./compute";
+import {
+  getComputedDocumentValues,
+  getComputedSheetValue,
+  getHighlightsUntilSheet,
+} from "./compute";
 import { doSpansOverlap, getTextForHighlight } from "./utils";
 import { OFFICIAL_FOODS } from "./data/officialFoods";
 // @ts-ignore
@@ -337,12 +341,26 @@ function evaluateFormula(
       return result;
     },
 
-    // TODO: can we make formulas take in strings instead of highlights directly?
     NormalizeFoodName: (foodName: Highlight): string | undefined => {
-      const text = textDocument.text.sliceString(
-        foodName.span[0],
-        foodName.span[1]
-      );
+      let text = getTextForHighlight(foodName);
+      const matchedHighlight = foodName.data.matchedHighlight as
+        | Highlight
+        | undefined;
+      if (matchedHighlight !== undefined) {
+        const computedData = getComputedDocumentValues(
+          foodName.data.matchedHighlight.documentId
+        ).get();
+        const rowForHighlight = computedData[
+          matchedHighlight.sheetConfigId
+        ].find((row) => row.data.name === matchedHighlight);
+        if (
+          rowForHighlight &&
+          rowForHighlight.data.officialName !== undefined
+        ) {
+          text = rowForHighlight.data.officialName.data.groups[0];
+        }
+      }
+
       const fuzzySetResult = foodNameMatchSet.get(text);
       if (fuzzySetResult === null) {
         return undefined;

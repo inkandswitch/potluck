@@ -309,7 +309,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "numbers",
         formula:
-          'Filter(NextValuesUntil(activity, HasType("workouts")), SameLine(activity))',
+          'Filter(NextUntil(activity, HasType("workouts")), SameLine(activity))',
       },
       {
         name: "weight",

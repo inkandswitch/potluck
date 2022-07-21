@@ -150,10 +150,10 @@ export const Editor = observer(
         dispatch(transaction) {
           view.update([transaction]);
 
-          if (transaction.docChanged) {
-            runInAction(() => {
+          runInAction(() => {
+            textEditorStateMobx.set(transaction.state);
+            if (transaction.docChanged) {
               textDocument.text = view.state.doc;
-              textEditorStateMobx.set(transaction.state);
               for (const sheet of textDocument.sheets) {
                 if (sheet.highlightSearchRange !== undefined) {
                   sheet.highlightSearchRange = [
@@ -162,8 +162,8 @@ export const Editor = observer(
                   ];
                 }
               }
-            });
-          }
+            }
+          });
         },
       });
 

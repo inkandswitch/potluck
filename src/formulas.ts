@@ -377,7 +377,7 @@ function evaluateFormula(
       return result;
     },
 
-    NormalizeFoodName: (foodName: Highlight): string | undefined => {
+    USDAFoodName: (foodName: Highlight): string | undefined => {
       let text = getTextForHighlight(foodName);
       const matchedHighlight = foodName.data.matchedHighlight as
         | Highlight

@@ -128,8 +128,38 @@ Grill the pork and onion, in batches if necessary, until nicely charred and cara
 Step 4
 Serve the grilled pork and onions with the fresh sesame kimchi and rice on the side.`;
 
+const PIZZA_TEXT = `Sheet Pan Corn Pizza With Kimchi and Hot Dogs
+
+5 Tbsp. extra-virgin olive oil, divided
+1 lb. store-bought pizza dough, room temperature
+1 14.5-oz. can crushed tomatoes
+2 tsp. sugar
+1 cup coarsely chopped drained kimchi, plus juice from jar (optional)
+Kosher salt
+8 oz. low-moisture mozzarella, grated
+1 medium green bell pepper, cut into ¼" pieces
+4 all-beef or other hot dogs, sliced into ½" coins
+2 cups corn (from about 2 ears)
+3 scallions, thinly sliced
+
+Step 1
+Coat a large rimmed baking sheet with 4 Tbsp. extra-virgin olive oil. Place 1 lb. store-bought pizza dough, room temperature, in center of baking sheet; using your fingers, gradually stretch dough outward from center until it reaches to edges and into corners of baking sheet. (If dough is too stiff or springs back, cover with an inverted baking sheet or plastic wrap and let rest 10 minutes before trying again. You may need to let dough rest 2 or 3 times.) Cover and let rise in a warm spot until slightly puffy, about 30 minutes.
+
+Step 2
+While the dough is rising, place a rack in lowest position of oven; preheat to 475°. Combine one 14.5-oz. can crushed tomatoes, 2 tsp. sugar, remaining 1 Tbsp. extra-virgin olive oil, and up to ¼ cup kimchi juice (if using) in a small saucepan. Bring to a simmer over medium heat and cook, stirring occasionally, until sauce is slightly reduced, 7–10 minutes. Remove from heat; season with salt.
+
+Step 3
+Uncover dough and scatter 8 oz. low-moisture mozzarella, grated, over, going all the way to the edges. Dollop sauce over (do not spread), then evenly top with 1 medium green bell pepper, cut into ¼" pieces, 4 all-beef or other hot dogs, sliced into ½" coins, 2 cups corn kernels (from about 2 ears), and 1 cup coarsely chopped drained kimchi.
+
+Step 4
+Bake pizza until cheese is melted and crust is golden brown on bottom and sides (lift an edge with a heatproof spatula to check), 22–28 minutes. If crust feels soft or bendy in center, loosely cover pizza with foil and continue to bake 8–10 minutes longer.
+
+Step 5
+To serve, top pizza with 3 scallions, thinly sliced; cut into squares.`;
+
 export const WORKOUT_DOCUMENT_ID = "workout";
 export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork";
+export const PIZZA_DOCUMENT_ID = generateNanoid();
 export const ALL_INGREDIENTS_DOCUMENT_ID = "all ingredients";
 export const WORKOUT_SHEET_CONFIG_ID = generateNanoid();
 export const NUMBER_SHEET_CONFIG_ID = generateNanoid();
@@ -142,6 +172,7 @@ export const DATE_SHEET_CONFIG_ID = generateNanoid();
 export const DATE_SHEET_IN_WORKOUT_ID = generateNanoid();
 export const WORKOUT_SHEET_IN_WORKOUT_ID = generateNanoid();
 export const INGREDIENTS_SHEET_IN_GOCHUJANG_ID = generateNanoid();
+export const INGREDIENTS_SHEET_IN_PIZZA_ID = generateNanoid();
 
 export const textDocumentsMobx = observable.map<string, TextDocument>({
   [WORKOUT_DOCUMENT_ID]: {
@@ -192,6 +223,25 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
         id: INGREDIENTS_SHEET_IN_GOCHUJANG_ID,
         configId: INGREDIENTS_SHEET_CONFIG_ID,
         highlightSearchRange: [662, 1430],
+      },
+      {
+        id: generateNanoid(),
+        configId: NUMBER_SHEET_CONFIG_ID,
+      },
+      {
+        id: generateNanoid(),
+        configId: QUANTITY_SHEET_CONFIG_ID,
+      },
+    ],
+  },
+  [PIZZA_DOCUMENT_ID]: {
+    id: PIZZA_DOCUMENT_ID,
+    name: "sheet pan corn kimchi pizza",
+    text: Text.of(PIZZA_TEXT.split("\n")),
+    sheets: [
+      {
+        id: INGREDIENTS_SHEET_IN_PIZZA_ID,
+        configId: INGREDIENTS_SHEET_CONFIG_ID,
       },
       {
         id: generateNanoid(),
@@ -293,8 +343,8 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
         formula: "name.data.matchedHighlight",
       },
       {
-        name: "normalized",
-        formula: "NormalizeFoodName(name)",
+        name: "USDA Name",
+        formula: "USDAFoodName(name)",
       },
       {
         name: "quantity",
@@ -312,7 +362,8 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
       {
         name: "officialName",
-        formula: 'First(Filter(MatchRegexp("USDA: (.*),?"), SameLine(name)))',
+        formula:
+          'First(Filter(MatchRegexp("USDA name: (.*),?"), SameLine(name)))',
       },
     ],
   },
@@ -355,4 +406,5 @@ export const isSheetExpandedMobx = observable.map<string, boolean>({
   [DATE_SHEET_IN_WORKOUT_ID]: true,
   [WORKOUT_SHEET_IN_WORKOUT_ID]: true,
   [INGREDIENTS_SHEET_IN_GOCHUJANG_ID]: true,
+  [INGREDIENTS_SHEET_IN_PIZZA_ID]: true,
 });

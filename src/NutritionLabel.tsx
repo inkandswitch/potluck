@@ -68,7 +68,7 @@ export const NutritionLabel = observer(({ rows }: SheetViewProps) => {
 
       return {
         food: OFFICIAL_FOODS.find(
-          (food) => food.description === row.data.normalized
+          (food) => food.description === row.data["USDA Name"]
         ),
         quantity,
       };

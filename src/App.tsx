@@ -16,9 +16,10 @@ import { Text } from "@codemirror/state";
 import classNames from "classnames";
 import { getComputedDocumentValues } from "./compute";
 import { generateNanoid } from "./utils";
-import { DirectoryPersistence } from "./persistence";
+import { DirectoryPersistence, FileDropWrapper } from "./persistence";
 import { FileIcon, FileTextIcon, PauseIcon } from "@radix-ui/react-icons";
 import * as Tooltip from "@radix-ui/react-tooltip";
+import { ToastViewport } from "@radix-ui/react-toast";
 
 const NEW_OPTION_ID = "new";
 const AddNewDocumentSheet = observer(
@@ -248,7 +249,7 @@ const PersistenceButton = observer(() => {
 const App = observer(() => {
   const textDocumentId = selectedTextDocumentIdBox.get();
   return (
-    <div className="h-screen flex pl-4">
+    <FileDropWrapper className="h-screen flex pl-4">
       <div className="w-1/2 max-w-lg flex flex-col flex-shrink-0">
         <TextDocumentSelector />
         <TextDocumentComponent
@@ -260,7 +261,8 @@ const App = observer(() => {
         <DocumentSheets textDocumentId={textDocumentId} />
       </div>
       <PersistenceButton />
-    </div>
+      <ToastViewport className="fixed top-4 right-4 flex flex-col gap-2" />
+    </FileDropWrapper>
   );
 });
 

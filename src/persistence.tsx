@@ -12,13 +12,16 @@ import {
   TextDocument,
   textDocumentsMobx,
 } from "./primitives";
+import React, { useState } from "react";
+import { generateNanoid } from "./utils";
+import * as Toast from "@radix-ui/react-toast";
 
 // we'll always start file paths with / so "/foo.txt" is a foo.txt in the root
 // directory.
 
-const TEXT_FILE_EXTENSION = "txt";
-const HIGHLIGHTER_FILE_EXTENSION = "highlighter";
-const DOCUMENT_SHEET_CONFIG_FILEPATH = "/_documentsheets";
+export const TEXT_FILE_EXTENSION = "txt";
+export const HIGHLIGHTER_FILE_EXTENSION = "highlighter";
+export const DOCUMENT_SHEET_CONFIG_FILEPATH = "/_documentsheets";
 
 function getRelativePath(fileHandle: File) {
   return fileHandle.webkitRelativePath.substring(
@@ -215,6 +218,86 @@ export class DirectoryPersistence {
       unsubscribe();
     }
   }
+}
+
+export function FileDropWrapper({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className: string;
+}) {
+  const [toastMessage, setToastMessage] = useState<
+    [newDocumentNames: string[], newSheetConfigNames: string[]] | undefined
+  >(undefined);
+  return (
+    <div
+      onDragOver={(e) => {
+        e.preventDefault();
+      }}
+      onDrop={async (e) => {
+        e.preventDefault();
+        const newTextDocumentNames: string[] = [];
+        const newSheetConfigNames: string[] = [];
+        for (const file of e.dataTransfer.files) {
+          if (file.name.endsWith(TEXT_FILE_EXTENSION)) {
+            const fileText = await file.text();
+            const lines = fileText.split("\n");
+            runInAction(() => {
+              const id = generateNanoid();
+              textDocumentsMobx.set(id, {
+                id,
+                name: lines[0],
+                text: Text.of(lines.slice(1)),
+                sheets: [],
+              });
+            });
+            newTextDocumentNames.push(lines[0]);
+          } else if (file.name.endsWith(HIGHLIGHTER_FILE_EXTENSION)) {
+            const fileText = await file.text();
+            const id = generateNanoid();
+            const sheetConfig = { ...JSON.parse(fileText), id };
+            runInAction(() => {
+              sheetConfigsMobx.set(id, sheetConfig);
+            });
+            newSheetConfigNames.push(sheetConfig.name);
+          }
+          if (
+            newTextDocumentNames.length > 0 ||
+            newSheetConfigNames.length > 0
+          ) {
+            setToastMessage([newTextDocumentNames, newSheetConfigNames]);
+          }
+        }
+      }}
+      className={className}
+    >
+      {children}
+      {toastMessage !== undefined ? (
+        <Toast.Root
+          duration={3000}
+          onOpenChange={(open) => {
+            if (!open) {
+              setToastMessage(undefined);
+            }
+          }}
+          className="w-80 text-sm bg-white border border-gray-200 p-4 rounded shadow-lg z-1"
+        >
+          <Toast.Title className="font-semibold pb-2">Files added!</Toast.Title>
+          <Toast.Description className="whitespace-pre-wrap">
+            {toastMessage[0].length > 0 ? (
+              <span>
+                {toastMessage[0].join(", ")} added as text documents.{" "}
+              </span>
+            ) : null}
+            {toastMessage[1].length > 0 ? (
+              <span>{toastMessage[1].join(", ")} added as sheet configs.</span>
+            ) : null}
+          </Toast.Description>
+        </Toast.Root>
+      ) : null}
+    </div>
+  );
 }
 
 type SerializedDocumentSheet = {

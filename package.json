@@ -13,6 +13,7 @@
     "@codemirror/view": "^6.0.3",
     "@radix-ui/react-hover-card": "^0.1.5",
     "@radix-ui/react-icons": "^1.1.1",
+    "@radix-ui/react-toast": "^1.0.0",
     "@radix-ui/react-tooltip": "^1.0.0",
     "@rollup/plugin-dsv": "^2.0.3",
     "@types/nanoid-dictionary": "^4.2.0",

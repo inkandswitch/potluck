@@ -104,8 +104,7 @@ const SheetName = observer(
           className="font-medium inline text-md border-b outline-none text-gray-600"
         />
         <div className="ml-2 py-1 px-2 rounded-lg bg-gray-50 text-sm text-gray-400">
-          <span className="font-medium text-gray-500">{rowsCount}</span>{" "}
-          highlights
+          <span className="font-medium text-gray-500">{rowsCount}</span> results
         </div>
       </div>
     );

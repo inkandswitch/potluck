@@ -469,6 +469,108 @@ function evaluateFormula(
   }
 }
 
+export const FORMULA_REFERENCE = [
+  { name: "SplitLines", args: ["until?: string"], return: "Highlight[]" },
+  {
+    name: "MatchRegexp",
+    args: ["regexString: string", "flags?: string"],
+    return: "Highlight[]",
+  },
+  {
+    name: "MatchString",
+    args: [
+      "values: string | string[] | Highlight[]",
+      "isCaseSensitive?: boolean",
+    ],
+    return: "Highlight[]",
+  },
+  {
+    name: "MatchHighlight",
+    args: ["values: Highlight[]", "isCaseSensitive?: boolean"],
+    return: "Highlight[]",
+  },
+  {
+    name: "HighlightsOfType",
+    args: ["type: string"],
+    return: "Highlight[]",
+  },
+  {
+    name: "NextOfType",
+    args: ["highlight: Highlight", "type: string", "distanceLimit?: number"],
+    return: "Highlight",
+  },
+  {
+    name: "PrevOfType",
+    args: ["highlight: Highlight", "type: string", "distanceLimit?: number"],
+    return: "Highlight",
+  },
+  {
+    name: "NextUntil",
+    args: ["highlight: Highlight", "stopCondition: any"],
+    return: "Highlight[]",
+  },
+  {
+    name: "HasType",
+    args: ["type: string", "highlight: Highlight"],
+    return: "boolean",
+  },
+  {
+    name: "HasTextOnLeft",
+    args: ["text: string", "highlight: Highlight"],
+    return: "boolean",
+  },
+  {
+    name: "HasTextOnRight",
+    args: ["text: string", "highlight: Highlight"],
+    return: "boolean",
+  },
+  {
+    name: "SameLine",
+    args: ["a: Highlight", "b: Highlight"],
+    return: "boolean",
+  },
+  {
+    name: "Filter",
+    args: ["list: any[]", "condition: any"],
+    return: "any[]",
+  },
+  {
+    name: "Not",
+    args: ["value: any"],
+  },
+  {
+    name: "First",
+    args: ["list: any[]"],
+  },
+  {
+    name: "Second",
+    args: ["list: any[]"],
+  },
+  {
+    name: "Third",
+    args: ["list: any[]"],
+  },
+  {
+    name: "ParseInt",
+    args: ["number: string"],
+  },
+  {
+    name: "DataFromDoc",
+    args: ["docName: string", "sheetConfigName: string", "columnName: string"],
+    return: "Highlight[]",
+  },
+  {
+    name: "USDAFoodName",
+    args: ["foodName: Highlight"],
+    return: "string?",
+  },
+  {
+    name: "Markdown",
+    args: [],
+    return: "Highlight[]",
+  },
+];
+
 export function evaluateSheet(
   textDocument: TextDocument,
   sheetConfig: SheetConfig,

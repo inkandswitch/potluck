@@ -22,7 +22,7 @@ import {
   isNumericish,
   isValueRowHighlight,
 } from "./utils";
-import { FormulaColumn } from "./formulas";
+import { FormulaColumn, FORMULA_REFERENCE } from "./formulas";
 import { SheetCalendar } from "./SheetCalendar";
 import { HighlightHoverCard } from "./HighlightHoverCard";
 import {
@@ -33,8 +33,10 @@ import {
   TableIcon,
   CookieIcon,
   SectionIcon,
+  QuestionMarkCircledIcon,
 } from "@radix-ui/react-icons";
 import { NutritionLabel } from "./NutritionLabel";
+import * as Popover from "@radix-ui/react-popover";
 
 let i = 1;
 
@@ -110,6 +112,43 @@ const SheetName = observer(
     );
   }
 );
+
+function FormulaReferenceButton() {
+  return (
+    <Popover.Root>
+      <Popover.Anchor asChild={true}>
+        <Popover.Trigger asChild={true}>
+          <button className="flex flex-shrink-0 items-center justify-center w-7 text-gray-400 hover:text-gray-600">
+            <QuestionMarkCircledIcon />
+          </button>
+        </Popover.Trigger>
+      </Popover.Anchor>
+      <Popover.Portal>
+        <Popover.Content
+          align="end"
+          className="font-mono text-xs bg-gray-50 p-4 rounded shadow-lg overflow-auto max-h-[calc(100vh-256px)]"
+        >
+          <div className="uppercase mb-2">available formulas</div>
+          <table>
+            <tbody>
+              {FORMULA_REFERENCE.map(({ name, args, return: returnType }) => (
+                <tr className="border-t border-gray-200" key={name}>
+                  <td className="py-1 pr-2">{name}</td>
+                  <td className="text-gray-400 pr-2">
+                    <span className="text-gray-400">(</span>
+                    {args.join(", ")}
+                    <span className="text-gray-400">)</span>
+                  </td>
+                  <td className="text-gray-400">{returnType}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+}
 
 const textEditorSelectionSpanComputed = computed<Span>(() => {
   const selectionRange = textEditorStateMobx.get().selection.asSingle().main;
@@ -235,9 +274,9 @@ export const SheetTable = observer(
     return (
       <>
         {selectedFormulaIndex !== undefined && (
-          <div className="flex mr-[30px]">
+          <div className="flex">
             <input
-              className="pl-1 border border-gray-200"
+              className="pl-1 w-1/4 border border-gray-200"
               value={columns[selectedFormulaIndex].name}
               onChange={(evt) =>
                 changeNameAt(selectedFormulaIndex, evt.target.value)
@@ -245,12 +284,13 @@ export const SheetTable = observer(
             />
             <span>&nbsp;=&nbsp;</span>
             <input
-              className="pl-1 border border-gray-200 flex-1"
+              className="pl-1 grow border border-gray-200"
               value={columns[selectedFormulaIndex].formula}
               onChange={(evt) =>
                 changeFormulaAt(selectedFormulaIndex, evt.target.value)
               }
             />
+            <FormulaReferenceButton />
           </div>
         )}
 

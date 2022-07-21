@@ -50,20 +50,19 @@ Artichoke
 Artichokes
 Arugula
 Asian greens
-Asparagus
-Asparagus
+Asparagus, USDA name: Asparagus, raw
 Autumn crocus
 Avocado oil
 Bacon
 Balsamic vinegar
-Bananas
+Bananas, USDA name: Bananas, raw
 Barbecued meat
 Basil
 Bean curd
 Beef, USDA name: Beef, retail cuts, separable fat, cooked
 Beer
 Beets
-Bell peppers
+Bell peppers, USDA name: Peppers, sweet, yellow, raw
 Bitter almond oil
 Bitter cucumber
 Bitter melon
@@ -82,17 +81,17 @@ Bread
 Broccoli
 Broccoli sprouts
 Brown mustard
-Brown rice
+Brown rice, USDA name: Rice, brown, medium-grain
 Brown rice syrup
 Brown sugar, USDA name: Sugars, brown
 Brussels sprouts
 Buckwheat
 Butter
 Butternut squash
-Cabbage
+Cabbage, USDA name: Cabbage, common
 Canola oil
 Cantaloupe
-Carrots
+Carrots, USDA name: Carrots, raw
 Cashews
 Cauliflower
 Caviar

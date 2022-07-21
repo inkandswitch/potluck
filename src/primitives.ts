@@ -400,7 +400,6 @@ export const selectedTextDocumentIdBox = observable.box(
   GOCHUJANG_PORK_DOCUMENT_ID
 );
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
-export const LoadTextDocumentEmitter = new EventEmitter();
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({
   [DATE_SHEET_IN_WORKOUT_ID]: true,

@@ -407,7 +407,10 @@ export const SheetComponent = observer(
       (sheet) => sheet.configId === sheetConfigId
     )!;
 
-    const sheetConfig = sheetConfigsMobx.get(sheetConfigId)!;
+    const sheetConfig = sheetConfigsMobx.get(sheetConfigId);
+    if (sheetConfig === undefined) {
+      return null;
+    }
     const columns = sheetConfig.columns;
 
     const isExpanded = isSheetExpandedMobx.get(id);

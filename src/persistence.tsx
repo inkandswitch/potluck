@@ -6,7 +6,6 @@ import {
 } from "browser-fs-access";
 import { comparer, reaction, runInAction } from "mobx";
 import {
-  LoadTextDocumentEmitter,
   selectedTextDocumentIdBox,
   sheetConfigsMobx,
   Span,
@@ -95,7 +94,6 @@ export class DirectoryPersistence {
             .map(([filePath, contents]) => {
               const id = getTextDocumentId(filePath);
               const text = Text.of(contents.split("\n").slice(1));
-              LoadTextDocumentEmitter.emit(id, { text });
               return [
                 id,
                 {

@@ -19,7 +19,6 @@ import { observer } from "mobx-react-lite";
 import {
   Highlight,
   hoverHighlightsMobx,
-  LoadTextDocumentEmitter,
   Span,
   textDocumentsMobx,
   textEditorStateMobx,
@@ -151,23 +150,16 @@ export const Editor = observer(
         dispatch(transaction) {
           view.update([transaction]);
 
-          if (
-            transaction.annotation(Transaction.remote) !== true &&
-            transaction.docChanged
-          ) {
+          if (transaction.docChanged) {
             runInAction(() => {
-              // this textDocument may have been replaced by filesystem sync
-              const textDocument = textDocumentsMobx.get(textDocumentId);
-              if (textDocument !== undefined) {
-                textDocument.text = view.state.doc;
-                textEditorStateMobx.set(transaction.state);
-                for (const sheet of textDocument.sheets) {
-                  if (sheet.highlightSearchRange !== undefined) {
-                    sheet.highlightSearchRange = [
-                      transaction.changes.mapPos(sheet.highlightSearchRange[0]),
-                      transaction.changes.mapPos(sheet.highlightSearchRange[1]),
-                    ];
-                  }
+              textDocument.text = view.state.doc;
+              textEditorStateMobx.set(transaction.state);
+              for (const sheet of textDocument.sheets) {
+                if (sheet.highlightSearchRange !== undefined) {
+                  sheet.highlightSearchRange = [
+                    transaction.changes.mapPos(sheet.highlightSearchRange[0]),
+                    transaction.changes.mapPos(sheet.highlightSearchRange[1]),
+                  ];
                 }
               }
             });
@@ -179,13 +171,6 @@ export const Editor = observer(
         textEditorStateMobx.set(view.state);
       });
 
-      function onLoadTextDocument({ text }: { text: Text }) {
-        view.dispatch({
-          changes: { from: 0, to: view.state.doc.length, insert: text },
-          annotations: Transaction.remote.of(true),
-        });
-      }
-      LoadTextDocumentEmitter.addListener(textDocumentId, onLoadTextDocument);
       const unsubscribes: (() => void)[] = [
         autorun(() => {
           const highlights = editorSelectionHighlightsComputed.get();
@@ -202,13 +187,9 @@ export const Editor = observer(
 
       return () => {
         unsubscribes.forEach((unsubscribe) => unsubscribe());
-        LoadTextDocumentEmitter.removeListener(
-          textDocumentId,
-          onLoadTextDocument
-        );
         view.destroy();
       };
-    }, [textDocumentId]);
+    }, [textDocument]);
 
     return (
       <div

@@ -158,14 +158,16 @@ export const Editor = observer(
             runInAction(() => {
               // this textDocument may have been replaced by filesystem sync
               const textDocument = textDocumentsMobx.get(textDocumentId);
-              textDocument.text = view.state.doc;
-              textEditorStateMobx.set(transaction.state);
-              for (const sheet of textDocument.sheets) {
-                if (sheet.highlightSearchRange !== undefined) {
-                  sheet.highlightSearchRange = [
-                    transaction.changes.mapPos(sheet.highlightSearchRange[0]),
-                    transaction.changes.mapPos(sheet.highlightSearchRange[1]),
-                  ];
+              if (textDocument !== undefined) {
+                textDocument.text = view.state.doc;
+                textEditorStateMobx.set(transaction.state);
+                for (const sheet of textDocument.sheets) {
+                  if (sheet.highlightSearchRange !== undefined) {
+                    sheet.highlightSearchRange = [
+                      transaction.changes.mapPos(sheet.highlightSearchRange[0]),
+                      transaction.changes.mapPos(sheet.highlightSearchRange[1]),
+                    ];
+                  }
                 }
               }
             });

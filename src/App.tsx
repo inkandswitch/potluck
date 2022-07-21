@@ -16,6 +16,9 @@ import { Text } from "@codemirror/state";
 import classNames from "classnames";
 import { getComputedDocumentValues } from "./compute";
 import { generateNanoid } from "./utils";
+import { DirectoryPersistence } from "./persistence";
+import { FileIcon, FileTextIcon, PauseIcon } from "@radix-ui/react-icons";
+import * as Tooltip from "@radix-ui/react-tooltip";
 
 const NEW_OPTION_ID = "new";
 const AddNewDocumentSheet = observer(
@@ -177,6 +180,71 @@ const DocumentSheets = observer(
   }
 );
 
+const PersistenceButton = observer(() => {
+  const [directoryPersistence, setDirectoryPersistence] = useState<
+    DirectoryPersistence | undefined
+  >(undefined);
+  return (
+    <div className="absolute top-2 right-2 flex gap-2 bg-white bg-opacity-50 p-2 rounded">
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild={true}>
+          <button
+            onClick={() => {
+              if (directoryPersistence !== undefined) {
+                directoryPersistence.destroy();
+              }
+              async function go() {
+                const d = new DirectoryPersistence();
+                await d.init();
+                setDirectoryPersistence(d);
+              }
+              go();
+            }}
+            className="text-gray-400 hover:text-gray-700"
+          >
+            {directoryPersistence !== undefined ? (
+              <FileTextIcon />
+            ) : (
+              <FileIcon />
+            )}
+          </button>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
+            {directoryPersistence !== undefined
+              ? "syncing with filesystem"
+              : "sync with filesystem"}
+            <Tooltip.Arrow className="fill-gray-700" />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+      {directoryPersistence !== undefined ? (
+        <Tooltip.Root>
+          <Tooltip.Trigger asChild={true}>
+            <button
+              onClick={() => {
+                if (directoryPersistence !== undefined) {
+                  directoryPersistence.destroy();
+                }
+                setDirectoryPersistence(undefined);
+              }}
+              className="text-gray-400 hover:text-gray-700"
+            >
+              <PauseIcon />
+            </button>
+          </Tooltip.Trigger>
+          <Tooltip.Portal>
+            <Tooltip.Content className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
+              stop syncing
+              <Tooltip.Arrow className="fill-gray-700" />
+            </Tooltip.Content>
+          </Tooltip.Portal>
+        </Tooltip.Root>
+      ) : null}
+    </div>
+  );
+});
+
 const App = observer(() => {
   const textDocumentId = selectedTextDocumentIdBox.get();
   return (
@@ -191,6 +259,7 @@ const App = observer(() => {
       <div className="grow h-full overflow-auto pl-8 pr-6 pt-24">
         <DocumentSheets textDocumentId={textDocumentId} />
       </div>
+      <PersistenceButton />
     </div>
   );
 });

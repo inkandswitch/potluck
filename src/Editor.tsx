@@ -4,7 +4,14 @@ import {
   ViewPlugin,
   ViewUpdate,
 } from "@codemirror/view";
-import { Facet, StateEffect, StateField } from "@codemirror/state";
+import {
+  Annotation,
+  Facet,
+  StateEffect,
+  StateField,
+  Text,
+  Transaction,
+} from "@codemirror/state";
 import { minimalSetup } from "codemirror";
 import { useEffect, useRef } from "react";
 import { autorun, comparer, computed, runInAction } from "mobx";
@@ -12,6 +19,7 @@ import { observer } from "mobx-react-lite";
 import {
   Highlight,
   hoverHighlightsMobx,
+  LoadTextDocumentEmitter,
   Span,
   textDocumentsMobx,
   textEditorStateMobx,
@@ -143,18 +151,25 @@ export const Editor = observer(
         dispatch(transaction) {
           view.update([transaction]);
 
-          runInAction(() => {
-            textDocument.text = view.state.doc;
-            textEditorStateMobx.set(transaction.state);
-            for (const sheet of textDocument.sheets) {
-              if (sheet.highlightSearchRange !== undefined) {
-                sheet.highlightSearchRange = [
-                  transaction.changes.mapPos(sheet.highlightSearchRange[0]),
-                  transaction.changes.mapPos(sheet.highlightSearchRange[1]),
-                ];
+          if (
+            transaction.annotation(Transaction.remote) !== true &&
+            transaction.docChanged
+          ) {
+            runInAction(() => {
+              // this textDocument may have been replaced by filesystem sync
+              const textDocument = textDocumentsMobx.get(textDocumentId);
+              textDocument.text = view.state.doc;
+              textEditorStateMobx.set(transaction.state);
+              for (const sheet of textDocument.sheets) {
+                if (sheet.highlightSearchRange !== undefined) {
+                  sheet.highlightSearchRange = [
+                    transaction.changes.mapPos(sheet.highlightSearchRange[0]),
+                    transaction.changes.mapPos(sheet.highlightSearchRange[1]),
+                  ];
+                }
               }
-            }
-          });
+            });
+          }
         },
       });
 
@@ -162,6 +177,13 @@ export const Editor = observer(
         textEditorStateMobx.set(view.state);
       });
 
+      function onLoadTextDocument({ text }: { text: Text }) {
+        view.dispatch({
+          changes: { from: 0, to: view.state.doc.length, insert: text },
+          annotations: Transaction.remote.of(true),
+        });
+      }
+      LoadTextDocumentEmitter.addListener(textDocumentId, onLoadTextDocument);
       const unsubscribes: (() => void)[] = [
         autorun(() => {
           const highlights = editorSelectionHighlightsComputed.get();
@@ -178,6 +200,10 @@ export const Editor = observer(
 
       return () => {
         unsubscribes.forEach((unsubscribe) => unsubscribe());
+        LoadTextDocumentEmitter.removeListener(
+          textDocumentId,
+          onLoadTextDocument
+        );
         view.destroy();
       };
     }, [textDocumentId]);

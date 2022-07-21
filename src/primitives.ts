@@ -3,6 +3,7 @@ import { EditorState, Text } from "@codemirror/state";
 import { FormulaColumn } from "./formulas";
 import { ALL_INGREDIENTS_TEXT } from "./data/all_ingredients";
 import { generateNanoid } from "./utils";
+import { EventEmitter } from "eventemitter3";
 
 export type Span = [from: number, to: number];
 
@@ -333,6 +334,7 @@ export const selectedTextDocumentIdBox = observable.box(
   GOCHUJANG_PORK_DOCUMENT_ID
 );
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
+export const LoadTextDocumentEmitter = new EventEmitter();
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({
   [DATE_SHEET_IN_WORKOUT_ID]: true,

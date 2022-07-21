@@ -25,10 +25,49 @@ import { doSpansOverlap, getTextForHighlight } from "./utils";
 import { OFFICIAL_FOODS } from "./data/officialFoods";
 // @ts-ignore
 import FuzzySet from "fuzzyset";
+import Prism from "prismjs";
 const foodNameMatchSet = new FuzzySet(
   OFFICIAL_FOODS.map((food: any) => food.description),
   false
 );
+
+// eslint-disable-next-line
+// @ts-ignore
+Prism.languages.markdown = Prism.languages.extend("markup", {}), Prism.languages.insertBefore("markdown", "prolog", {
+  blockquote: {pattern: /^>(?:[\t ]*>)*/m, alias: "punctuation"},
+  code: [{pattern: /^(?: {4}|\t).+/m, alias: "keyword"}, {pattern: /``.+?``|`[^`\n]+`/, alias: "keyword"}],
+  title: [{
+    pattern: /\w+.*(?:\r?\n|\r)(?:==+|--+)/,
+    alias: "important",
+    inside: {punctuation: /==+$|--+$/}
+  }, {pattern: /(^\s*)#+.+/m, lookbehind: !0, alias: "important", inside: {punctuation: /^#+|#+$/}}],
+  hr: {pattern: /(^\s*)([*-])([\t ]*\2){2,}(?=\s*$)/m, lookbehind: !0, alias: "punctuation"},
+  list: {pattern: /(^\s*)(?:[*+-]|\d+\.)(?=[\t ].)/m, lookbehind: !0, alias: "punctuation"},
+  "url-reference": {
+    pattern: /!?\[[^\]]+\]:[\t ]+(?:\S+|<(?:\\.|[^>\\])+>)(?:[\t ]+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\)))?/,
+    inside: {
+      variable: {pattern: /^(!?\[)[^\]]+/, lookbehind: !0},
+      string: /(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\))$/,
+      punctuation: /^[\[\]!:]|[<>]/
+    },
+    alias: "url"
+  },
+  bold: {
+    pattern: /(^|[^\\])(\*\*|__)(?:(?:\r?\n|\r)(?!\r?\n|\r)|.)+?\2/,
+    lookbehind: !0,
+    inside: {punctuation: /^\*\*|^__|\*\*$|__$/}
+  },
+  italic: {
+    pattern: /(^|[^\\])([*_])(?:(?:\r?\n|\r)(?!\r?\n|\r)|.)+?\2/,
+    lookbehind: !0,
+    inside: {punctuation: /^[*_]|[*_]$/}
+  },
+  url: {
+    pattern: /!?\[[^\]]+\](?:\([^\s)]+(?:[\t ]+"(?:\\.|[^"\\])*")?\)| ?\[[^\]\n]*\])/,
+    inside: {variable: {pattern: /(!?\[)[^\]]+(?=\]$)/, lookbehind: !0}, string: {pattern: /"(?:\\.|[^"\\])*"(?=\)$)/}}
+  }
+//@ts-ignore
+}), Prism.languages.markdown.bold.inside.url = Prism.util.clone(Prism.languages.markdown.url), Prism.languages.markdown.italic.inside.url = Prism.util.clone(Prism.languages.markdown.url), Prism.languages.markdown.bold.inside.italic = Prism.util.clone(Prism.languages.markdown.italic), Prism.languages.markdown.italic.inside.bold = Prism.util.clone(Prism.languages.markdown.bold); // prettier-ignore
 
 export type FormulaColumn = {
   name: string;
@@ -221,10 +260,7 @@ function evaluateFormula(
         );
     },
 
-    NextUntil: (
-      highlight: Highlight,
-      stopCondition: any
-    ): Highlight[] => {
+    NextUntil: (highlight: Highlight, stopCondition: any): Highlight[] => {
       const textDocument = textDocumentsMobx.get(highlight.documentId);
 
       if (!textDocument) {
@@ -371,6 +407,46 @@ function evaluateFormula(
       // we could allow the user to pick one and encode that as a mapping in the allIngredients list?
       // const confidenceScore = Math.round(result[0] * 100);
       return normalizedName;
+    },
+    Markdown: (): Highlight[] => {
+      const docString = textDocument.text.sliceString(0);
+      let highlights: Highlight[] = [];
+      const getLength = (token: any): number => {
+        if (typeof token === "string") {
+          return token.length;
+        } else if (typeof token.content === "string") {
+          return token.content.length;
+        } else if (Array.isArray(token.content)) {
+          return token.content.reduce(
+            (l: number, t: any) => l + getLength(t),
+            0
+          );
+        } else {
+          return 0;
+        }
+      };
+
+      const tokens = Prism.tokenize(docString, Prism.languages.markdown);
+      console.log({ docString, tokens });
+      let start = 0;
+
+      for (const token of tokens) {
+        const length = getLength(token);
+        const end = start + length;
+
+        if (typeof token !== "string") {
+          highlights.push({
+            documentId: textDocument.id,
+            sheetConfigId: sheetConfig.id,
+            span: [start, end],
+            data: { type: token.type },
+          });
+        }
+
+        start = end;
+      }
+
+      return highlights;
     },
   };
 

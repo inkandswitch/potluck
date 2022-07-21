@@ -137,6 +137,7 @@ export const QUANTITY_SHEET_CONFIG_ID = generateNanoid();
 export const ICE_CREAM_DOCUMENT_ID = "ice cream";
 export const INGREDIENTS_SHEET_CONFIG_ID = generateNanoid();
 export const ALL_INGREDIENTS_SHEET_CONFIG_ID = generateNanoid();
+export const MARKDOWN_SHEET_CONFIG_ID = generateNanoid();
 export const DATE_SHEET_CONFIG_ID = generateNanoid();
 export const DATE_SHEET_IN_WORKOUT_ID = generateNanoid();
 export const WORKOUT_SHEET_IN_WORKOUT_ID = generateNanoid();
@@ -312,6 +313,20 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "officialName",
         formula: 'First(Filter(MatchRegexp("USDA: (.*),?"), SameLine(name)))',
+      },
+    ],
+  },
+  [MARKDOWN_SHEET_CONFIG_ID]: {
+    id: MARKDOWN_SHEET_CONFIG_ID,
+    name: "markdown",
+    columns: [
+      {
+        name: "text",
+        formula: "Markdown()",
+      },
+      {
+        name: "type",
+        formula: "text.data.type",
       },
     ],
   },

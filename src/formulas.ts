@@ -160,7 +160,7 @@ function evaluateFormula(
       return highlights;
     },
 
-    ValuesOfType: (type: string) => {
+    HighlightsOfType: (type: string) => {
       const typeSheetConfig = Array.from(sheetConfigsMobx.values()).find(
         (sheetConfig) => sheetConfig.name === type
       );
@@ -221,7 +221,7 @@ function evaluateFormula(
         );
     },
 
-    NextValuesUntil: (
+    NextUntil: (
       highlight: Highlight,
       stopCondition: any
     ): Highlight[] => {

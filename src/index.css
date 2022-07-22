@@ -42,10 +42,6 @@
   @apply border-b-2 border-yellow-400;
 }
 
-.cm-content {
-  @apply font-serif;
-}
-
 .rbc-event:hover {
   @apply bg-blue-500;
 }

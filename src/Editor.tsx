@@ -1,20 +1,8 @@
-import {
-  Decoration,
-  EditorView,
-  ViewPlugin,
-  ViewUpdate,
-} from "@codemirror/view";
-import {
-  Annotation,
-  Facet,
-  StateEffect,
-  StateField,
-  Text,
-  Transaction,
-} from "@codemirror/state";
+import { Decoration, EditorView } from "@codemirror/view";
+import { Facet, StateEffect, StateField } from "@codemirror/state";
 import { minimalSetup } from "codemirror";
 import { useEffect, useRef } from "react";
-import { autorun, comparer, computed, runInAction } from "mobx";
+import { autorun, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   Highlight,
@@ -23,10 +11,7 @@ import {
   textDocumentsMobx,
   textEditorStateMobx,
 } from "./primitives";
-import {
-  editorSelectionHighlightsComputed,
-  getComputedDocumentValues,
-} from "./compute";
+import { editorSelectionHighlightsComputed } from "./compute";
 import { doSpansOverlap, isValueRowHighlight } from "./utils";
 
 const textDocumentIdFacet = Facet.define<string, string>({
@@ -138,6 +123,9 @@ export const Editor = observer(
             "&": {
               height: "100%",
               padding: "4px",
+            },
+            ".cm-content": {
+              fontFamily: `ui-serif, Georgia, Cambria, "Times New Roman", Times, serif`,
             },
           }),
           EditorView.lineWrapping,

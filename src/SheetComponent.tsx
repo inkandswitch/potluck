@@ -3,9 +3,8 @@ import classNames from "classnames";
 import { isArray } from "lodash";
 import { action, comparer, computed, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { FC, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import {
-  Highlight,
   hoverHighlightsMobx,
   isSheetExpandedMobx,
   SheetConfig,
@@ -37,6 +36,15 @@ import {
 } from "@radix-ui/react-icons";
 import { NutritionLabel } from "./NutritionLabel";
 import * as Popover from "@radix-ui/react-popover";
+import { EditorView, minimalSetup } from "codemirror";
+import { bracketMatching, LanguageSupport } from "@codemirror/language";
+import { javascriptLanguage } from "@codemirror/lang-javascript";
+import { highlightSpecialChars, keymap } from "@codemirror/view";
+import {
+  autocompletion,
+  closeBrackets,
+  closeBracketsKeymap,
+} from "@codemirror/autocomplete";
 
 let i = 1;
 
@@ -205,6 +213,85 @@ function compareColumnValues(
     : rv;
 }
 
+function FormulaInput({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  const valueRef = useRef(value);
+  const viewRef = useRef<EditorView | undefined>(undefined);
+
+  useEffect(() => {
+    const view = new EditorView({
+      doc: value,
+      extensions: [
+        minimalSetup,
+        EditorView.theme({
+          ".cm-content": {
+            padding: "4px 2px",
+            fontFamily: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
+          },
+          ".cm-completionIcon": {
+            width: "1em",
+          },
+        }),
+        highlightSpecialChars(),
+        bracketMatching(),
+        closeBrackets(),
+        autocompletion(),
+        new LanguageSupport(javascriptLanguage, [
+          javascriptLanguage.data.of({
+            autocomplete: FORMULA_REFERENCE.map(
+              ({ name, args, return: returnType }) => ({
+                label: name,
+                type: "function",
+                info: `(${args.join(", ")}) => ${returnType}`,
+              })
+            ),
+          }),
+        ]),
+        keymap.of([...closeBracketsKeymap]),
+      ],
+      parent: rootRef.current!,
+      dispatch(transaction) {
+        view.update([transaction]);
+        if (transaction.docChanged) {
+          const value = transaction.state.doc.toString();
+          valueRef.current = value;
+          onChange(value);
+        }
+      },
+    });
+    viewRef.current = view;
+    return () => {
+      view.destroy();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (valueRef.current !== value) {
+      const view = viewRef.current!;
+      view.dispatch({
+        changes: {
+          from: 0,
+          to: view.state.doc.length,
+          insert: value,
+        },
+      });
+    }
+  }, [value]);
+
+  return (
+    <div
+      className="border border-gray-200 grow overflow-auto"
+      ref={rootRef}
+    ></div>
+  );
+}
+
 export const SheetTable = observer(
   ({
     textDocument,
@@ -274,21 +361,21 @@ export const SheetTable = observer(
     return (
       <>
         {selectedFormulaIndex !== undefined && (
-          <div className="flex">
+          <div className="flex text-sm items-center overflow-hidden">
             <input
-              className="pl-1 w-1/4 border border-gray-200"
+              className="pl-1 self-stretch font-mono w-1/5 flex-shrink-0 border border-gray-200"
               value={columns[selectedFormulaIndex].name}
               onChange={(evt) =>
                 changeNameAt(selectedFormulaIndex, evt.target.value)
               }
             />
             <span>&nbsp;=&nbsp;</span>
-            <input
-              className="pl-1 grow border border-gray-200"
+            <FormulaInput
               value={columns[selectedFormulaIndex].formula}
-              onChange={(evt) =>
-                changeFormulaAt(selectedFormulaIndex, evt.target.value)
-              }
+              onChange={(value) => {
+                changeFormulaAt(selectedFormulaIndex, value);
+              }}
+              key={selectedFormulaIndex}
             />
             <FormulaReferenceButton />
           </div>

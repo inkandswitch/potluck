@@ -8,7 +8,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.1.0",
     "@codemirror/commands": "^6.0.1",
+    "@codemirror/lang-javascript": "^6.0.2",
+    "@codemirror/language": "^6.2.1",
     "@codemirror/state": "^6.1.0",
     "@codemirror/view": "^6.0.3",
     "@radix-ui/react-hover-card": "^0.1.5",

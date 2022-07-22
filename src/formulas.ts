@@ -25,11 +25,49 @@ import { doSpansOverlap, getTextForHighlight } from "./utils";
 import { OFFICIAL_FOODS } from "./data/officialFoods";
 // @ts-ignore
 import FuzzySet from "fuzzyset";
-
+import Prism from "prismjs";
 const foodNameMatchSet = new FuzzySet(
   OFFICIAL_FOODS.map((food: any) => food.description),
   false
 );
+
+// eslint-disable-next-line
+// @ts-ignore
+Prism.languages.markdown = Prism.languages.extend("markup", {}), Prism.languages.insertBefore("markdown", "prolog", {
+  blockquote: {pattern: /^>(?:[\t ]*>)*/m, alias: "punctuation"},
+  code: [{pattern: /^(?: {4}|\t).+/m, alias: "keyword"}, {pattern: /``.+?``|`[^`\n]+`/, alias: "keyword"}],
+  title: [{
+    pattern: /\w+.*(?:\r?\n|\r)(?:==+|--+)/,
+    alias: "important",
+    inside: {punctuation: /==+$|--+$/}
+  }, {pattern: /(^\s*)#+.+/m, lookbehind: !0, alias: "important", inside: {punctuation: /^#+|#+$/}}],
+  hr: {pattern: /(^\s*)([*-])([\t ]*\2){2,}(?=\s*$)/m, lookbehind: !0, alias: "punctuation"},
+  list: {pattern: /(^\s*)(?:[*+-]|\d+\.)(?=[\t ].)/m, lookbehind: !0, alias: "punctuation"},
+  "url-reference": {
+    pattern: /!?\[[^\]]+\]:[\t ]+(?:\S+|<(?:\\.|[^>\\])+>)(?:[\t ]+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\)))?/,
+    inside: {
+      variable: {pattern: /^(!?\[)[^\]]+/, lookbehind: !0},
+      string: /(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\))$/,
+      punctuation: /^[\[\]!:]|[<>]/
+    },
+    alias: "url"
+  },
+  bold: {
+    pattern: /(^|[^\\])(\*\*|__)(?:(?:\r?\n|\r)(?!\r?\n|\r)|.)+?\2/,
+    lookbehind: !0,
+    inside: {punctuation: /^\*\*|^__|\*\*$|__$/}
+  },
+  italic: {
+    pattern: /(^|[^\\])([*_])(?:(?:\r?\n|\r)(?!\r?\n|\r)|.)+?\2/,
+    lookbehind: !0,
+    inside: {punctuation: /^[*_]|[*_]$/}
+  },
+  url: {
+    pattern: /!?\[[^\]]+\](?:\([^\s)]+(?:[\t ]+"(?:\\.|[^"\\])*")?\)| ?\[[^\]\n]*\])/,
+    inside: {variable: {pattern: /(!?\[)[^\]]+(?=\]$)/, lookbehind: !0}, string: {pattern: /"(?:\\.|[^"\\])*"(?=\)$)/}}
+  }
+//@ts-ignore
+}), Prism.languages.markdown.bold.inside.url = Prism.util.clone(Prism.languages.markdown.url), Prism.languages.markdown.italic.inside.url = Prism.util.clone(Prism.languages.markdown.url), Prism.languages.markdown.bold.inside.italic = Prism.util.clone(Prism.languages.markdown.italic), Prism.languages.markdown.italic.inside.bold = Prism.util.clone(Prism.languages.markdown.bold); // prettier-ignore
 
 export type FormulaColumn = {
   name: string;
@@ -194,7 +232,7 @@ function evaluateFormula(
         ))
           .filter(row => "span" in row) as Highlight[],
         ({ span }) => span[0])
-      
+
       return sheetValueRows.find(
         (r) =>
           "span" in r &&
@@ -239,10 +277,7 @@ function evaluateFormula(
         );
     },
 
-    NextUntil: (
-      highlight: Highlight,
-      stopCondition: any
-    ): Highlight[] => {
+    NextUntil: (highlight: Highlight, stopCondition: any): Highlight[] => {
       const textDocument = textDocumentsMobx.get(highlight.documentId);
 
       if (!textDocument) {
@@ -359,7 +394,7 @@ function evaluateFormula(
       return result;
     },
 
-    NormalizeFoodName: (foodName: Highlight): string | undefined => {
+    USDAFoodName: (foodName: Highlight): string | undefined => {
       let text = getTextForHighlight(foodName);
       const matchedHighlight = foodName.data.matchedHighlight as
         | Highlight
@@ -390,6 +425,46 @@ function evaluateFormula(
       // const confidenceScore = Math.round(result[0] * 100);
       return normalizedName;
     },
+    Markdown: (): Highlight[] => {
+      const docString = textDocument.text.sliceString(0);
+      let highlights: Highlight[] = [];
+      const getLength = (token: any): number => {
+        if (typeof token === "string") {
+          return token.length;
+        } else if (typeof token.content === "string") {
+          return token.content.length;
+        } else if (Array.isArray(token.content)) {
+          return token.content.reduce(
+            (l: number, t: any) => l + getLength(t),
+            0
+          );
+        } else {
+          return 0;
+        }
+      };
+
+      const tokens = Prism.tokenize(docString, Prism.languages.markdown);
+      console.log({ docString, tokens });
+      let start = 0;
+
+      for (const token of tokens) {
+        const length = getLength(token);
+        const end = start + length;
+
+        if (typeof token !== "string") {
+          highlights.push({
+            documentId: textDocument.id,
+            sheetConfigId: sheetConfig.id,
+            span: [start, end],
+            data: { type: token.type },
+          });
+        }
+
+        start = end;
+      }
+
+      return highlights;
+    },
   };
 
   try {
@@ -410,6 +485,108 @@ function evaluateFormula(
     return e;
   }
 }
+
+export const FORMULA_REFERENCE = [
+  { name: "SplitLines", args: ["until?: string"], return: "Highlight[]" },
+  {
+    name: "MatchRegexp",
+    args: ["regexString: string", "flags?: string"],
+    return: "Highlight[]",
+  },
+  {
+    name: "MatchString",
+    args: [
+      "values: string | string[] | Highlight[]",
+      "isCaseSensitive?: boolean",
+    ],
+    return: "Highlight[]",
+  },
+  {
+    name: "MatchHighlight",
+    args: ["values: Highlight[]", "isCaseSensitive?: boolean"],
+    return: "Highlight[]",
+  },
+  {
+    name: "HighlightsOfType",
+    args: ["type: string"],
+    return: "Highlight[]",
+  },
+  {
+    name: "NextOfType",
+    args: ["highlight: Highlight", "type: string", "distanceLimit?: number"],
+    return: "Highlight",
+  },
+  {
+    name: "PrevOfType",
+    args: ["highlight: Highlight", "type: string", "distanceLimit?: number"],
+    return: "Highlight",
+  },
+  {
+    name: "NextUntil",
+    args: ["highlight: Highlight", "stopCondition: any"],
+    return: "Highlight[]",
+  },
+  {
+    name: "HasType",
+    args: ["type: string", "highlight: Highlight"],
+    return: "boolean",
+  },
+  {
+    name: "HasTextOnLeft",
+    args: ["text: string", "highlight: Highlight"],
+    return: "boolean",
+  },
+  {
+    name: "HasTextOnRight",
+    args: ["text: string", "highlight: Highlight"],
+    return: "boolean",
+  },
+  {
+    name: "SameLine",
+    args: ["a: Highlight", "b: Highlight"],
+    return: "boolean",
+  },
+  {
+    name: "Filter",
+    args: ["list: any[]", "condition: any"],
+    return: "any[]",
+  },
+  {
+    name: "Not",
+    args: ["value: any"],
+  },
+  {
+    name: "First",
+    args: ["list: any[]"],
+  },
+  {
+    name: "Second",
+    args: ["list: any[]"],
+  },
+  {
+    name: "Third",
+    args: ["list: any[]"],
+  },
+  {
+    name: "ParseInt",
+    args: ["number: string"],
+  },
+  {
+    name: "DataFromDoc",
+    args: ["docName: string", "sheetConfigName: string", "columnName: string"],
+    return: "Highlight[]",
+  },
+  {
+    name: "USDAFoodName",
+    args: ["foodName: Highlight"],
+    return: "string?",
+  },
+  {
+    name: "Markdown",
+    args: [],
+    return: "Highlight[]",
+  },
+];
 
 export function evaluateSheet(
   textDocument: TextDocument,

@@ -49,7 +49,7 @@ const AddNewDocumentSheet = observer(
           className="border border-gray-200 rounded px-1"
           ref={sheetConfigSelectRef}
         >
-          <option value={NEW_OPTION_ID}>new sheet config</option>
+          <option value={NEW_OPTION_ID}>New highlighter type</option>
           {[...sheetConfigsMobx.values()].map((sheetConfig) => (
             <option value={sheetConfig.id} key={sheetConfig.id}>
               {sheetConfig.name}
@@ -57,7 +57,7 @@ const AddNewDocumentSheet = observer(
           ))}
         </select>
         <button type="submit" className="button">
-          add sheet
+          + Add sheet
         </button>
       </form>
     );

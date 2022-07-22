@@ -93,13 +93,13 @@ export class DirectoryPersistence {
             .filter(([filePath]) => filePath.endsWith(TEXT_FILE_EXTENSION))
             .map(([filePath, contents]) => {
               const id = getTextDocumentId(filePath);
+              const text = Text.of(contents.split("\n").slice(1));
               return [
                 id,
                 {
                   id,
                   name: contents.split("\n")[0],
-                  // TODO: if the file is already open, update codemirror
-                  text: Text.of(contents.split("\n").slice(1)),
+                  text,
                   sheets: documentSheetConfig
                     .filter((c) => c.textDocumentId === id)
                     .map((c) => ({

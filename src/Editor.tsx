@@ -1,13 +1,8 @@
-import {
-  Decoration,
-  EditorView,
-  ViewPlugin,
-  ViewUpdate,
-} from "@codemirror/view";
+import { Decoration, EditorView } from "@codemirror/view";
 import { Facet, StateEffect, StateField } from "@codemirror/state";
 import { minimalSetup } from "codemirror";
 import { useEffect, useRef } from "react";
-import { autorun, comparer, computed, runInAction } from "mobx";
+import { autorun, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   Highlight,
@@ -16,10 +11,7 @@ import {
   textDocumentsMobx,
   textEditorStateMobx,
 } from "./primitives";
-import {
-  editorSelectionHighlightsComputed,
-  getComputedDocumentValues,
-} from "./compute";
+import { editorSelectionHighlightsComputed } from "./compute";
 import { doSpansOverlap, isValueRowHighlight } from "./utils";
 
 const textDocumentIdFacet = Facet.define<string, string>({
@@ -132,6 +124,9 @@ export const Editor = observer(
               height: "100%",
               padding: "4px",
             },
+            ".cm-content": {
+              fontFamily: `ui-serif, Georgia, Cambria, "Times New Roman", Times, serif`,
+            },
           }),
           EditorView.lineWrapping,
           highlightsField,
@@ -144,14 +139,16 @@ export const Editor = observer(
           view.update([transaction]);
 
           runInAction(() => {
-            textDocument.text = view.state.doc;
             textEditorStateMobx.set(transaction.state);
-            for (const sheet of textDocument.sheets) {
-              if (sheet.highlightSearchRange !== undefined) {
-                sheet.highlightSearchRange = [
-                  transaction.changes.mapPos(sheet.highlightSearchRange[0]),
-                  transaction.changes.mapPos(sheet.highlightSearchRange[1]),
-                ];
+            if (transaction.docChanged) {
+              textDocument.text = view.state.doc;
+              for (const sheet of textDocument.sheets) {
+                if (sheet.highlightSearchRange !== undefined) {
+                  sheet.highlightSearchRange = [
+                    transaction.changes.mapPos(sheet.highlightSearchRange[0]),
+                    transaction.changes.mapPos(sheet.highlightSearchRange[1]),
+                  ];
+                }
               }
             }
           });
@@ -180,7 +177,7 @@ export const Editor = observer(
         unsubscribes.forEach((unsubscribe) => unsubscribe());
         view.destroy();
       };
-    }, [textDocumentId]);
+    }, [textDocument]);
 
     return (
       <div

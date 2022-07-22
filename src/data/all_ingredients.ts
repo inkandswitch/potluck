@@ -50,20 +50,19 @@ Artichoke
 Artichokes
 Arugula
 Asian greens
-Asparagus
-Asparagus
+Asparagus, USDA name: Asparagus, raw
 Autumn crocus
 Avocado oil
 Bacon
 Balsamic vinegar
-Bananas
+Bananas, USDA name: Bananas, raw
 Barbecued meat
 Basil
 Bean curd
-Beef
+Beef, USDA name: Beef, retail cuts, separable fat, cooked
 Beer
 Beets
-Bell peppers
+Bell peppers, USDA name: Peppers, sweet, yellow, raw
 Bitter almond oil
 Bitter cucumber
 Bitter melon
@@ -75,23 +74,24 @@ Black pepper
 Black tea
 Blackberries
 Blueberries
-Bok choy, USDA: Cabbage, Chinese, pak choi
+Bok choy, USDA name: Cabbage, Chinese, pak choi
 Boysenberries
 Brazil nuts
 Bread
 Broccoli
 Broccoli sprouts
 Brown mustard
-Brown rice
+Brown rice, USDA name: Rice, brown, medium-grain
 Brown rice syrup
+Brown sugar, USDA name: Sugars, brown
 Brussels sprouts
 Buckwheat
 Butter
 Butternut squash
-Cabbage
+Cabbage, USDA name: Cabbage, common
 Canola oil
 Cantaloupe
-Carrots
+Carrots, USDA name: Carrots, raw
 Cashews
 Cauliflower
 Caviar
@@ -113,7 +113,7 @@ Coconut
 Coconut oil
 Coffee
 Collard greens
-Corn
+Corn, USDA name: Corn, sweet, white, cooked, boiled, drained, without salt
 Corn oil
 Crab
 Cranberries
@@ -169,6 +169,7 @@ Kale
 Kefir
 Kelp
 Kidney beans
+Kimchi, USDA name: Cabbage, kimchi
 King mackerel
 Kiwifruit
 Kohlrabi
@@ -218,7 +219,7 @@ Oatmeal
 Oats
 Octopus
 Ohyo
-Olive oil
+Olive oil, USDA name: Oil, olive, salad or cooking
 Olives
 Onions
 Oranges
@@ -253,7 +254,7 @@ Plantains
 Plums
 Pomegranate juice
 Pomegranates
-Pork
+Pork, USDA name: Pork, fresh, belly, raw
 Portobello mushrooms
 Potatoes
 Prunes
@@ -278,7 +279,7 @@ Red wine vinegar
 Reishi mushrooms
 Rhubarb
 Ribs
-Rice
+Rice, USDA name: Rice, white, medium-grain, enriched, cooked
 Rice bran
 Rice bran oil
 Rice wine vinegar
@@ -304,7 +305,7 @@ Sausages
 Scallions
 Scallops
 Seaweed
-Sesame oil, USDA: Oil, sesame
+Sesame oil, best to buy at H-mart, USDA name: Oil, sesame
 Sesame seeds
 Shallots
 Shellfish
@@ -330,7 +331,7 @@ Steak
 Strawberries
 String beans
 Subtropical ginger
-Sugar
+Sugar, USDA name: Sugars, granulated
 Sugar beets
 Sugar snap peas
 Summer squash
@@ -347,7 +348,7 @@ Tea
 Thyme
 Tofu
 Tomato paste
-Tomatoes
+Tomatoes, USDA name: Tomatoes, red, ripe, raw
 Tropical ginger
 Turkey
 Turkey bacon

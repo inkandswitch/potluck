@@ -50,33 +50,44 @@ export function getSheetConfigsOfTextDocument(textDocument: TextDocument) {
     .filter((sheetConfig) => sheetConfig !== undefined) as SheetConfig[];
 }
 
-const WORKOUT_TEXT = `Gym 3/16/22
+const WORKOUT_TEXT = `Gym 7/20/22
 
-Dead 40lb Squat 50lb, Maintain next time.
+Bench 30 Squat 40, Maintain next time.
 
-Gym 3/20/22
+Gym 7/18/22
 
-Dead 50lb 10x3
+Bench 30kg 10x3
+Squat 35kg 10x3  (easy, could increase weights next)
 
-Gym 3/22/22
+Gym 7/16/22
 
-Squat 50 10x3
-Dead 50 10x3
+Squat 30kg 10x3 
+Bench 35kg 10x3
 
+Try to focus on form more
 
-Gym 3/24/22
+Gym 7/13/22
 
-Squat 50 10x3
-Dead 50 10x3
+Squat 30 10x3
+Bench 35 10x3
 
-4/15/22 gym: run + plank
+Gym 7/12/22
 
-4/17/22 gym: elliptical + plank
+run 10 km 
 
-4/20/22 gym:
+Squat 30 10x3
+Bench 35 10x3
 
-Squat 50 10x3
-Dead 50 10x3`;
+7/7/22 gym: elliptical + bench
+
+7/6/22 gym: squat 30, bench 30
+
+7/4/22 gym: run + squat
+
+7/1/22 gym:
+
+Squat 30 10x3
+Bench 35 10x3, felt a bit sore`;
 
 export const textEditorStateMobx = observable.box(
   EditorState.create({ doc: WORKOUT_TEXT })
@@ -231,7 +242,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: generateNanoid(),
         configId: QUANTITY_SHEET_CONFIG_ID,
-      },
+      }
     ],
   },
   [PIZZA_DOCUMENT_ID]: {
@@ -292,7 +303,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "unit",
         formula:
-          // There are two layers of escaping going on here; todo: improve the situation by auto-escaping user input?
+        // There are two layers of escaping going on here; todo: improve the situation by auto-escaping user input?
           'MatchRegexp("\\\\b(cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|gram|g|milliliter|ml)s?\\\\b")',
       },
       { name: "amount", formula: "PrevOfType(unit, 'numbers', 20)" },
@@ -304,7 +315,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     columns: [
       {
         name: "activity",
-        formula: 'MatchRegexp("squat|dead|run|plank|elliptical", "i")',
+        formula: 'MatchRegexp("squat|bench|rowing|triceps|elliptical", "i")',
       },
       {
         name: "numbers",
@@ -338,14 +349,14 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
         formula:
           'MatchHighlight(DataFromDoc("all ingredients", "allIngredients", "name"))',
       },
-      {
+      /*{
         name: "matched",
         formula: "name.data.matchedHighlight",
-      },
-      {
+      },*/
+      /*{
         name: "quantity",
         formula: 'PrevOfType(name, ["quantity", "numbers"], 20)',
-      },
+      },*/
       {
         name: "USDA Name",
         formula: "USDAFoodName(name)",
@@ -401,7 +412,7 @@ export function addSheetConfig() {
 }
 
 export const selectedTextDocumentIdBox = observable.box(
-  GOCHUJANG_PORK_DOCUMENT_ID
+  WORKOUT_DOCUMENT_ID
 );
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
 

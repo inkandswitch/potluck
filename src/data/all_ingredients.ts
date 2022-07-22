@@ -1,5 +1,10 @@
 export const ALL_INGREDIENTS_TEXT = `ground chuck beef
 onion powder
+gochujang
+fish sauce
+onion
+soy sauce
+oil
 garlic powder
 ipa beer
 tomato sauce/puree

@@ -67,6 +67,9 @@ export const editorSelectionHighlightsComputed = computed(
     if (textDocument === undefined) {
       return [];
     }
+    const sheetConfigStyles = getSheetConfigsOfTextDocument(textDocument).map(
+      (sc) => sc.highlightStyle
+    );
     const documentValueRows = getComputedDocumentValues(textDocumentId).get();
     return Object.values(documentValueRows)
       .map((sheetValueRows) =>

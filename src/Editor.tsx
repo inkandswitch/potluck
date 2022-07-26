@@ -7,12 +7,17 @@ import { observer } from "mobx-react-lite";
 import {
   Highlight,
   hoverHighlightsMobx,
+  sheetConfigsMobx,
   Span,
   textDocumentsMobx,
   textEditorStateMobx,
 } from "./primitives";
 import { editorSelectionHighlightsComputed } from "./compute";
-import { doSpansOverlap, isValueRowHighlight } from "./utils";
+import {
+  doSpansOverlap,
+  isValueRowHighlight,
+  styleForHighlight,
+} from "./utils";
 
 const textDocumentIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
@@ -99,8 +104,9 @@ const highlightDecorations = EditorView.decorations.compute(
           }).range(highlight.span[0], highlight.span[1]);
         }),
         ...highlights.map((highlight) => {
+          const style = styleForHighlight(highlight);
           return Decoration.mark({
-            class: "cm-highlight",
+            attributes: { style },
           }).range(highlight.span[0], highlight.span[1]);
         }),
       ],
@@ -162,6 +168,7 @@ export const Editor = observer(
       const unsubscribes: (() => void)[] = [
         autorun(() => {
           const highlights = editorSelectionHighlightsComputed.get();
+
           view.dispatch({
             effects: setHighlightsEffect.of(highlights),
           });

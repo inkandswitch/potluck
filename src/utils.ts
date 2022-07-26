@@ -1,5 +1,10 @@
 import { customAlphabet } from "nanoid";
-import { Highlight, Span, textDocumentsMobx } from "./primitives";
+import {
+  Highlight,
+  sheetConfigsMobx,
+  Span,
+  textDocumentsMobx,
+} from "./primitives";
 import { alphanumeric } from "nanoid-dictionary";
 
 export function doSpansOverlap(a: Span, b: Span) {
@@ -35,3 +40,19 @@ export function isNumericish(value: any): boolean {
 }
 
 export const generateNanoid = customAlphabet(alphanumeric);
+
+export function styleForHighlight(highlight: Highlight) {
+  const sheetConfig = sheetConfigsMobx.get(highlight.sheetConfigId);
+  console.log({ ...sheetConfig?.highlightStyle });
+  switch (sheetConfig?.highlightStyle?._type) {
+    case undefined: {
+      return "";
+    }
+    case "color": {
+      return `background-color: rgba(${sheetConfig.highlightStyle.rgb.r}, ${sheetConfig.highlightStyle.rgb.g}, ${sheetConfig.highlightStyle.rgb.b}, 0.3);`;
+    }
+    case "custom": {
+      return sheetConfig?.highlightStyle.style;
+    }
+  }
+}

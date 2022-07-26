@@ -11,6 +11,7 @@ import {
   sheetConfigsMobx,
   SheetValueRow,
   SheetView,
+  DEFAULT_SHEET_STYLE_OPTIONS,
   Span,
   TextDocument,
   textEditorStateMobx,
@@ -661,6 +662,42 @@ export const SheetComponent = observer(
                   )}
                 </button>
               )}
+              Style:
+              <select
+                value={
+                  sheetConfig.highlightStyle === undefined
+                    ? "none"
+                    : sheetConfig.highlightStyle._type === "custom"
+                    ? "custom"
+                    : sheetConfig.highlightStyle.name
+                }
+                onChange={(e) =>
+                  runInAction(() => {
+                    const value = e.target.value;
+                    if (value === "none") {
+                      sheetConfig.highlightStyle = undefined;
+                    } else if (value === "custom") {
+                      sheetConfig.highlightStyle = {
+                        _type: "custom",
+                        style: "underline",
+                      };
+                    } else {
+                      sheetConfig.highlightStyle =
+                        DEFAULT_SHEET_STYLE_OPTIONS.find(
+                          (style) => style.name === value
+                        );
+                    }
+                  })
+                }
+              >
+                <option value="none">none</option>
+                {DEFAULT_SHEET_STYLE_OPTIONS.filter(
+                  (s) => s._type === "color"
+                ).map((style) => (
+                  <option value={style.name}>{style.name}</option>
+                ))}
+                <option value={"custom"}>custom</option>
+              </select>
             </div>
           </>
         )}

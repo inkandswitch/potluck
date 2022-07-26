@@ -17,11 +17,21 @@ export type Highlight = {
 export type SheetValueRowWithoutSpan = Omit<Highlight, "span">;
 export type SheetValueRow = Highlight | SheetValueRowWithoutSpan;
 
+type HighlightStyle =
+  | { _type: "color"; name: string; rgb: { r: number; g: number; b: number } }
+  | { _type: "custom"; style: string };
+
 export type SheetConfig = {
   id: string;
   name: string;
   columns: FormulaColumn[];
+  highlightStyle?: HighlightStyle;
 };
+
+export const DEFAULT_SHEET_STYLE_OPTIONS: HighlightStyle[] = [
+  { _type: "color", name: "red", rgb: { r: 255, g: 0, b: 0 } },
+  { _type: "color", name: "yellow", rgb: { r: 255, g: 255, b: 0 } },
+];
 
 export enum SheetView {
   Table,
@@ -61,7 +71,7 @@ Squat 35kg 10x3  (easy, could increase weights next)
 
 Gym 7/16/22
 
-Squat 30kg 10x3 
+Squat 30kg 10x3
 Bench 35kg 10x3
 
 Try to focus on form more
@@ -73,7 +83,7 @@ Bench 35 10x3
 
 Gym 7/12/22
 
-run 10 km 
+run 10 km
 
 Squat 30 10x3
 Bench 35 10x3
@@ -242,7 +252,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: generateNanoid(),
         configId: QUANTITY_SHEET_CONFIG_ID,
-      }
+      },
     ],
   },
   [PIZZA_DOCUMENT_ID]: {
@@ -303,7 +313,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "unit",
         formula:
-        // There are two layers of escaping going on here; todo: improve the situation by auto-escaping user input?
+          // There are two layers of escaping going on here; todo: improve the situation by auto-escaping user input?
           'MatchRegexp("\\\\b(cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|gram|g|milliliter|ml)s?\\\\b")',
       },
       { name: "amount", formula: "PrevOfType(unit, 'numbers', 20)" },
@@ -411,9 +421,7 @@ export function addSheetConfig() {
   return sheetConfig;
 }
 
-export const selectedTextDocumentIdBox = observable.box(
-  WORKOUT_DOCUMENT_ID
-);
+export const selectedTextDocumentIdBox = observable.box(WORKOUT_DOCUMENT_ID);
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({

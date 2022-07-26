@@ -21,6 +21,7 @@ import {
   getTextForHighlight,
   isNumericish,
   isValueRowHighlight,
+  styleForHighlight,
 } from "./utils";
 import { FormulaColumn, FORMULA_REFERENCE } from "./formulas";
 import { SheetCalendar } from "./SheetCalendar";
@@ -63,10 +64,14 @@ function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
 
   if (isValueRowHighlight(value)) {
     const text = getTextForHighlight(value);
+    const style = { ...styleForHighlight(value) };
+    console.log({ styleInValue: style });
 
     return (
       <HighlightHoverCard highlight={value}>
-        <span className="bg-yellow-100 rounded">{text}</span>
+        <span className="rounded" style={style}>
+          {text}
+        </span>
       </HighlightHoverCard>
     );
   }

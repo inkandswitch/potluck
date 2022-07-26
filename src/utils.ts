@@ -41,15 +41,16 @@ export function isNumericish(value: any): boolean {
 
 export const generateNanoid = customAlphabet(alphanumeric);
 
-export function styleForHighlight(highlight: Highlight) {
+export function styleForHighlight(highlight: Highlight): any {
   const sheetConfig = sheetConfigsMobx.get(highlight.sheetConfigId);
-  console.log({ ...sheetConfig?.highlightStyle });
   switch (sheetConfig?.highlightStyle?._type) {
     case undefined: {
-      return "";
+      return {};
     }
     case "color": {
-      return `background-color: rgba(${sheetConfig.highlightStyle.rgb.r}, ${sheetConfig.highlightStyle.rgb.g}, ${sheetConfig.highlightStyle.rgb.b}, 0.3);`;
+      return {
+        backgroundColor: `rgba(${sheetConfig.highlightStyle.rgb.r}, ${sheetConfig.highlightStyle.rgb.g}, ${sheetConfig.highlightStyle.rgb.b}, 0.3);`,
+      };
     }
     case "custom": {
       return sheetConfig?.highlightStyle.style;

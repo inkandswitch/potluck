@@ -19,7 +19,7 @@ export type SheetValueRow = Highlight | SheetValueRowWithoutSpan;
 
 type HighlightStyle =
   | { _type: "color"; name: string; rgb: { r: number; g: number; b: number } }
-  | { _type: "custom"; style: string };
+  | { _type: "custom"; style: any };
 
 export type SheetConfig = {
   id: string;

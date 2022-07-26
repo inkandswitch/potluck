@@ -1949,6 +1949,11 @@ style-mod@^4.0.0:
   resolved "https://registry.npmjs.org/style-mod/-/style-mod-4.0.0.tgz"
   integrity sha512-OPhtyEjyyN9x3nhPsu76f52yUGXiZcgvsrFVtvTkyGRQJ0XK+GPc6ov1z+lRpbeabka+MYEQxOYRnt5nF30aMw==
 
+style-object-to-css-string@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/style-object-to-css-string/-/style-object-to-css-string-1.0.1.tgz#ef47ed3e47417189b3ea19604a3599f9310d743a"
+  integrity sha512-ci7tySCofUqq86WziXoEsIE/aGZ2rkw7mmz6Afklhbmk7i05Z1d8hSUaJMUWUOJPbsvK+7TW5ulklZm55/S44Q==
+
 supports-color@^5.3.0:
   version "5.5.0"
   resolved "https://registry.npmjs.org/supports-color/-/supports-color-5.5.0.tgz"

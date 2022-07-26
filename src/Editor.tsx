@@ -4,6 +4,8 @@ import { minimalSetup } from "codemirror";
 import { useEffect, useRef } from "react";
 import { autorun, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
+// @ts-ignore
+import styleToCss from "style-object-to-css-string";
 import {
   Highlight,
   hoverHighlightsMobx,
@@ -104,9 +106,9 @@ const highlightDecorations = EditorView.decorations.compute(
           }).range(highlight.span[0], highlight.span[1]);
         }),
         ...highlights.map((highlight) => {
-          const style = styleForHighlight(highlight);
+          const styleString = styleToCss(styleForHighlight(highlight));
           return Decoration.mark({
-            attributes: { style },
+            attributes: { style: styleString },
           }).range(highlight.span[0], highlight.span[1]);
         }),
       ],

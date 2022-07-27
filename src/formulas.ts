@@ -466,6 +466,8 @@ function evaluateFormula(
       return highlights;
     },
     Timer: (durationHighlight: Highlight): HighlightComponent => {
+      // TODO: remove highlight component entries that are no longer used
+      // not clear when to do this, on every eval?
       const durationText = textDocument.text
         .sliceString(durationHighlight.span[0], durationHighlight.span[1])
         .trim();

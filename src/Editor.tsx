@@ -6,6 +6,7 @@ import { autorun, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   Highlight,
+  highlightComponentEntriesMobx,
   hoverHighlightsMobx,
   Span,
   textDocumentsMobx,
@@ -149,6 +150,12 @@ export const Editor = observer(
                     transaction.changes.mapPos(sheet.highlightSearchRange[1]),
                   ];
                 }
+              }
+              for (const componentEntry of highlightComponentEntriesMobx) {
+                componentEntry.span = [
+                  transaction.changes.mapPos(componentEntry.span[0]),
+                  transaction.changes.mapPos(componentEntry.span[1]),
+                ];
               }
             }
           });

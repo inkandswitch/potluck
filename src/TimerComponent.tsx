@@ -1,9 +1,8 @@
-import { action, computed, observable } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import playPng from "./play.png";
 import pausePng from "./pause.png";
-import classNames from "classnames";
 
 function formatDuration(durationSeconds: number) {
   let rv = "";
@@ -15,16 +14,18 @@ function formatDuration(durationSeconds: number) {
   return rv;
 }
 
+type TimerState = {
+  runningEndTime: number | undefined;
+  pausedSecondsRemaining: number | undefined;
+};
+
 const Timer = observer(
   ({
     durationSeconds,
     state,
   }: {
     durationSeconds: number;
-    state: {
-      runningEndTime: number | undefined;
-      pausedSecondsRemaining: number | undefined;
-    };
+    state: TimerState;
   }) => {
     const [secondsRemainingBox] = useState(() =>
       observable.box<number | undefined>(undefined)
@@ -110,15 +111,29 @@ function durationTextToSeconds(durationText: string): number {
   return seconds;
 }
 
+class TimerComponentData {
+  constructor(readonly state: TimerState) {
+    makeObservable(this, {
+      isRunning: computed,
+    });
+  }
+
+  get isRunning() {
+    return this.state.runningEndTime !== undefined;
+  }
+}
+
 class TimerComponent {
   durationSeconds: number;
   state = observable({
     runningEndTime: undefined,
     pausedSecondsRemaining: undefined,
   });
+  data: TimerComponentData;
 
   constructor(durationText: string) {
     this.durationSeconds = durationTextToSeconds(durationText);
+    this.data = new TimerComponentData(this.state);
   }
 
   render() {

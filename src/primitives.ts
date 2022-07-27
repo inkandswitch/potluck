@@ -42,6 +42,21 @@ export type TextDocument = {
   sheets: TextDocumentSheet[];
 };
 
+export interface HighlightComponent {
+  render: () => React.ReactNode;
+  destroy: () => void;
+}
+
+export type HighlightComponentEntry = {
+  componentType: string;
+  span: Span;
+  text: string;
+  component: HighlightComponent;
+};
+
+export const highlightComponentEntriesMobx =
+  observable.array<HighlightComponentEntry>([]);
+
 export function getSheetConfigsOfTextDocument(textDocument: TextDocument) {
   return textDocument.sheets
     .map((textDocumentSheet) =>
@@ -187,6 +202,7 @@ export const ICE_CREAM_DOCUMENT_ID = "ice cream";
 export const INGREDIENTS_SHEET_CONFIG_ID = generateNanoid();
 export const ALL_INGREDIENTS_SHEET_CONFIG_ID = generateNanoid();
 export const MARKDOWN_SHEET_CONFIG_ID = generateNanoid();
+export const DURATIONS_SHEET_CONFIG_ID = generateNanoid();
 export const DATE_SHEET_CONFIG_ID = generateNanoid();
 export const DATE_SHEET_IN_WORKOUT_ID = generateNanoid();
 export const WORKOUT_SHEET_IN_WORKOUT_ID = generateNanoid();
@@ -416,6 +432,20 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "type",
         formula: "text.data.type",
+      },
+    ],
+  },
+  [DURATIONS_SHEET_CONFIG_ID]: {
+    id: DURATIONS_SHEET_CONFIG_ID,
+    name: "durations",
+    columns: [
+      {
+        name: "value",
+        formula: `MatchRegexp("((\\\\d+\\\\s+(hours?|minutes?|seconds?))\\\\s*)*(\\\\d+\\\\s+(hours?|minutes?|seconds?))")`,
+      },
+      {
+        name: "timer",
+        formula: "Timer(value)",
       },
     ],
   },

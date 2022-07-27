@@ -6,6 +6,9 @@ import {
   getSheetConfigsOfTextDocument,
   TextDocument,
   SheetValueRow,
+  HighlightComponent,
+  highlightComponentEntriesMobx,
+  HighlightComponentEntry,
 } from "./primitives";
 import {
   curry,
@@ -26,6 +29,8 @@ import { OFFICIAL_FOODS } from "./data/officialFoods";
 // @ts-ignore
 import FuzzySet from "fuzzyset";
 import Prism from "prismjs";
+import { createTimerComponent } from "./TimerComponent";
+import { runInAction } from "mobx";
 const foodNameMatchSet = new FuzzySet(
   OFFICIAL_FOODS.map((food: any) => food.description),
   false
@@ -216,22 +221,20 @@ function evaluateFormula(
       distanceLimit?: number
     ) => {
       const typeSheetConfigs = Array.from(sheetConfigsMobx.values()).filter(
-        (sheetConfig) => (
+        (sheetConfig) =>
           isString(type)
             ? sheetConfig.name === type
             : type.includes(sheetConfig.name)
-        )
       );
 
       const sheetValueRows = sortBy(
-        typeSheetConfigs.flatMap((typeSheetConfig) => (
-          getComputedSheetValue(
-            textDocument.id,
-            typeSheetConfig.id
-          ).get()
-        ))
-          .filter(row => "span" in row) as Highlight[],
-        ({ span }) => span[0])
+        typeSheetConfigs
+          .flatMap((typeSheetConfig) =>
+            getComputedSheetValue(textDocument.id, typeSheetConfig.id).get()
+          )
+          .filter((row) => "span" in row) as Highlight[],
+        ({ span }) => span[0]
+      );
 
       return sheetValueRows.find(
         (r) =>
@@ -248,23 +251,20 @@ function evaluateFormula(
       distanceLimit?: number
     ) => {
       const typeSheetConfigs = Array.from(sheetConfigsMobx.values()).filter(
-        (sheetConfig) => (
+        (sheetConfig) =>
           isString(type)
             ? sheetConfig.name === type
             : type.includes(sheetConfig.name)
-        )
       );
 
       const sheetValueRows = sortBy(
-        typeSheetConfigs.flatMap((typeSheetConfig) => (
-          getComputedSheetValue(
-            textDocument.id,
-            typeSheetConfig.id
-          ).get()
-        ))
-          .filter(row => "span" in row) as Highlight[],
-        ({ span }) => span[0])
-
+        typeSheetConfigs
+          .flatMap((typeSheetConfig) =>
+            getComputedSheetValue(textDocument.id, typeSheetConfig.id).get()
+          )
+          .filter((row) => "span" in row) as Highlight[],
+        ({ span }) => span[0]
+      );
 
       return [...sheetValueRows]
         .reverse()
@@ -465,6 +465,33 @@ function evaluateFormula(
 
       return highlights;
     },
+    Timer: (durationHighlight: Highlight): HighlightComponent => {
+      // TODO: remove highlight component entries that are no longer used
+      // not clear when to do this, on every eval?
+      const durationText = textDocument.text
+        .sliceString(durationHighlight.span[0], durationHighlight.span[1])
+        .trim();
+      const existingTimer = highlightComponentEntriesMobx.find(
+        (entry) =>
+          entry.componentType === "Timer" &&
+          entry.span[0] === durationHighlight.span[0] &&
+          entry.span[1] === durationHighlight.span[1] &&
+          entry.text === durationText
+      );
+      if (existingTimer !== undefined) {
+        return existingTimer.component;
+      }
+      const componentEntry: HighlightComponentEntry = {
+        componentType: "Timer",
+        span: durationHighlight.span,
+        text: durationText,
+        component: createTimerComponent(durationText),
+      };
+      runInAction(() => {
+        highlightComponentEntriesMobx.push(componentEntry);
+      });
+      return componentEntry.component;
+    },
   };
 
   try {
@@ -602,9 +629,9 @@ export function evaluateSheet(
   if (textDocumentSheet === undefined) {
     throw new Error(
       "expected to find sheet of type " +
-      sheetConfig.name +
-      " in text document " +
-      textDocument.name
+        sheetConfig.name +
+        " in text document " +
+        textDocument.name
     );
   }
 

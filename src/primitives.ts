@@ -179,6 +179,7 @@ export const ICE_CREAM_DOCUMENT_ID = "ice cream";
 export const INGREDIENTS_SHEET_CONFIG_ID = generateNanoid();
 export const ALL_INGREDIENTS_SHEET_CONFIG_ID = generateNanoid();
 export const MARKDOWN_SHEET_CONFIG_ID = generateNanoid();
+export const DURATIONS_SHEET_CONFIG_ID = generateNanoid();
 export const DATE_SHEET_CONFIG_ID = generateNanoid();
 export const DATE_SHEET_IN_WORKOUT_ID = generateNanoid();
 export const WORKOUT_SHEET_IN_WORKOUT_ID = generateNanoid();
@@ -242,7 +243,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: generateNanoid(),
         configId: QUANTITY_SHEET_CONFIG_ID,
-      }
+      },
     ],
   },
   [PIZZA_DOCUMENT_ID]: {
@@ -303,7 +304,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "unit",
         formula:
-        // There are two layers of escaping going on here; todo: improve the situation by auto-escaping user input?
+          // There are two layers of escaping going on here; todo: improve the situation by auto-escaping user input?
           'MatchRegexp("\\\\b(cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|gram|g|milliliter|ml)s?\\\\b")',
       },
       { name: "amount", formula: "PrevOfType(unit, 'numbers', 20)" },
@@ -396,6 +397,16 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
     ],
   },
+  [DURATIONS_SHEET_CONFIG_ID]: {
+    id: DURATIONS_SHEET_CONFIG_ID,
+    name: "durations",
+    columns: [
+      {
+        name: "value",
+        formula: `MatchRegexp("((\\\\d+[hms])\\\\s*)*((\\\\d+[hms]))")`,
+      },
+    ],
+  },
 });
 
 export function addSheetConfig() {
@@ -411,9 +422,7 @@ export function addSheetConfig() {
   return sheetConfig;
 }
 
-export const selectedTextDocumentIdBox = observable.box(
-  WORKOUT_DOCUMENT_ID
-);
+export const selectedTextDocumentIdBox = observable.box(WORKOUT_DOCUMENT_ID);
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({

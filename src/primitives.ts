@@ -42,6 +42,21 @@ export type TextDocument = {
   sheets: TextDocumentSheet[];
 };
 
+export interface HighlightComponent {
+  render: () => React.ReactNode;
+  destroy: () => void;
+}
+
+export type HighlightComponentEntry = {
+  componentType: string;
+  span: Span;
+  text: string;
+  component: HighlightComponent;
+};
+
+export const highlightComponentEntriesMobx =
+  observable.array<HighlightComponentEntry>([]);
+
 export function getSheetConfigsOfTextDocument(textDocument: TextDocument) {
   return textDocument.sheets
     .map((textDocumentSheet) =>

@@ -60,6 +60,10 @@ function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
     return <span className="text-red-500">#Err</span>;
   }
 
+  if (value?.render !== undefined) {
+    return <span>{value.render()}</span>;
+  }
+
   if (isValueRowHighlight(value)) {
     const text = getTextForHighlight(value);
 

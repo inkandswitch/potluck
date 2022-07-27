@@ -14,6 +14,8 @@ import {
   Span,
   TextDocument,
   textEditorStateMobx,
+  PropertyDefinition,
+  PropertyVisibility,
 } from "./primitives";
 import {
   doSpansOverlap,
@@ -21,7 +23,7 @@ import {
   isNumericish,
   isValueRowHighlight,
 } from "./utils";
-import { FormulaColumn, FORMULA_REFERENCE } from "./formulas";
+import { FORMULA_REFERENCE } from "./formulas";
 import { SheetCalendar } from "./SheetCalendar";
 import { HighlightHoverCard } from "./HighlightHoverCard";
 import {
@@ -51,7 +53,7 @@ let i = 1;
 export type SheetViewProps = {
   textDocument: TextDocument;
   sheetConfig: SheetConfig;
-  columns: FormulaColumn[];
+  columns: PropertyDefinition[];
   rows: SheetValueRow[];
 };
 
@@ -305,7 +307,7 @@ export const SheetTable = observer(
   }: {
     textDocument: TextDocument;
     sheetConfig: SheetConfig;
-    columns: FormulaColumn[];
+    columns: PropertyDefinition[];
     rows: SheetValueRow[];
   }) => {
     const [sortBy, setSortBy] = useState<
@@ -325,21 +327,22 @@ export const SheetTable = observer(
     ).get();
 
     const addColumn = action(() => {
-      sheetConfig.columns.push({
+      sheetConfig.properties.push({
         name: `col${++i}`,
         formula: "",
+        visibility: PropertyVisibility.Hidden,
       });
       setSelectedFormulaIndex(columns.length - 1);
     });
 
     const changeFormulaAt = action((changedIndex: number, formula: string) => {
-      sheetConfig.columns = sheetConfig.columns.map((column, index) =>
+      sheetConfig.properties = sheetConfig.properties.map((column, index) =>
         index === changedIndex ? { ...column, formula } : column
       );
     });
 
     const changeNameAt = action((changedIndex: number, name: string) => {
-      sheetConfig.columns = sheetConfig.columns.map((column, index) =>
+      sheetConfig.properties = sheetConfig.properties.map((column, index) =>
         index === changedIndex ? { ...column, name } : column
       );
     });
@@ -382,6 +385,17 @@ export const SheetTable = observer(
               key={selectedFormulaIndex}
             />
             <FormulaReferenceButton />
+            <select
+              value={columns[selectedFormulaIndex].visibility}
+              onChange={(e) =>
+                (columns[selectedFormulaIndex].visibility = e.target
+                  .value as PropertyVisibility)
+              }
+            >
+              {Object.entries(PropertyVisibility).map(([name, value]) => (
+                <option value={value}>{name}</option>
+              ))}
+            </select>
           </div>
         )}
 
@@ -542,7 +556,7 @@ export const SheetComponent = observer(
     if (sheetConfig === undefined) {
       return null;
     }
-    const columns = sheetConfig.columns;
+    const columns = sheetConfig.properties;
 
     const isExpanded = isSheetExpandedMobx.get(id);
 
@@ -588,7 +602,7 @@ export const SheetComponent = observer(
                 >
                   <TableIcon className="inline" /> Table
                 </button>
-                {sheetConfig.columns.some(
+                {sheetConfig.properties.some(
                   (column) => column.name === "date"
                 ) ? (
                   <button

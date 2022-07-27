@@ -1,6 +1,7 @@
 import { customAlphabet } from "nanoid";
 import { Highlight, Span, textDocumentsMobx } from "./primitives";
 import { alphanumeric } from "nanoid-dictionary";
+import { getComputedSheetValue } from "./compute";
 
 export function doSpansOverlap(a: Span, b: Span) {
   return a[0] <= b[1] && b[0] <= a[1];

@@ -74,11 +74,6 @@ Prism.languages.markdown = Prism.languages.extend("markup", {}), Prism.languages
 //@ts-ignore
 }), Prism.languages.markdown.bold.inside.url = Prism.util.clone(Prism.languages.markdown.url), Prism.languages.markdown.italic.inside.url = Prism.util.clone(Prism.languages.markdown.url), Prism.languages.markdown.bold.inside.italic = Prism.util.clone(Prism.languages.markdown.italic), Prism.languages.markdown.italic.inside.bold = Prism.util.clone(Prism.languages.markdown.bold); // prettier-ignore
 
-export type FormulaColumn = {
-  name: string;
-  formula: string;
-};
-
 export type Scope = { [name: string]: any };
 
 function evalCondition(condition: any, item: any): any {
@@ -635,7 +630,7 @@ export function evaluateSheet(
     );
   }
 
-  for (const column of sheetConfig.columns) {
+  for (const column of sheetConfig.properties) {
     if (resultRows === undefined) {
       const result = evaluateFormula(
         textDocument,

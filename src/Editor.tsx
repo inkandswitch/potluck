@@ -1,19 +1,81 @@
-import { Decoration, EditorView } from "@codemirror/view";
+import { Decoration, EditorView, WidgetType } from "@codemirror/view";
 import { Facet, StateEffect, StateField } from "@codemirror/state";
 import { minimalSetup } from "codemirror";
 import { useEffect, useRef } from "react";
-import { autorun, runInAction } from "mobx";
+import { autorun, comparer, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   Highlight,
   highlightComponentEntriesMobx,
   hoverHighlightsMobx,
+  PropertyVisibility,
+  sheetConfigsMobx,
   Span,
   textDocumentsMobx,
   textEditorStateMobx,
 } from "./primitives";
-import { editorSelectionHighlightsComputed } from "./compute";
-import { doSpansOverlap, isValueRowHighlight } from "./utils";
+import {
+  editorSelectionHighlightsComputed,
+  getComputedSheetValue,
+} from "./compute";
+import {
+  doSpansOverlap,
+  getTextForHighlight,
+  isValueRowHighlight,
+} from "./utils";
+
+const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
+const MAX_SUPERSCRIPT_LENGTH = 20;
+class HighlightDataWidget extends WidgetType {
+  constructor(
+    readonly highlightData: { [key: string]: string },
+    readonly visibleProperties: string[]
+  ) {
+    super();
+  }
+
+  eq(other: WidgetType): boolean {
+    return (
+      other instanceof HighlightDataWidget &&
+      comparer.structural(this.highlightData, other.highlightData) &&
+      comparer.structural(this.visibleProperties, other.visibleProperties)
+    );
+  }
+
+  toDOM() {
+    const root = document.createElement("span");
+    root.className = "relative";
+    const wrap = document.createElement("span");
+    root.appendChild(wrap);
+    wrap.className = "absolute bottom-full left-0 flex gap-1";
+    wrap.setAttribute("aria-hidden", "true");
+    if (this.highlightData === undefined) {
+      return wrap;
+    }
+    for (const key of this.visibleProperties) {
+      const value = this.highlightData[key];
+      if (value === undefined) {
+        continue;
+      }
+      let valueAsText = isValueRowHighlight(value)
+        ? getTextForHighlight(value) ?? ""
+        : value;
+      if (valueAsText.length > MAX_SUPERSCRIPT_LENGTH) {
+        valueAsText = valueAsText.substring(0, MAX_SUPERSCRIPT_LENGTH) + "...";
+      }
+      const token = document.createElement("span");
+      token.className = `${ANNOTATION_TOKEN_CLASSNAME} text-[#3a82f5] text-[11px] leading-[8px] whitespace-nowrap relative top-0.5`;
+      token.innerText = valueAsText;
+      token.setAttribute("data-snippet-property-name", key);
+      wrap.appendChild(token);
+    }
+    return root;
+  }
+
+  ignoreEvent(event: Event): boolean {
+    return false;
+  }
+}
 
 const textDocumentIdFacet = Facet.define<string, string>({
   combine: (values) => values[0],
@@ -99,10 +161,25 @@ const highlightDecorations = EditorView.decorations.compute(
             class: "cm-highlight-hover",
           }).range(highlight.span[0], highlight.span[1]);
         }),
-        ...highlights.map((highlight) => {
-          return Decoration.mark({
-            class: "cm-highlight",
-          }).range(highlight.span[0], highlight.span[1]);
+        ...highlights.flatMap((highlight) => {
+          return [
+            Decoration.mark({
+              class: "cm-highlight",
+            }).range(highlight.span[0], highlight.span[1]),
+            Decoration.widget({
+              widget: new HighlightDataWidget(
+                highlight.data,
+                sheetConfigsMobx
+                  .get(highlight.sheetConfigId)!
+                  .properties.filter(
+                    (property) =>
+                      property.visibility === PropertyVisibility.Superscript
+                  )
+                  .map((property) => property.name)
+              ),
+              side: 1,
+            }).range(highlight.span[0]),
+          ];
         }),
       ],
       true

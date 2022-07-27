@@ -12,8 +12,8 @@ import {
   SheetConfig,
   SheetValueRow,
   TextDocument,
+  PropertyDefinition,
 } from "./primitives";
-import { FormulaColumn } from "./formulas";
 import { useMemo, useState } from "react";
 import { getTextForHighlight, isValueRowHighlight } from "./utils";
 import addDays from "date-fns/addDays";
@@ -78,7 +78,7 @@ export const SheetCalendar = observer(
         "en-US": enUS,
       },
     });
-    const titleColumnName = sheetConfig.columns[0].name;
+    const titleColumnName = sheetConfig.properties[0].name;
     const events = useMemo(
       () =>
         rows.map((row, i): CalendarEvent => {

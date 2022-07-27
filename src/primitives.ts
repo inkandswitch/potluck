@@ -441,7 +441,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     columns: [
       {
         name: "value",
-        formula: `MatchRegexp("((\\\\d+[hms])\\\\s*)*((\\\\d+[hms]))")`,
+        formula: `MatchRegexp("((\\\\d+\\\\s+(hours?|minutes?|seconds?))\\\\s*)*(\\\\d+\\\\s+(hours?|minutes?|seconds?))")`,
       },
       {
         name: "timer",

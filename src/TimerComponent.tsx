@@ -3,6 +3,7 @@ import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import playPng from "./play.png";
 import pausePng from "./pause.png";
+import { generateNanoid } from "./utils";
 
 function formatDuration(durationSeconds: number) {
   let rv = "";
@@ -89,20 +90,23 @@ const Timer = observer(
 );
 
 function durationTextToSeconds(durationText: string): number {
-  const regex = /(\d)+([hms])/g;
+  const regex = /(\d+)\s+(hours?|minutes?|seconds?)/g;
   let match;
   let seconds = 0;
   while ((match = regex.exec(durationText)) !== null) {
     switch (match[2]) {
-      case "h": {
+      case "hour":
+      case "hours": {
         seconds += parseInt(match[1]) * 60 * 60;
         break;
       }
-      case "m": {
+      case "minute":
+      case "minutes": {
         seconds += parseInt(match[1]) * 60;
         break;
       }
-      case "s": {
+      case "second":
+      case "seconds": {
         seconds += parseInt(match[1]);
         break;
       }
@@ -124,6 +128,7 @@ class TimerComponentData {
 }
 
 class TimerComponent {
+  id = generateNanoid();
   durationSeconds: number;
   state = observable({
     runningEndTime: undefined,
@@ -137,7 +142,13 @@ class TimerComponent {
   }
 
   render() {
-    return <Timer durationSeconds={this.durationSeconds} state={this.state} />;
+    return (
+      <Timer
+        durationSeconds={this.durationSeconds}
+        state={this.state}
+        key={this.id}
+      />
+    );
   }
 
   destroy() {}

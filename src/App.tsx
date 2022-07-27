@@ -74,7 +74,7 @@ const TextDocumentName = observer(
           onChange={action((e) => {
             textDocument.name = e.target.value;
           })}
-          className="text-xl border-b border-gray-200 w-full mb-4 pb-1 outline-none focus:border-gray-400"
+          className="text-md border-b border-gray-100 w-full mb-4 pb-0.5 outline-none focus:border-gray-300"
         />
       </div>
     );
@@ -249,7 +249,7 @@ const PersistenceButton = observer(() => {
 const App = observer(() => {
   const textDocumentId = selectedTextDocumentIdBox.get();
   return (
-    <FileDropWrapper className="h-screen flex pl-4">
+    <FileDropWrapper className="h-screen flex px-12">
       <div className="w-1/2 max-w-lg flex flex-col flex-shrink-0">
         <TextDocumentSelector />
         <TextDocumentComponent

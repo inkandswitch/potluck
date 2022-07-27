@@ -7,6 +7,8 @@ import { observer } from "mobx-react-lite";
 import {
   Highlight,
   hoverHighlightsMobx,
+  PropertyVisibility,
+  sheetConfigsMobx,
   Span,
   textDocumentsMobx,
   textEditorStateMobx,
@@ -16,17 +18,17 @@ import {
   getComputedSheetValue,
 } from "./compute";
 import {
-  dataForHighlightRow,
   doSpansOverlap,
   getTextForHighlight,
   isValueRowHighlight,
 } from "./utils";
 
 const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
+const MAX_SUPERSCRIPT_LENGTH = 20;
 class HighlightDataWidget extends WidgetType {
   constructor(
     readonly highlightData: { [key: string]: string },
-    readonly highlightProperties: string[]
+    readonly visibleProperties: string[]
   ) {
     super();
   }
@@ -35,7 +37,7 @@ class HighlightDataWidget extends WidgetType {
     return (
       other instanceof HighlightDataWidget &&
       comparer.structural(this.highlightData, other.highlightData) &&
-      comparer.structural(this.highlightProperties, other.highlightProperties)
+      comparer.structural(this.visibleProperties, other.visibleProperties)
     );
   }
 
@@ -49,15 +51,19 @@ class HighlightDataWidget extends WidgetType {
     if (this.highlightData === undefined) {
       return wrap;
     }
-    for (const [key, value] of Object.entries(this.highlightData)) {
+    for (const key of this.visibleProperties) {
+      const value = this.highlightData[key];
       if (value === undefined) {
         continue;
       }
-      const valueAsText = isValueRowHighlight(value)
+      let valueAsText = isValueRowHighlight(value)
         ? getTextForHighlight(value) ?? ""
         : value;
+      if (valueAsText.length > MAX_SUPERSCRIPT_LENGTH) {
+        valueAsText = valueAsText.substring(0, MAX_SUPERSCRIPT_LENGTH) + "...";
+      }
       const token = document.createElement("span");
-      token.className = `${ANNOTATION_TOKEN_CLASSNAME} text-[#3a82f5] text-[11px] leading-[8px] whitespace-nowrap relative`;
+      token.className = `${ANNOTATION_TOKEN_CLASSNAME} text-[#3a82f5] text-[11px] leading-[8px] whitespace-nowrap relative top-0.5`;
       token.innerText = valueAsText;
       token.setAttribute("data-snippet-property-name", key);
       wrap.appendChild(token);
@@ -155,13 +161,21 @@ const highlightDecorations = EditorView.decorations.compute(
           }).range(highlight.span[0], highlight.span[1]);
         }),
         ...highlights.flatMap((highlight) => {
-          console.log({ highlight, text: getTextForHighlight(highlight) });
           return [
             Decoration.mark({
               class: "cm-highlight",
             }).range(highlight.span[0], highlight.span[1]),
             Decoration.widget({
-              widget: new HighlightDataWidget(highlight.data, ["hello", "foo"]),
+              widget: new HighlightDataWidget(
+                highlight.data,
+                sheetConfigsMobx
+                  .get(highlight.sheetConfigId)!
+                  .properties.filter(
+                    (property) =>
+                      property.visibility === PropertyVisibility.Superscript
+                  )
+                  .map((property) => property.name)
+              ),
               side: 1,
             }).range(highlight.span[0]),
           ];

@@ -1,6 +1,5 @@
 import { observable, runInAction } from "mobx";
 import { EditorState, Text } from "@codemirror/state";
-import { FormulaColumn } from "./formulas";
 import { ALL_INGREDIENTS_TEXT } from "./data/all_ingredients";
 import { generateNanoid } from "./utils";
 import { EventEmitter } from "eventemitter3";
@@ -17,10 +16,22 @@ export type Highlight = {
 export type SheetValueRowWithoutSpan = Omit<Highlight, "span">;
 export type SheetValueRow = Highlight | SheetValueRowWithoutSpan;
 
+export enum PropertyVisibility {
+  None,
+  Inline,
+  Superscript,
+}
+
+export type PropertyDefinition = {
+  name: string;
+  formula: string;
+  visibility: PropertyVisibility;
+};
+
 export type SheetConfig = {
   id: string;
   name: string;
-  columns: FormulaColumn[];
+  properties: PropertyDefinition[];
 };
 
 export enum SheetView {
@@ -304,73 +315,104 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
   [NUMBER_SHEET_CONFIG_ID]: {
     id: NUMBER_SHEET_CONFIG_ID,
     name: "numbers",
-    columns: [{ name: "value", formula: 'MatchRegexp("[0-9]+")' }],
+    properties: [
+      {
+        name: "value",
+        formula: 'MatchRegexp("[0-9]+")',
+        visibility: PropertyVisibility.None,
+      },
+    ],
   },
   [DATE_SHEET_CONFIG_ID]: {
     id: DATE_SHEET_CONFIG_ID,
     name: "dates",
-    columns: [
+    properties: [
       {
         name: "date",
         formula: 'MatchRegexp("([0-9]{1,2})/([0-9]{1,2})/([0-9]{2})")',
+        visibility: PropertyVisibility.None,
       },
-      { name: "day", formula: "ParseInt(Second(date.data.groups))" },
-      { name: "month", formula: "ParseInt(First(date.data.groups))" },
-      { name: "year", formula: "ParseInt(Third(date.data.groups))" },
+      {
+        name: "day",
+        formula: "ParseInt(Second(date.data.groups))",
+        visibility: PropertyVisibility.None,
+      },
+      {
+        name: "month",
+        formula: "ParseInt(First(date.data.groups))",
+        visibility: PropertyVisibility.None,
+      },
+      {
+        name: "year",
+        formula: "ParseInt(Third(date.data.groups))",
+        visibility: PropertyVisibility.None,
+      },
     ],
   },
   [QUANTITY_SHEET_CONFIG_ID]: {
     id: QUANTITY_SHEET_CONFIG_ID,
     name: "quantity",
-    columns: [
+    properties: [
       {
         name: "unit",
         formula:
           // There are two layers of escaping going on here; todo: improve the situation by auto-escaping user input?
           'MatchRegexp("\\\\b(cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|gram|g|milliliter|ml)s?\\\\b")',
+        visibility: PropertyVisibility.None,
       },
-      { name: "amount", formula: "PrevOfType(unit, 'numbers', 20)" },
+      {
+        name: "amount",
+        formula: "PrevOfType(unit, 'numbers', 20)",
+        visibility: PropertyVisibility.None,
+      },
     ],
   },
   [WORKOUT_SHEET_CONFIG_ID]: {
     id: WORKOUT_SHEET_CONFIG_ID,
     name: "workouts",
-    columns: [
+    properties: [
       {
         name: "activity",
         formula: 'MatchRegexp("squat|bench|rowing|triceps|elliptical", "i")',
+        visibility: PropertyVisibility.None,
       },
       {
         name: "numbers",
         formula:
           'Filter(NextUntil(activity, HasType("workouts")), SameLine(activity))',
+        visibility: PropertyVisibility.None,
       },
       {
         name: "weight",
         formula: "First(numbers)",
+        visibility: PropertyVisibility.None,
       },
       {
         name: "reps",
         formula: "Second(numbers)",
+        visibility: PropertyVisibility.None,
       },
       {
         name: "sets",
         formula: "Third(numbers)",
+        visibility: PropertyVisibility.None,
       },
       {
         name: "date",
         formula: 'PrevOfType(activity, "dates")',
+        visibility: PropertyVisibility.None,
       },
     ],
   },
   [INGREDIENTS_SHEET_CONFIG_ID]: {
     id: INGREDIENTS_SHEET_CONFIG_ID,
     name: "ingredients",
-    columns: [
+    properties: [
       {
         name: "name",
         formula:
           'MatchHighlight(DataFromDoc("all ingredients", "allIngredients", "name"))',
+        visibility: PropertyVisibility.None,
       },
       /*{
         name: "matched",
@@ -383,39 +425,45 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "USDA Name",
         formula: "USDAFoodName(name)",
+        visibility: PropertyVisibility.Superscript,
       },
       {
         name: "quantity",
         formula: 'PrevOfType(name, ["quantity", "numbers"], 20)',
+        visibility: PropertyVisibility.None,
       },
     ],
   },
   [ALL_INGREDIENTS_SHEET_CONFIG_ID]: {
     id: ALL_INGREDIENTS_SHEET_CONFIG_ID,
     name: "allIngredients",
-    columns: [
+    properties: [
       {
         name: "name",
         formula: 'SplitLines(",")',
+        visibility: PropertyVisibility.None,
       },
       {
         name: "officialName",
         formula:
           'First(Filter(MatchRegexp("USDA name: (.*),?"), SameLine(name)))',
+        visibility: PropertyVisibility.None,
       },
     ],
   },
   [MARKDOWN_SHEET_CONFIG_ID]: {
     id: MARKDOWN_SHEET_CONFIG_ID,
     name: "markdown",
-    columns: [
+    properties: [
       {
         name: "text",
         formula: "Markdown()",
+        visibility: PropertyVisibility.None,
       },
       {
         name: "type",
         formula: "text.data.type",
+        visibility: PropertyVisibility.None,
       },
     ],
   },
@@ -423,10 +471,12 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
 
 export function addSheetConfig() {
   const id = generateNanoid();
-  const sheetConfig = {
+  const sheetConfig: SheetConfig = {
     id,
     name: `sheet${nextSheetIndex++}`,
-    columns: [{ name: "col1", formula: "" }],
+    properties: [
+      { name: "col1", formula: "", visibility: PropertyVisibility.None },
+    ],
   };
   runInAction(() => {
     sheetConfigsMobx.set(id, sheetConfig);

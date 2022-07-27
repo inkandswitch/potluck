@@ -126,7 +126,10 @@ export const Editor = observer(
               padding: "4px",
             },
             ".cm-content": {
-              fontFamily: `ui-serif, Georgia, Cambria, "Times New Roman", Times, serif`,
+              fontFamily: `"SF Compact", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";`,
+              fontSize: "14px",
+              lineHeight: "1.8",
+              color: "#555",
             },
           }),
           EditorView.lineWrapping,
@@ -187,10 +190,7 @@ export const Editor = observer(
     }, [textDocument]);
 
     return (
-      <div
-        className="text-lg h-full bg-white border-black border-2 rounded-lg overflow-auto"
-        ref={editorRef}
-      />
+      <div className="text-lg h-full bg-white  overflow-auto" ref={editorRef} />
     );
   }
 );

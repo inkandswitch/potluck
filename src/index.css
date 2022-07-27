@@ -35,11 +35,11 @@
 }
 
 .cm-highlight {
-  @apply bg-yellow-100 rounded;
+  @apply border-b-2 border-gray-300 py-0.5;
 }
 
 .cm-highlight-hover {
-  @apply border-b-2 border-yellow-400;
+  @apply bg-gray-100
 }
 
 .rbc-event:hover {

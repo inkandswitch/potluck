@@ -76,7 +76,7 @@ Squat 35kg 10x3  (easy, could increase weights next)
 
 Gym 7/16/22
 
-Squat 30kg 10x3 
+Squat 30kg 10x3
 Bench 35kg 10x3
 
 Try to focus on form more
@@ -88,7 +88,7 @@ Bench 35 10x3
 
 Gym 7/12/22
 
-run 10 km 
+run 10 km
 
 Squat 30 10x3
 Bench 35 10x3
@@ -103,6 +103,13 @@ Bench 35 10x3
 
 Squat 30 10x3
 Bench 35 10x3, felt a bit sore`;
+
+const COFFEE_TEXT = `Grind 11 g coffee, medium-fine.
+Add 200 g water, brew 2 minutes, plunge!
+
+Notes:
+6/22: Pretty good, but forgot to swirl.
+6/23: Felt weak and under-extracted. Grind finer?`;
 
 export const textEditorStateMobx = observable.box(
   EditorState.create({ doc: WORKOUT_TEXT })
@@ -186,6 +193,7 @@ To serve, top pizza with 3 scallions, thinly sliced; cut into squares.`;
 export const WORKOUT_DOCUMENT_ID = "workout";
 export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork";
 export const PIZZA_DOCUMENT_ID = generateNanoid();
+export const COFFEE_DOCUMENT_ID = generateNanoid();
 export const ALL_INGREDIENTS_DOCUMENT_ID = "all ingredients";
 export const WORKOUT_SHEET_CONFIG_ID = generateNanoid();
 export const NUMBER_SHEET_CONFIG_ID = generateNanoid();
@@ -270,6 +278,21 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
         id: INGREDIENTS_SHEET_IN_PIZZA_ID,
         configId: INGREDIENTS_SHEET_CONFIG_ID,
       },
+      {
+        id: generateNanoid(),
+        configId: NUMBER_SHEET_CONFIG_ID,
+      },
+      {
+        id: generateNanoid(),
+        configId: QUANTITY_SHEET_CONFIG_ID,
+      },
+    ],
+  },
+  [COFFEE_DOCUMENT_ID]: {
+    id: COFFEE_DOCUMENT_ID,
+    name: "☕️ James Hoffmann Aeropress",
+    text: Text.of(COFFEE_TEXT.split("\n")),
+    sheets: [
       {
         id: generateNanoid(),
         configId: NUMBER_SHEET_CONFIG_ID,
@@ -441,7 +464,7 @@ export function addSheetConfig() {
   return sheetConfig;
 }
 
-export const selectedTextDocumentIdBox = observable.box(WORKOUT_DOCUMENT_ID);
+export const selectedTextDocumentIdBox = observable.box(COFFEE_DOCUMENT_ID);
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({

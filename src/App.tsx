@@ -257,7 +257,7 @@ const App = observer(() => {
           key={textDocumentId}
         />
       </div>
-      <div className="grow h-full overflow-auto pl-8 pr-6 pt-24">
+      <div className="grow h-full overflow-auto pl-8 pr-6 pt-24 border-l border-gray-100">
         <DocumentSheets textDocumentId={textDocumentId} />
       </div>
       <PersistenceButton />

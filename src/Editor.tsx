@@ -127,7 +127,7 @@ export const Editor = observer(
             },
             ".cm-content": {
               fontFamily: `"SF Compact", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";`,
-              fontSize: "14px",
+              fontSize: "15px",
               lineHeight: "1.8",
               color: "#555",
             },

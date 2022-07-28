@@ -141,6 +141,8 @@ const GOCHUJANG_PORK_TEXT = `Grilled Gochujang Pork With Fresh Sesame Kimchi
 
 Pork shoulder is often prepared as a large roast, requiring hours of cooking until it’s tender. But if you slice it thinly and pound it, the meat quickly absorbs this savory gochujang marinade and cooks up in no time. The spicy pork is balanced by a cool and crisp sesame kimchi, eaten fresh like a salad rather than fermented like traditional preparations. Baby bok choy stands in for the usual napa cabbage, and it’s coated in a vibrant sauce of garlic, ginger, gochugaru, fish sauce and nutty sesame oil. Tuck any leftover pork and kimchi into sandwiches the next day, garnished with tomatoes and mayonnaise.
 
+scale: 2x
+
 2 tablespoons gochugaru
 2 tablespoons distilled white vinegar
 2 tablespoons toasted sesame oil
@@ -215,9 +217,11 @@ export const ALL_INGREDIENTS_SHEET_CONFIG_ID = generateNanoid();
 export const MARKDOWN_SHEET_CONFIG_ID = generateNanoid();
 export const DURATIONS_SHEET_CONFIG_ID = generateNanoid();
 export const DATE_SHEET_CONFIG_ID = generateNanoid();
+export const SCALE_SHEET_CONFIG_ID = generateNanoid();
 export const DATE_SHEET_IN_WORKOUT_ID = generateNanoid();
 export const WORKOUT_SHEET_IN_WORKOUT_ID = generateNanoid();
 export const INGREDIENTS_SHEET_IN_GOCHUJANG_ID = generateNanoid();
+export const SCALE_SHEET_IN_GOCHUJANG_ID = generateNanoid();
 export const INGREDIENTS_SHEET_IN_PIZZA_ID = generateNanoid();
 
 export const textDocumentsMobx = observable.map<string, TextDocument>({
@@ -278,6 +282,10 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
         id: generateNanoid(),
         configId: QUANTITY_SHEET_CONFIG_ID,
       },
+      {
+        id: SCALE_SHEET_IN_GOCHUJANG_ID,
+        configId: SCALE_SHEET_CONFIG_ID
+      }
     ],
   },
   [PIZZA_DOCUMENT_ID]: {
@@ -509,6 +517,22 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
     ],
   },
+  [SCALE_SHEET_CONFIG_ID]: {
+    id: SCALE_SHEET_CONFIG_ID,
+    name: "scale",
+    properties: [
+      {
+        name: "match",
+        formula: 'MatchRegexp("scale: ?(\\\\d+\\\\.?\\\\d*)x")',
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "value",
+        formula: "ParseInt(First(match.data.groups))",
+        visibility: PropertyVisibility.Hidden,
+      },
+    ]
+  }
 });
 
 export function addSheetConfig() {
@@ -526,7 +550,7 @@ export function addSheetConfig() {
   return sheetConfig;
 }
 
-export const selectedTextDocumentIdBox = observable.box(WORKOUT_DOCUMENT_ID);
+export const selectedTextDocumentIdBox = observable.box(GOCHUJANG_PORK_DOCUMENT_ID);
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({
@@ -534,4 +558,5 @@ export const isSheetExpandedMobx = observable.map<string, boolean>({
   [WORKOUT_SHEET_IN_WORKOUT_ID]: true,
   [INGREDIENTS_SHEET_IN_GOCHUJANG_ID]: true,
   [INGREDIENTS_SHEET_IN_PIZZA_ID]: true,
+  [SCALE_SHEET_IN_GOCHUJANG_ID]: true,
 });

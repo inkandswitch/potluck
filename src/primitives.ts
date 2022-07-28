@@ -141,7 +141,7 @@ const GOCHUJANG_PORK_TEXT = `Grilled Gochujang Pork With Fresh Sesame Kimchi
 
 Pork shoulder is often prepared as a large roast, requiring hours of cooking until it’s tender. But if you slice it thinly and pound it, the meat quickly absorbs this savory gochujang marinade and cooks up in no time. The spicy pork is balanced by a cool and crisp sesame kimchi, eaten fresh like a salad rather than fermented like traditional preparations. Baby bok choy stands in for the usual napa cabbage, and it’s coated in a vibrant sauce of garlic, ginger, gochugaru, fish sauce and nutty sesame oil. Tuck any leftover pork and kimchi into sandwiches the next day, garnished with tomatoes and mayonnaise.
 
-scale: 2x
+scale: 200x
 
 2 tablespoons gochugaru
 2 tablespoons distilled white vinegar
@@ -222,6 +222,7 @@ export const DATE_SHEET_IN_WORKOUT_ID = generateNanoid();
 export const WORKOUT_SHEET_IN_WORKOUT_ID = generateNanoid();
 export const INGREDIENTS_SHEET_IN_GOCHUJANG_ID = generateNanoid();
 export const SCALE_SHEET_IN_GOCHUJANG_ID = generateNanoid();
+export const QUANTITY_SHEET_IN_GOCHUJANG_ID = generateNanoid();
 export const INGREDIENTS_SHEET_IN_PIZZA_ID = generateNanoid();
 
 export const textDocumentsMobx = observable.map<string, TextDocument>({
@@ -279,7 +280,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
         configId: NUMBER_SHEET_CONFIG_ID,
       },
       {
-        id: generateNanoid(),
+        id: QUANTITY_SHEET_IN_GOCHUJANG_ID,
         configId: QUANTITY_SHEET_CONFIG_ID,
       },
       {
@@ -389,6 +390,16 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
         formula: "PrevOfType(unit, 'numbers', 20)",
         visibility: PropertyVisibility.Hidden,
       },
+      {
+        name: "scaleFactor",
+        formula: 'First(HighlightsOfType("scale"))',
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "scaledAmount",
+        formula: '(scaleFactor && scaleFactor.data && amount) ? `-> ${scaleFactor.data.value * amount} ${unit}` : undefined',
+        visibility: PropertyVisibility.Inline,
+      }
     ],
   },
   [WORKOUT_SHEET_CONFIG_ID]: {
@@ -448,14 +459,11 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
           'MatchHighlight(DataFromDoc("all ingredients", "allIngredients", "name"))',
         visibility: PropertyVisibility.Hidden,
       },
-      /*{
+      {
         name: "matched",
         formula: "name.data.matchedHighlight",
-      },*/
-      /*{
-        name: "quantity",
-        formula: 'PrevOfType(name, ["quantity", "numbers"], 20)',
-      },*/
+        visibility: PropertyVisibility.Hidden,
+      },
       {
         name: "USDA Name",
         formula: "USDAFoodName(name)",
@@ -465,6 +473,16 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
         name: "quantity",
         formula: 'PrevOfType(name, ["quantity", "numbers"], 20)',
         visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "scaleFactor",
+        formula: 'First(HighlightsOfType("scale"))',
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "scaledQuantity",
+        formula: '(scaleFactor && scaleFactor.data.value && IsNumber(quantity.valueOf())) ? `-> ${quantity * Round(scaleFactor.data.value, 2)} ${name}` : undefined',
+        visibility: PropertyVisibility.Inline,
       },
     ],
   },
@@ -528,7 +546,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
       {
         name: "value",
-        formula: "ParseInt(First(match.data.groups))",
+        formula: "ParseFloat(First(match.data.groups))",
         visibility: PropertyVisibility.Hidden,
       },
     ]
@@ -557,6 +575,7 @@ export const isSheetExpandedMobx = observable.map<string, boolean>({
   [DATE_SHEET_IN_WORKOUT_ID]: false,
   [WORKOUT_SHEET_IN_WORKOUT_ID]: true,
   [INGREDIENTS_SHEET_IN_GOCHUJANG_ID]: true,
+  [QUANTITY_SHEET_IN_GOCHUJANG_ID]: true,
   [INGREDIENTS_SHEET_IN_PIZZA_ID]: true,
   [SCALE_SHEET_IN_GOCHUJANG_ID]: true,
 });

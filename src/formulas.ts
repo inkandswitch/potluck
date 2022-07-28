@@ -18,7 +18,9 @@ import {
   isString,
   sortBy,
   parseInt,
-  isNaN
+  isNaN,
+  isNumber,
+  round
 } from "lodash";
 import {
   getComputedDocumentValues,
@@ -368,9 +370,17 @@ function evaluateFormula(
       return list[2];
     },
 
+    IsNumber: isNumber,
+
     ParseInt: (number: string) => {
       return parseInt(number, 10);
     },
+
+    ParseFloat: (number: string) => {
+      return parseFloat(number)
+    },
+
+    Round: round,
 
     DataFromDoc: (
       docName: string,
@@ -605,6 +615,18 @@ export const FORMULA_REFERENCE = [
     args: ["number: string"],
   },
   {
+    name: "ParseFloat",
+    args: ["number: string"],
+  },
+  {
+    name: "IsNumber",
+    args: ["value: any"]
+  },
+  {
+    name: "Round",
+    args: ["value: number", "precision: number = 0"]
+  },
+  {
     name: "DataFromDoc",
     args: ["docName: string", "sheetConfigName: string", "columnName: string"],
     return: "Highlight[]",
@@ -716,43 +738,22 @@ export function evaluateSheet(
 }
 
 function wrapValueInProxy(value: any) {
-  if (isArray(value)) {
-    return arrayProxy(value);
-  }
-
-  if (isObject(value)) {
+  if (isObject(value) && !isArray(value)) {
     return scopeProxy(value);
   }
 
   return value;
 }
 
-function arrayProxy(array: any[]) {
-  const handler = {
-    get(target: any[], prop: string): any[] {
-      if (array[0] && array[0].hasOwnProperty(prop)) {
-        return array
-          .map((item) => wrapValueInProxy(item[prop]))
-          .filter((value) => value !== undefined);
-      }
-
-      // @ts-ignore
-      return Reflect.get(...arguments);
-    },
-  };
-
-  return new Proxy(array, handler);
-}
-
 function scopeProxy(scope: Scope) {
   const handler = {
     get(target: any, prop: string): any {
 
-      if (prop === 'valueOf' && scope && scope.span && scope.documentId) {
+      if ((prop === 'valueOf' || prop === 'toString') && scope && scope.span && scope.documentId) {
         const spanText = getTextForHighlight(scope as any)
 
         const value = (
-          (spanText && isNumericish(spanText))
+          (spanText && prop === 'valueOf' && isNumericish(spanText))
             ? parseFloat(spanText)
             : spanText
         )

@@ -1,8 +1,9 @@
-import { observable, runInAction } from "mobx";
+import { autorun, computed, observable, runInAction } from "mobx";
 import { EditorState, Text } from "@codemirror/state";
 import { ALL_INGREDIENTS_TEXT } from "./data/all_ingredients";
 import { generateNanoid } from "./utils";
 import { EventEmitter } from "eventemitter3";
+import { evaluateFormula } from "./formulas";
 
 export type Span = [from: number, to: number];
 
@@ -585,6 +586,29 @@ export const selectedTextDocumentIdBox = observable.box(
   GOCHUJANG_PORK_DOCUMENT_ID
 );
 export const searchTermBox = observable.box("");
+
+export const searchResults = computed<Highlight[]>(() => {
+  const searchTerm = searchTermBox.get();
+  if (!searchTerm || searchTerm === "") {
+    return [];
+  }
+  const textDocument = textDocumentsMobx.get(selectedTextDocumentIdBox.get())!;
+  const formula = `MatchRegexp("${searchTerm}", "i")`;
+  let results: Highlight[] = [];
+  try {
+    results = evaluateFormula(
+      textDocument,
+      {} as SheetConfig,
+      formula,
+      {}
+    ) as Highlight[];
+  } catch (e) {
+    console.error(e);
+    results = [];
+  }
+  return results;
+});
+
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({

@@ -9,6 +9,7 @@ import {
   highlightComponentEntriesMobx,
   hoverHighlightsMobx,
   PropertyVisibility,
+  searchResults,
   sheetConfigsMobx,
   Span,
   textDocumentsMobx,
@@ -422,8 +423,12 @@ export const Editor = observer(
           });
         }),
         autorun(() => {
+          const highlights = hoverHighlightsMobx
+            .toJSON()
+            .concat(searchResults.get());
+          console.log({ highlights });
           view.dispatch({
-            effects: setHoverHighlightsEffect.of(hoverHighlightsMobx.toJSON()),
+            effects: setHoverHighlightsEffect.of(highlights),
           });
         }),
       ];

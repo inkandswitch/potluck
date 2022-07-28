@@ -4,6 +4,8 @@ import {
   getSheetConfigsOfTextDocument,
   Highlight,
   isSheetExpandedMobx,
+  PropertyVisibility,
+  searchResults,
   searchTermBox,
   selectedTextDocumentIdBox,
   SheetConfig,
@@ -26,47 +28,6 @@ import { ToastViewport } from "@radix-ui/react-toast";
 import { evaluateFormula } from "./formulas";
 
 const NEW_OPTION_ID = "new";
-const AddNewDocumentSheet = observer(
-  ({ textDocument }: { textDocument: TextDocument }) => {
-    const sheetConfigSelectRef = useRef<HTMLSelectElement>(null);
-
-    return (
-      <form
-        onSubmit={action((e) => {
-          e.preventDefault();
-          let sheetConfigId = sheetConfigSelectRef.current!.value;
-          if (sheetConfigId === NEW_OPTION_ID) {
-            const sheetConfig = addSheetConfig();
-            sheetConfigId = sheetConfig.id;
-          }
-          const textDocumentSheetId = generateNanoid();
-          textDocument.sheets.push({
-            id: textDocumentSheetId,
-            configId: sheetConfigId,
-          });
-          sheetConfigSelectRef.current!.value = NEW_OPTION_ID;
-          isSheetExpandedMobx.set(textDocumentSheetId, true);
-        })}
-        className="flex gap-4"
-      >
-        <select
-          className="border border-gray-200 rounded px-1"
-          ref={sheetConfigSelectRef}
-        >
-          <option value={NEW_OPTION_ID}>New highlighter type</option>
-          {[...sheetConfigsMobx.values()].map((sheetConfig) => (
-            <option value={sheetConfig.id} key={sheetConfig.id}>
-              {sheetConfig.name}
-            </option>
-          ))}
-        </select>
-        <button type="submit" className="button">
-          + Add sheet
-        </button>
-      </form>
-    );
-  }
-);
 
 const TextDocumentName = observer(
   ({ textDocument }: { textDocument: TextDocument }) => {
@@ -173,13 +134,6 @@ const DocumentSheets = observer(
             );
           })}
         </div>
-        <div
-          className={classNames("mb-8", {
-            "mt-8": textDocument.sheets.length > 0,
-          })}
-        >
-          <AddNewDocumentSheet textDocument={textDocument} />
-        </div>
       </>
     );
   }
@@ -251,58 +205,87 @@ const PersistenceButton = observer(() => {
 });
 
 const SearchBox = observer(({ textDocumentId }: { textDocumentId: string }) => {
-  const textDoc = textDocumentsMobx.get(textDocumentId)!;
+  const textDocument = textDocumentsMobx.get(textDocumentId)!;
   const searchTerm = searchTermBox.get();
-  let results: Highlight[];
-  if (searchTerm === "") {
-    results = [];
-  } else {
-    const formula = `MatchRegexp("${searchTerm}")`;
-    results = evaluateFormula(
-      textDoc,
-      {} as SheetConfig,
-      formula,
-      {}
-    ) as Highlight[];
-    console.log({ formula, results });
-  }
+  const [searchBoxFocused, setSearchBoxFocused] = useState(false);
+  const searchBoxRef = useRef<HTMLInputElement>(null);
+  const results = searchResults.get();
 
-  // const results: Highlight[] = [
-  //   {
-  //     span: [10, 20],
-  //     data: {},
-  //     documentId: textDocumentId,
-  //     sheetConfigId: "",
-  //   },
-  //   {
-  //     span: [30, 40],
-  //     data: {},
-  //     documentId: textDocumentId,
-  //     sheetConfigId: "",
-  //   },
-  // ];
   return (
-    <div className="mb-8">
+    <div className="mb-8 relative">
       <input
+        ref={searchBoxRef}
         className="border-gray-200 border rounded p-1 w-full mb-2"
         type="text"
         placeholder="Search"
         value={searchTerm}
+        onFocus={() => setSearchBoxFocused(true)}
+        onBlur={() => setSearchBoxFocused(false)}
+        // Add a new sheet reflecting the search term
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            runInAction(() => {
+              const sheetConfigId = generateNanoid();
+              const sheetConfig: SheetConfig = {
+                id: sheetConfigId,
+                name: searchTerm,
+                properties: [
+                  {
+                    name: "result",
+                    formula: `MatchRegexp("${searchTerm}", "i")`,
+                    visibility: PropertyVisibility.Hidden,
+                  },
+                ],
+              };
+              sheetConfigsMobx.set(sheetConfigId, sheetConfig);
+              const textDocumentSheetId = generateNanoid();
+              textDocument.sheets.unshift({
+                id: textDocumentSheetId,
+                configId: sheetConfigId,
+              });
+              isSheetExpandedMobx.set(textDocumentSheetId, true);
+              searchTermBox.set("");
+              searchBoxRef.current?.blur();
+            });
+          }
+          if (e.key === "Escape") {
+            searchBoxRef.current?.blur();
+          }
+        }}
         onChange={(e) =>
           runInAction(() => {
             searchTermBox.set(e.target.value);
           })
         }
       ></input>
-      <div className="max-h-48 overflow-y-scroll">
-        {results.map((result) => {
-          return (
-            <div key={`${result.span[0]}${result.span[1]}`}>
-              {ValueDisplay({ value: result, doc: textDoc.text })}
+      {searchBoxFocused && searchTerm === "" && (
+        <div className="max-h-48 overflow-y-scroll absolute top-9 w-full bg-white z-10 border border-gray-100 px-4 py-2">
+          <div className="text-sm text-gray-500">Saved Searches</div>
+          {[...sheetConfigsMobx.entries()].map(([id, sheetConfig]) => (
+            <div
+              key={id}
+              className="hover:bg-blue-100 hover:cursor-pointer"
+              onMouseDown={(e) => {
+                runInAction(() => {
+                  const textDocumentSheetId = generateNanoid();
+                  textDocument.sheets.unshift({
+                    id: textDocumentSheetId,
+                    configId: id,
+                  });
+                  isSheetExpandedMobx.set(textDocumentSheetId, true);
+                });
+              }}
+            >
+              {sheetConfig.name}
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
+      {results.length > 0 && (
+        <div className="absolute top-2 right-2 bg-white z-10 text-gray-400 text-sm">
+          {results.length} results
+        </div>
+      )}
     </div>
   );
 });

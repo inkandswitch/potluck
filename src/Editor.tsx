@@ -112,7 +112,7 @@ class InlineWidget extends WidgetType {
         valueAsText = valueAsText.substring(0, MAX_SUPERSCRIPT_LENGTH) + "...";
       }
       const token = document.createElement("span");
-      token.className = `${ANNOTATION_TOKEN_CLASSNAME} bg-blue-100 ml-1 align-top top-1 relative top-px text-gray-800 font-mono text-[11px] py-[3px] px-1 rounded-sm whitespace-nowrap`;
+      token.className = `${ANNOTATION_TOKEN_CLASSNAME} bg-gray-100 ml-1 align-top top-[6px] relative text-gray-800 font-mono text-xs py-[3px] px-1 rounded-sm whitespace-nowrap`;
       token.innerText = valueAsText;
       token.setAttribute("data-snippet-property-name", key);
       wrap.appendChild(token);

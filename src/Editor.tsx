@@ -21,14 +21,18 @@ import {
 import {
   doSpansOverlap,
   getTextForHighlight,
+  isHighlightComponent,
   isValueRowHighlight,
 } from "./utils";
+import { createRoot, Root } from "react-dom/client";
 
 const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
 const MAX_SUPERSCRIPT_LENGTH = 20;
 class SuperscriptWidget extends WidgetType {
+  reactRoots: Root[] = [];
+
   constructor(
-    readonly highlightData: { [key: string]: string },
+    readonly highlightData: { [key: string]: any },
     readonly visibleProperties: string[]
   ) {
     super();
@@ -47,7 +51,8 @@ class SuperscriptWidget extends WidgetType {
     root.className = "relative";
     const wrap = document.createElement("span");
     root.appendChild(wrap);
-    wrap.className = "absolute bottom-full left-0 flex gap-1";
+    wrap.className =
+      "absolute bottom-[calc(100%-7px)] left-0 flex gap-1 whitespace-nowrap text-[11px]";
     wrap.setAttribute("aria-hidden", "true");
     if (this.highlightData === undefined) {
       return wrap;
@@ -57,6 +62,14 @@ class SuperscriptWidget extends WidgetType {
       if (value === undefined) {
         continue;
       }
+      if (isHighlightComponent(value)) {
+        const token = document.createElement("span");
+        const reactRoot = createRoot(token);
+        this.reactRoots.push(reactRoot);
+        reactRoot.render(value.render());
+        wrap.appendChild(token);
+        continue;
+      }
       let valueAsText = isValueRowHighlight(value)
         ? getTextForHighlight(value) ?? ""
         : value;
@@ -64,7 +77,7 @@ class SuperscriptWidget extends WidgetType {
         valueAsText = valueAsText.substring(0, MAX_SUPERSCRIPT_LENGTH) + "...";
       }
       const token = document.createElement("span");
-      token.className = `${ANNOTATION_TOKEN_CLASSNAME} text-[#3a82f5] text-[11px] leading-[8px] whitespace-nowrap relative top-0.5`;
+      token.className = `${ANNOTATION_TOKEN_CLASSNAME} text-[#3a82f5]`;
       token.innerText = valueAsText;
       token.setAttribute("data-snippet-property-name", key);
       wrap.appendChild(token);
@@ -72,14 +85,18 @@ class SuperscriptWidget extends WidgetType {
     return root;
   }
 
-  ignoreEvent(event: Event): boolean {
-    return false;
+  destroy(dom: HTMLElement): void {
+    for (const reactRoot of this.reactRoots) {
+      reactRoot.unmount();
+    }
   }
 }
 
 class InlineWidget extends WidgetType {
+  reactRoots: Root[] = [];
+
   constructor(
-    readonly highlightData: { [key: string]: string },
+    readonly highlightData: { [key: string]: any },
     readonly visibleProperties: string[]
   ) {
     super();
@@ -105,6 +122,15 @@ class InlineWidget extends WidgetType {
       if (value === undefined) {
         continue;
       }
+      if (isHighlightComponent(value)) {
+        const token = document.createElement("span");
+        token.className = "mx-1";
+        const reactRoot = createRoot(token);
+        this.reactRoots.push(reactRoot);
+        reactRoot.render(value.render());
+        wrap.appendChild(token);
+        continue;
+      }
       let valueAsText = isValueRowHighlight(value)
         ? getTextForHighlight(value) ?? ""
         : value;
@@ -120,8 +146,10 @@ class InlineWidget extends WidgetType {
     return wrap;
   }
 
-  ignoreEvent(event: Event): boolean {
-    return false;
+  destroy(dom: HTMLElement): void {
+    for (const reactRoot of this.reactRoots) {
+      reactRoot.unmount();
+    }
   }
 }
 
@@ -210,37 +238,46 @@ const highlightDecorations = EditorView.decorations.compute(
           }).range(highlight.span[0], highlight.span[1]);
         }),
         ...highlights.flatMap((highlight) => {
-          return [
+          const decorations = [
             Decoration.mark({
               class: "cm-highlight",
             }).range(highlight.span[0], highlight.span[1]),
-            Decoration.widget({
-              widget: new SuperscriptWidget(
-                highlight.data,
-                sheetConfigsMobx
-                  .get(highlight.sheetConfigId)!
-                  .properties.filter(
-                    (property) =>
-                      property.visibility === PropertyVisibility.Superscript
-                  )
-                  .map((property) => property.name)
-              ),
-              side: 1,
-            }).range(highlight.span[0]),
-            Decoration.widget({
-              widget: new InlineWidget(
-                highlight.data,
-                sheetConfigsMobx
-                  .get(highlight.sheetConfigId)!
-                  .properties.filter(
-                    (property) =>
-                      property.visibility === PropertyVisibility.Inline
-                  )
-                  .map((property) => property.name)
-              ),
-              side: 1,
-            }).range(highlight.span[1]),
           ];
+          if (highlight.data !== undefined) {
+            const superscriptProperties = sheetConfigsMobx
+              .get(highlight.sheetConfigId)!
+              .properties.filter(
+                (property) =>
+                  property.visibility === PropertyVisibility.Superscript
+              )
+              .map((property) => property.name);
+            if (superscriptProperties.length > 0) {
+              decorations.push(
+                Decoration.widget({
+                  widget: new SuperscriptWidget(
+                    highlight.data,
+                    superscriptProperties
+                  ),
+                  side: 1,
+                }).range(highlight.span[0])
+              );
+            }
+            const inlineProperties = sheetConfigsMobx
+              .get(highlight.sheetConfigId)!
+              .properties.filter(
+                (property) => property.visibility === PropertyVisibility.Inline
+              )
+              .map((property) => property.name);
+            if (inlineProperties.length > 0) {
+              decorations.push(
+                Decoration.widget({
+                  widget: new InlineWidget(highlight.data, inlineProperties),
+                  side: 1,
+                }).range(highlight.span[1])
+              );
+            }
+          }
+          return decorations;
         }),
       ],
       true

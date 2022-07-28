@@ -50,7 +50,7 @@ const Timer = observer(
     const secondsRemaining = secondsRemainingBox.get();
 
     return (
-      <div>
+      <div className="inline-flex items-center gap-1">
         {state.runningEndTime === undefined ? (
           <button
             onClick={action(() => {
@@ -59,7 +59,7 @@ const Timer = observer(
                 (state.pausedSecondsRemaining ?? durationSeconds) * 1000;
               state.pausedSecondsRemaining = undefined;
             })}
-            className="mr-1"
+            className="flex-shrink-0"
           >
             <img src={playPng} width="11px" height="11px" />
           </button>
@@ -69,12 +69,12 @@ const Timer = observer(
               state.pausedSecondsRemaining = secondsRemaining;
               state.runningEndTime = undefined;
             })}
-            className="mr-1"
+            className="flex-shrink-0"
           >
             <img src={pausePng} width="11px" height="11px" />
           </button>
         )}
-        <span className="font-mono">
+        <span className="font-mono text-gray-500">
           {secondsRemaining !== undefined ? (
             <span className={secondsRemaining < 0 ? "text-red-500" : undefined}>
               {formatDuration(Math.abs(secondsRemaining))}

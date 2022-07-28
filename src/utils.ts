@@ -1,5 +1,10 @@
 import { customAlphabet } from "nanoid";
-import { Highlight, Span, textDocumentsMobx } from "./primitives";
+import {
+  Highlight,
+  HighlightComponent,
+  Span,
+  textDocumentsMobx,
+} from "./primitives";
 import { alphanumeric } from "nanoid-dictionary";
 import { getComputedSheetValue } from "./compute";
 
@@ -26,6 +31,10 @@ export function isValueRowHighlight(valueRow: any): valueRow is Highlight {
     "span" in valueRow &&
     valueRow.span !== undefined
   );
+}
+
+export function isHighlightComponent(value: any): value is HighlightComponent {
+  return typeof value === "object" && typeof value.render === "function";
 }
 
 export function isNumericish(value: any): boolean {

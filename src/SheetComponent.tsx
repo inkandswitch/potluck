@@ -20,6 +20,7 @@ import {
 import {
   doSpansOverlap,
   getTextForHighlight,
+  isHighlightComponent,
   isNumericish,
   isValueRowHighlight,
 } from "./utils";
@@ -62,7 +63,7 @@ function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
     return <span className="text-red-500">#Err</span>;
   }
 
-  if (value?.render !== undefined) {
+  if (isHighlightComponent(value)) {
     return <span>{value.render()}</span>;
   }
 

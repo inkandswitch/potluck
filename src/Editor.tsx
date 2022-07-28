@@ -26,7 +26,7 @@ import {
 
 const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
 const MAX_SUPERSCRIPT_LENGTH = 20;
-class HighlightDataWidget extends WidgetType {
+class SuperscriptWidget extends WidgetType {
   constructor(
     readonly highlightData: { [key: string]: string },
     readonly visibleProperties: string[]
@@ -36,7 +36,7 @@ class HighlightDataWidget extends WidgetType {
 
   eq(other: WidgetType): boolean {
     return (
-      other instanceof HighlightDataWidget &&
+      other instanceof SuperscriptWidget &&
       comparer.structural(this.highlightData, other.highlightData) &&
       comparer.structural(this.visibleProperties, other.visibleProperties)
     );
@@ -70,6 +70,54 @@ class HighlightDataWidget extends WidgetType {
       wrap.appendChild(token);
     }
     return root;
+  }
+
+  ignoreEvent(event: Event): boolean {
+    return false;
+  }
+}
+
+class InlineWidget extends WidgetType {
+  constructor(
+    readonly highlightData: { [key: string]: string },
+    readonly visibleProperties: string[]
+  ) {
+    super();
+  }
+
+  eq(other: WidgetType): boolean {
+    return (
+      other instanceof SuperscriptWidget &&
+      comparer.structural(this.highlightData, other.highlightData) &&
+      comparer.structural(this.visibleProperties, other.visibleProperties)
+    );
+  }
+
+  toDOM() {
+    const wrap = document.createElement("span");
+    wrap.className = "rounded-r";
+    wrap.setAttribute("aria-hidden", "true");
+    if (this.highlightData === undefined) {
+      return wrap;
+    }
+    for (const key of this.visibleProperties) {
+      const value = this.highlightData[key];
+      if (value === undefined) {
+        continue;
+      }
+      let valueAsText = isValueRowHighlight(value)
+        ? getTextForHighlight(value) ?? ""
+        : value;
+      if (valueAsText.length > MAX_SUPERSCRIPT_LENGTH) {
+        valueAsText = valueAsText.substring(0, MAX_SUPERSCRIPT_LENGTH) + "...";
+      }
+      const token = document.createElement("span");
+      token.className = `${ANNOTATION_TOKEN_CLASSNAME} bg-blue-100 ml-1 align-top top-1 relative top-px text-gray-800 font-mono text-[11px] py-[3px] px-1 rounded-sm whitespace-nowrap`;
+      token.innerText = valueAsText;
+      token.setAttribute("data-snippet-property-name", key);
+      wrap.appendChild(token);
+    }
+    return wrap;
   }
 
   ignoreEvent(event: Event): boolean {
@@ -167,7 +215,7 @@ const highlightDecorations = EditorView.decorations.compute(
               class: "cm-highlight",
             }).range(highlight.span[0], highlight.span[1]),
             Decoration.widget({
-              widget: new HighlightDataWidget(
+              widget: new SuperscriptWidget(
                 highlight.data,
                 sheetConfigsMobx
                   .get(highlight.sheetConfigId)!
@@ -179,6 +227,19 @@ const highlightDecorations = EditorView.decorations.compute(
               ),
               side: 1,
             }).range(highlight.span[0]),
+            Decoration.widget({
+              widget: new InlineWidget(
+                highlight.data,
+                sheetConfigsMobx
+                  .get(highlight.sheetConfigId)!
+                  .properties.filter(
+                    (property) =>
+                      property.visibility === PropertyVisibility.Inline
+                  )
+                  .map((property) => property.name)
+              ),
+              side: 1,
+            }).range(highlight.span[1]),
           ];
         }),
       ],

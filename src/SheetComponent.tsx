@@ -58,7 +58,7 @@ export type SheetViewProps = {
   rows: SheetValueRow[];
 };
 
-function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
+export function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
   if (value instanceof Error) {
     return <span className="text-red-500">#Err</span>;
   }

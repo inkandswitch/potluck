@@ -92,7 +92,7 @@ function evalCondition(condition: any, item: any): any {
   return condition;
 }
 
-function evaluateFormula(
+export function evaluateFormula(
   textDocument: TextDocument,
   sheetConfig: SheetConfig,
   source: string,
@@ -457,7 +457,6 @@ function evaluateFormula(
       };
 
       const tokens = Prism.tokenize(docString, Prism.languages.markdown);
-      console.log({ docString, tokens });
       let start = 0;
 
       for (const token of tokens) {

@@ -584,6 +584,7 @@ export function addSheetConfig() {
 export const selectedTextDocumentIdBox = observable.box(
   GOCHUJANG_PORK_DOCUMENT_ID
 );
+export const searchTermBox = observable.box("");
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({

@@ -2,15 +2,18 @@ import { Editor } from "./Editor";
 import {
   addSheetConfig,
   getSheetConfigsOfTextDocument,
+  Highlight,
   isSheetExpandedMobx,
+  searchTermBox,
   selectedTextDocumentIdBox,
+  SheetConfig,
   sheetConfigsMobx,
   TextDocument,
   textDocumentsMobx,
 } from "./primitives";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
-import { SheetComponent } from "./SheetComponent";
+import { SheetComponent, ValueDisplay } from "./SheetComponent";
 import { action, runInAction } from "mobx";
 import { Text } from "@codemirror/state";
 import classNames from "classnames";
@@ -20,6 +23,7 @@ import { DirectoryPersistence, FileDropWrapper } from "./persistence";
 import { FileIcon, FileTextIcon, PauseIcon } from "@radix-ui/react-icons";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { ToastViewport } from "@radix-ui/react-toast";
+import { evaluateFormula } from "./formulas";
 
 const NEW_OPTION_ID = "new";
 const AddNewDocumentSheet = observer(
@@ -246,6 +250,63 @@ const PersistenceButton = observer(() => {
   );
 });
 
+const SearchBox = observer(({ textDocumentId }: { textDocumentId: string }) => {
+  const textDoc = textDocumentsMobx.get(textDocumentId)!;
+  const searchTerm = searchTermBox.get();
+  let results: Highlight[];
+  if (searchTerm === "") {
+    results = [];
+  } else {
+    const formula = `MatchRegexp("${searchTerm}")`;
+    results = evaluateFormula(
+      textDoc,
+      {} as SheetConfig,
+      formula,
+      {}
+    ) as Highlight[];
+    console.log({ formula, results });
+  }
+
+  // const results: Highlight[] = [
+  //   {
+  //     span: [10, 20],
+  //     data: {},
+  //     documentId: textDocumentId,
+  //     sheetConfigId: "",
+  //   },
+  //   {
+  //     span: [30, 40],
+  //     data: {},
+  //     documentId: textDocumentId,
+  //     sheetConfigId: "",
+  //   },
+  // ];
+  return (
+    <div className="mb-8">
+      <input
+        className="border-gray-200 border rounded p-1 w-full mb-2"
+        type="text"
+        placeholder="Search"
+        value={searchTerm}
+        onChange={(e) =>
+          runInAction(() => {
+            searchTermBox.set(e.target.value);
+          })
+        }
+      ></input>
+      <div className="max-h-48 overflow-y-scroll">
+        {results.map((result) => {
+          return (
+            <div key={`${result.span[0]}${result.span[1]}`}>
+              {ValueDisplay({ value: result, doc: textDoc.text })}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+});
+
 const App = observer(() => {
   const textDocumentId = selectedTextDocumentIdBox.get();
   return (
@@ -258,6 +319,7 @@ const App = observer(() => {
         />
       </div>
       <div className="grow h-full overflow-auto pl-8 pr-6 pt-24 border-l border-gray-100">
+        <SearchBox textDocumentId={textDocumentId} />
         <DocumentSheets textDocumentId={textDocumentId} />
       </div>
       <PersistenceButton />

@@ -392,12 +392,12 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
       {
         name: "scaleFactor",
-        formula: 'First(HighlightsOfType("scale"))',
+        formula: 'First(HighlightsOfType("scale"))?.data.value',
         visibility: PropertyVisibility.Hidden,
       },
       {
         name: "scaledAmount",
-        formula: '(scaleFactor && scaleFactor.data && amount) ? `-> ${scaleFactor.data.value * amount} ${unit}` : undefined',
+        formula: '(scaleFactor && amount) ? `-> ${scaleFactor * amount} ${unit}` : undefined',
         visibility: PropertyVisibility.Inline,
       }
     ],
@@ -476,12 +476,12 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
       {
         name: "scaleFactor",
-        formula: 'First(HighlightsOfType("scale"))',
+        formula: 'First(HighlightsOfType("scale"))?.data.value',
         visibility: PropertyVisibility.Hidden,
       },
       {
         name: "scaledQuantity",
-        formula: '(scaleFactor && scaleFactor.data.value && IsNumber(quantity.valueOf())) ? `-> ${quantity * Round(scaleFactor.data.value, 2)} ${name}` : undefined',
+        formula: '(scaleFactor && IsNumber(quantity.valueOf())) ? `-> ${quantity * Round(scaleFactor, 2)} ${name}` : undefined',
         visibility: PropertyVisibility.Inline,
       },
     ],

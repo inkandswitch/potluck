@@ -45,3 +45,13 @@
 .rbc-event:hover {
   @apply bg-blue-500;
 }
+
+input[type="range"] {
+  @apply h-1 w-12 rounded border border-gray-400;
+  -webkit-appearance: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  @apply h-2 w-2 rounded-full bg-blue-500 cursor-ew-resize;
+  -webkit-appearance: none;
+}

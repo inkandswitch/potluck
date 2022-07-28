@@ -285,8 +285,8 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       },
       {
         id: SCALE_SHEET_IN_GOCHUJANG_ID,
-        configId: SCALE_SHEET_CONFIG_ID
-      }
+        configId: SCALE_SHEET_CONFIG_ID,
+      },
     ],
   },
   [PIZZA_DOCUMENT_ID]: {
@@ -392,14 +392,15 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
       {
         name: "scaleFactor",
-        formula: 'First(HighlightsOfType("scale"))?.data.value',
+        formula: 'First(HighlightsOfType("scale"))?.data.sliderValue',
         visibility: PropertyVisibility.Hidden,
       },
       {
         name: "scaledAmount",
-        formula: '(scaleFactor && amount) ? `-> ${scaleFactor * amount} ${unit}` : undefined',
+        formula:
+          "(scaleFactor && scaleFactor !== 1 && amount) ? `-> ${scaleFactor * amount} ${unit}` : undefined",
         visibility: PropertyVisibility.Inline,
-      }
+      },
     ],
   },
   [WORKOUT_SHEET_CONFIG_ID]: {
@@ -440,13 +441,13 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "total",
         formula: "reps * sets",
-        visibility : PropertyVisibility.Hidden
+        visibility: PropertyVisibility.Hidden,
       },
       {
         name: "nextWeight",
         formula: "weight + 5",
-        visibility : PropertyVisibility.Hidden
-      }
+        visibility: PropertyVisibility.Hidden,
+      },
     ],
   },
   [INGREDIENTS_SHEET_CONFIG_ID]: {
@@ -476,12 +477,13 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
       {
         name: "scaleFactor",
-        formula: 'First(HighlightsOfType("scale"))?.data.value',
+        formula: 'First(HighlightsOfType("scale"))?.data.sliderValue',
         visibility: PropertyVisibility.Hidden,
       },
       {
         name: "scaledQuantity",
-        formula: '(scaleFactor && IsNumber(quantity.valueOf())) ? `-> ${quantity * Round(scaleFactor, 2)} ${name}` : undefined',
+        formula:
+          "(scaleFactor && scaleFactor !== 1 && IsNumber(quantity.valueOf())) ? `-> ${quantity * Round(scaleFactor, 2)} ${name}` : undefined",
         visibility: PropertyVisibility.Inline,
       },
     ],
@@ -549,8 +551,18 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
         formula: "ParseFloat(First(match.data.groups))",
         visibility: PropertyVisibility.Hidden,
       },
-    ]
-  }
+      {
+        name: "slider",
+        formula: "NumberSlider(match, value)",
+        visibility: PropertyVisibility.Superscript,
+      },
+      {
+        name: "sliderValue",
+        formula: "slider.data.value",
+        visibility: PropertyVisibility.Inline,
+      },
+    ],
+  },
 });
 
 export function addSheetConfig() {
@@ -568,7 +580,9 @@ export function addSheetConfig() {
   return sheetConfig;
 }
 
-export const selectedTextDocumentIdBox = observable.box(GOCHUJANG_PORK_DOCUMENT_ID);
+export const selectedTextDocumentIdBox = observable.box(
+  GOCHUJANG_PORK_DOCUMENT_ID
+);
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({

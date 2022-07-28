@@ -21,7 +21,7 @@ import {
   isNaN,
   isNumber,
   round,
-  minBy
+  minBy,
 } from "lodash";
 import {
   getComputedDocumentValues,
@@ -35,13 +35,12 @@ import FuzzySet from "fuzzyset";
 import Prism from "prismjs";
 import { createTimerComponent } from "./TimerComponent";
 import { runInAction } from "mobx";
+import { createNumberSliderComponent } from "./NumberSliderComponent";
 
 const foodNameMatchSet = new FuzzySet(
   OFFICIAL_FOODS.map((food: any) => food.description),
   false
 );
-
-import { Text } from "@codemirror/state"
 
 // eslint-disable-next-line
 // @ts-ignore
@@ -272,16 +271,15 @@ function evaluateFormula(
       );
 
       return minBy(
-        [...sheetValueRows]
-          .filter(
-            (r) =>
-              "span" in r &&
-              r.span[1] < highlight.span[0] &&
-              (distanceLimit === undefined || highlight.span[0] - r.span[1] < distanceLimit)
-          ),
-        (r) => (
-          highlight.span[0] - r.span[1]
-        ));
+        [...sheetValueRows].filter(
+          (r) =>
+            "span" in r &&
+            r.span[1] < highlight.span[0] &&
+            (distanceLimit === undefined ||
+              highlight.span[0] - r.span[1] < distanceLimit)
+        ),
+        (r) => highlight.span[0] - r.span[1]
+      );
     },
 
     NextUntil: (highlight: Highlight, stopCondition: any): Highlight[] => {
@@ -380,7 +378,7 @@ function evaluateFormula(
     },
 
     ParseFloat: (number: string) => {
-      return parseFloat(number)
+      return parseFloat(number);
     },
 
     Round: round,
@@ -420,7 +418,7 @@ function evaluateFormula(
         ).get();
         const rowForHighlight = computedData[
           matchedHighlight.sheetConfigId
-          ].find((row) => row.data.name === matchedHighlight);
+        ].find((row) => row.data.name === matchedHighlight);
         if (
           rowForHighlight &&
           rowForHighlight.data.officialName !== undefined
@@ -507,6 +505,39 @@ function evaluateFormula(
       });
       return componentEntry.component;
     },
+    NumberSlider: (
+      highlight: Highlight,
+      value: number
+    ): HighlightComponent | undefined => {
+      if (highlight === undefined || value === undefined) {
+        return undefined;
+      }
+      // TODO: remove highlight component entries that are no longer used
+      // not clear when to do this, on every eval?
+      const highlightText = textDocument.text
+        .sliceString(highlight.span[0], highlight.span[1])
+        .trim();
+      const existingTimer = highlightComponentEntriesMobx.find(
+        (entry) =>
+          entry.componentType === "NumberSlider" &&
+          entry.span[0] === highlight.span[0] &&
+          entry.span[1] === highlight.span[1] &&
+          entry.text === highlightText
+      );
+      if (existingTimer !== undefined) {
+        return existingTimer.component;
+      }
+      const componentEntry: HighlightComponentEntry = {
+        componentType: "NumberSlider",
+        span: highlight.span,
+        text: highlightText,
+        component: createNumberSliderComponent(value),
+      };
+      runInAction(() => {
+        highlightComponentEntriesMobx.push(componentEntry);
+      });
+      return componentEntry.component;
+    },
   };
 
   try {
@@ -524,8 +555,7 @@ function evaluateFormula(
 
     const result = fn(API, scopeProxy(scope));
 
-    return isNaN(result) ? undefined : result
-
+    return isNaN(result) ? undefined : result;
   } catch (e) {
     console.error(e);
     return e;
@@ -623,11 +653,11 @@ export const FORMULA_REFERENCE = [
   },
   {
     name: "IsNumber",
-    args: ["value: any"]
+    args: ["value: any"],
   },
   {
     name: "Round",
-    args: ["value: number", "precision: number = 0"]
+    args: ["value: number", "precision: number = 0"],
   },
   {
     name: "DataFromDoc",
@@ -660,9 +690,9 @@ export function evaluateSheet(
   if (textDocumentSheet === undefined) {
     throw new Error(
       "expected to find sheet of type " +
-      sheetConfig.name +
-      " in text document " +
-      textDocument.name
+        sheetConfig.name +
+        " in text document " +
+        textDocument.name
     );
   }
 
@@ -751,17 +781,20 @@ function wrapValueInProxy(value: any) {
 function scopeProxy(scope: Scope) {
   const handler = {
     get(target: any, prop: string): any {
+      if (
+        (prop === "valueOf" || prop === "toString") &&
+        scope &&
+        scope.span &&
+        scope.documentId
+      ) {
+        const spanText = getTextForHighlight(scope as any);
 
-      if ((prop === 'valueOf' || prop === 'toString') && scope && scope.span && scope.documentId) {
-        const spanText = getTextForHighlight(scope as any)
-
-        const value = (
-          (spanText && prop === 'valueOf' && isNumericish(spanText))
+        const value =
+          spanText && prop === "valueOf" && isNumericish(spanText)
             ? parseFloat(spanText)
-            : spanText
-        )
+            : spanText;
 
-        return () => value
+        return () => value;
       }
 
       return wrapValueInProxy(scope[prop]);

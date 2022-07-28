@@ -25,6 +25,7 @@ import {
   isValueRowHighlight,
 } from "./utils";
 import { createRoot, Root } from "react-dom/client";
+import { NumberSliderComponent } from "./NumberSliderComponent";
 
 const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
 const MAX_SUPERSCRIPT_LENGTH = 20;
@@ -39,6 +40,21 @@ class SuperscriptWidget extends WidgetType {
   }
 
   eq(other: WidgetType): boolean {
+    // BIG HACK
+    // For number sliders, we can't swap out the DOM element while the user is
+    // dragging. Therefore, if any of the highlight data is a slider, we'll
+    // reuse the previous widget to keep the same DOM.
+    if (
+      other instanceof SuperscriptWidget &&
+      Object.values(this.highlightData).some(
+        (value) => value instanceof NumberSliderComponent
+      ) &&
+      Object.values(other.highlightData).some(
+        (value) => value instanceof NumberSliderComponent
+      )
+    ) {
+      return true;
+    }
     return (
       other instanceof SuperscriptWidget &&
       comparer.structural(this.highlightData, other.highlightData) &&

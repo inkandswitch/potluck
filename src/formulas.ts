@@ -20,7 +20,8 @@ import {
   parseInt,
   isNaN,
   isNumber,
-  round
+  round,
+  minBy
 } from "lodash";
 import {
   getComputedDocumentValues,
@@ -270,15 +271,17 @@ function evaluateFormula(
         ({ span }) => span[0]
       );
 
-      return [...sheetValueRows]
-        .reverse()
-        .find(
-          (r) =>
-            "span" in r &&
-            r.span[1] < highlight.span[0] &&
-            (distanceLimit === undefined ||
-              highlight.span[0] - r.span[1] < distanceLimit)
-        );
+      return minBy(
+        [...sheetValueRows]
+          .filter(
+            (r) =>
+              "span" in r &&
+              r.span[1] < highlight.span[0] &&
+              (distanceLimit === undefined || highlight.span[0] - r.span[1] < distanceLimit)
+          ),
+        (r) => (
+          highlight.span[0] - r.span[1]
+        ));
     },
 
     NextUntil: (highlight: Highlight, stopCondition: any): Highlight[] => {
@@ -519,9 +522,9 @@ function evaluateFormula(
   `
     );
 
-    const result =  fn(API, scopeProxy(scope));
+    const result = fn(API, scopeProxy(scope));
 
-    return isNaN(result)  ? undefined : result
+    return isNaN(result) ? undefined : result
 
   } catch (e) {
     console.error(e);

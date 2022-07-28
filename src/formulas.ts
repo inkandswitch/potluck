@@ -18,40 +18,44 @@ import {
   isString,
   sortBy,
   parseInt,
+  isNaN
 } from "lodash";
 import {
   getComputedDocumentValues,
   getComputedSheetValue,
   getHighlightsUntilSheet,
 } from "./compute";
-import { doSpansOverlap, getTextForHighlight } from "./utils";
+import { doSpansOverlap, getTextForHighlight, isNumericish } from "./utils";
 import { OFFICIAL_FOODS } from "./data/officialFoods";
 // @ts-ignore
 import FuzzySet from "fuzzyset";
 import Prism from "prismjs";
 import { createTimerComponent } from "./TimerComponent";
 import { runInAction } from "mobx";
+
 const foodNameMatchSet = new FuzzySet(
   OFFICIAL_FOODS.map((food: any) => food.description),
   false
 );
 
+import { Text } from "@codemirror/state"
+
 // eslint-disable-next-line
 // @ts-ignore
 Prism.languages.markdown = Prism.languages.extend("markup", {}), Prism.languages.insertBefore("markdown", "prolog", {
-  blockquote: {pattern: /^>(?:[\t ]*>)*/m, alias: "punctuation"},
-  code: [{pattern: /^(?: {4}|\t).+/m, alias: "keyword"}, {pattern: /``.+?``|`[^`\n]+`/, alias: "keyword"}],
+  blockquote: { pattern: /^>(?:[\t ]*>)*/m, alias: "punctuation" },
+  code: [{ pattern: /^(?: {4}|\t).+/m, alias: "keyword" }, { pattern: /``.+?``|`[^`\n]+`/, alias: "keyword" }],
   title: [{
     pattern: /\w+.*(?:\r?\n|\r)(?:==+|--+)/,
     alias: "important",
-    inside: {punctuation: /==+$|--+$/}
-  }, {pattern: /(^\s*)#+.+/m, lookbehind: !0, alias: "important", inside: {punctuation: /^#+|#+$/}}],
-  hr: {pattern: /(^\s*)([*-])([\t ]*\2){2,}(?=\s*$)/m, lookbehind: !0, alias: "punctuation"},
-  list: {pattern: /(^\s*)(?:[*+-]|\d+\.)(?=[\t ].)/m, lookbehind: !0, alias: "punctuation"},
+    inside: { punctuation: /==+$|--+$/ }
+  }, { pattern: /(^\s*)#+.+/m, lookbehind: !0, alias: "important", inside: { punctuation: /^#+|#+$/ } }],
+  hr: { pattern: /(^\s*)([*-])([\t ]*\2){2,}(?=\s*$)/m, lookbehind: !0, alias: "punctuation" },
+  list: { pattern: /(^\s*)(?:[*+-]|\d+\.)(?=[\t ].)/m, lookbehind: !0, alias: "punctuation" },
   "url-reference": {
     pattern: /!?\[[^\]]+\]:[\t ]+(?:\S+|<(?:\\.|[^>\\])+>)(?:[\t ]+(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\)))?/,
     inside: {
-      variable: {pattern: /^(!?\[)[^\]]+/, lookbehind: !0},
+      variable: { pattern: /^(!?\[)[^\]]+/, lookbehind: !0 },
       string: /(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|\((?:\\.|[^)\\])*\))$/,
       punctuation: /^[\[\]!:]|[<>]/
     },
@@ -60,16 +64,19 @@ Prism.languages.markdown = Prism.languages.extend("markup", {}), Prism.languages
   bold: {
     pattern: /(^|[^\\])(\*\*|__)(?:(?:\r?\n|\r)(?!\r?\n|\r)|.)+?\2/,
     lookbehind: !0,
-    inside: {punctuation: /^\*\*|^__|\*\*$|__$/}
+    inside: { punctuation: /^\*\*|^__|\*\*$|__$/ }
   },
   italic: {
     pattern: /(^|[^\\])([*_])(?:(?:\r?\n|\r)(?!\r?\n|\r)|.)+?\2/,
     lookbehind: !0,
-    inside: {punctuation: /^[*_]|[*_]$/}
+    inside: { punctuation: /^[*_]|[*_]$/ }
   },
   url: {
     pattern: /!?\[[^\]]+\](?:\([^\s)]+(?:[\t ]+"(?:\\.|[^"\\])*")?\)| ?\[[^\]\n]*\])/,
-    inside: {variable: {pattern: /(!?\[)[^\]]+(?=\]$)/, lookbehind: !0}, string: {pattern: /"(?:\\.|[^"\\])*"(?=\)$)/}}
+    inside: {
+      variable: { pattern: /(!?\[)[^\]]+(?=\]$)/, lookbehind: !0 },
+      string: { pattern: /"(?:\\.|[^"\\])*"(?=\)$)/ }
+    }
   }
 //@ts-ignore
 }), Prism.languages.markdown.bold.inside.url = Prism.util.clone(Prism.languages.markdown.url), Prism.languages.markdown.italic.inside.url = Prism.util.clone(Prism.languages.markdown.url), Prism.languages.markdown.bold.inside.italic = Prism.util.clone(Prism.languages.markdown.italic), Prism.languages.markdown.italic.inside.bold = Prism.util.clone(Prism.languages.markdown.bold); // prettier-ignore
@@ -160,7 +167,7 @@ function evaluateFormula(
         const text = isString(value) ? value : getTextForHighlight(value);
         const newHighlights = API.MatchRegexp(
           `\\b${text}s?\\b`,
-          isCaseSensitive === false ? "" : "i"
+          !isCaseSensitive ? "" : "i"
         ).filter(
           (newHighlight) =>
             !highlights.some((old) =>
@@ -180,7 +187,7 @@ function evaluateFormula(
       for (const value of values) {
         const newHighlights = API.MatchRegexp(
           `\\b${getTextForHighlight(value)}s?\\b`,
-          isCaseSensitive === false ? "" : "i"
+          !isCaseSensitive ? "" : "i"
         )
           .filter(
             (newHighlight) =>
@@ -400,7 +407,7 @@ function evaluateFormula(
         ).get();
         const rowForHighlight = computedData[
           matchedHighlight.sheetConfigId
-        ].find((row) => row.data.name === matchedHighlight);
+          ].find((row) => row.data.name === matchedHighlight);
         if (
           rowForHighlight &&
           rowForHighlight.data.officialName !== undefined
@@ -501,7 +508,11 @@ function evaluateFormula(
     }
   `
     );
-    return fn(API, scope);
+
+    const result =  fn(API, scopeProxy(scope));
+
+    return isNaN(result)  ? undefined : result
+
   } catch (e) {
     console.error(e);
     return e;
@@ -624,9 +635,9 @@ export function evaluateSheet(
   if (textDocumentSheet === undefined) {
     throw new Error(
       "expected to find sheet of type " +
-        sheetConfig.name +
-        " in text document " +
-        textDocument.name
+      sheetConfig.name +
+      " in text document " +
+      textDocument.name
     );
   }
 
@@ -736,6 +747,19 @@ function arrayProxy(array: any[]) {
 function scopeProxy(scope: Scope) {
   const handler = {
     get(target: any, prop: string): any {
+
+      if (prop === 'valueOf' && scope && scope.span && scope.documentId) {
+        const spanText = getTextForHighlight(scope as any)
+
+        const value = (
+          (spanText && isNumericish(spanText))
+            ? parseFloat(spanText)
+            : spanText
+        )
+
+        return () => value
+      }
+
       return wrapValueInProxy(scope[prop]);
     },
   };

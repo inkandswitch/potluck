@@ -418,6 +418,16 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
         formula: 'PrevOfType(activity, "dates")',
         visibility: PropertyVisibility.Hidden,
       },
+      {
+        name: "total",
+        formula: "reps * sets",
+        visibility : PropertyVisibility.Hidden
+      },
+      {
+        name: "nextWeight",
+        formula: "weight + 5",
+        visibility : PropertyVisibility.Hidden
+      }
     ],
   },
   [INGREDIENTS_SHEET_CONFIG_ID]: {
@@ -516,11 +526,11 @@ export function addSheetConfig() {
   return sheetConfig;
 }
 
-export const selectedTextDocumentIdBox = observable.box(COFFEE_DOCUMENT_ID);
+export const selectedTextDocumentIdBox = observable.box(WORKOUT_DOCUMENT_ID);
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({
-  [DATE_SHEET_IN_WORKOUT_ID]: true,
+  [DATE_SHEET_IN_WORKOUT_ID]: false,
   [WORKOUT_SHEET_IN_WORKOUT_ID]: true,
   [INGREDIENTS_SHEET_IN_GOCHUJANG_ID]: true,
   [INGREDIENTS_SHEET_IN_PIZZA_ID]: true,

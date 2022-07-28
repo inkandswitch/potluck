@@ -387,13 +387,16 @@ export const SheetTable = observer(
             <FormulaReferenceButton />
             <select
               value={columns[selectedFormulaIndex].visibility}
-              onChange={(e) =>
-                (columns[selectedFormulaIndex].visibility = e.target
-                  .value as PropertyVisibility)
-              }
+              onChange={action(
+                (e) =>
+                  (columns[selectedFormulaIndex].visibility = e.target
+                    .value as PropertyVisibility)
+              )}
             >
-              {Object.entries(PropertyVisibility).map(([name, value]) => (
-                <option value={value}>{name}</option>
+              {Object.entries(PropertyVisibility).map(([name, value], i) => (
+                <option value={value} key={i}>
+                  {name}
+                </option>
               ))}
             </select>
           </div>

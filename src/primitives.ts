@@ -143,7 +143,7 @@ const GOCHUJANG_PORK_TEXT = `Grilled Gochujang Pork With Fresh Sesame Kimchi
 
 Pork shoulder is often prepared as a large roast, requiring hours of cooking until it’s tender. But if you slice it thinly and pound it, the meat quickly absorbs this savory gochujang marinade and cooks up in no time. The spicy pork is balanced by a cool and crisp sesame kimchi, eaten fresh like a salad rather than fermented like traditional preparations. Baby bok choy stands in for the usual napa cabbage, and it’s coated in a vibrant sauce of garlic, ginger, gochugaru, fish sauce and nutty sesame oil. Tuck any leftover pork and kimchi into sandwiches the next day, garnished with tomatoes and mayonnaise.
 
-scale: 2 x <-- remove space between number and x to scale
+scale by
 
 2 tablespoons gochugaru
 2 tablespoons distilled white vinegar
@@ -545,17 +545,12 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     properties: [
       {
         name: "match",
-        formula: 'MatchRegexp("scale: ?(\\\\d+\\\\.?\\\\d*)x")',
-        visibility: PropertyVisibility.Hidden,
-      },
-      {
-        name: "value",
-        formula: "ParseFloat(First(match.data.groups))",
+        formula: 'MatchRegexp("scale by")',
         visibility: PropertyVisibility.Hidden,
       },
       {
         name: "slider",
-        formula: "NumberSlider(match, value)",
+        formula: "NumberSlider(match, 1)",
         visibility: PropertyVisibility.Superscript,
       },
       {

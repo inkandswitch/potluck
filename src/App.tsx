@@ -359,7 +359,7 @@ const SearchBox = observer(({ textDocumentId }: { textDocumentId: string }) => {
 const App = observer(() => {
   const textDocumentId = selectedTextDocumentIdBox.get();
   return (
-    <FileDropWrapper className="h-screen flex px-12">
+    <FileDropWrapper className="h-screen flex px-4">
       <div className="w-1/2 max-w-lg flex flex-col flex-shrink-0">
         <TextDocumentSelector />
         <TextDocumentComponent
@@ -367,7 +367,7 @@ const App = observer(() => {
           key={textDocumentId}
         />
       </div>
-      <div className="grow h-full overflow-auto pl-8 pr-6 pt-24 border-l border-gray-100">
+      <div className="grow h-full overflow-auto pl-6 pr-4 pt-24">
         <SearchBox textDocumentId={textDocumentId} />
         <DocumentSheets textDocumentId={textDocumentId} />
       </div>

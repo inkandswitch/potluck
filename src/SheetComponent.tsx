@@ -16,6 +16,7 @@ import {
   textEditorStateMobx,
   PropertyDefinition,
   PropertyVisibility,
+  TextDocumentSheet,
 } from "./primitives";
 import {
   doSpansOverlap,
@@ -105,27 +106,121 @@ export function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
   return <span>{JSON.stringify(value)}</span>;
 }
 
+const SheetSettingsPopoverContent = observer(
+  ({
+    textDocumentSheet,
+    sheetConfig,
+  }: {
+    textDocumentSheet: TextDocumentSheet;
+    sheetConfig: SheetConfig;
+  }) => {
+    const firstColumn = sheetConfig.properties[0];
+
+    return (
+      <div className="w-80 bg-white rounded shadow-xl text-sm overflow-hidden">
+        <div className="relative">
+          <FormulaInput
+            value={firstColumn.formula}
+            onChange={action((value) => {
+              sheetConfig.properties = sheetConfig.properties.map(
+                (column, index) =>
+                  index === 0 ? { ...column, formula: value } : column
+              );
+            })}
+          />
+          <FormulaReferenceButton className="absolute bottom-1 left-1" />
+        </div>
+        <div className="p-2">
+          <div className="text-sm text-gray-500">
+            <SectionIcon className="inline" /> Highlighting{" "}
+            {textDocumentSheet.highlightSearchRange === undefined
+              ? "whole document"
+              : "limited range"}
+            {textDocumentSheet.highlightSearchRange !== undefined && (
+              <button
+                className="ml-4 underline"
+                onClick={() =>
+                  runInAction(() => {
+                    textDocumentSheet.highlightSearchRange = undefined;
+                  })
+                }
+              >
+                Clear
+              </button>
+            )}
+            {textDocumentSheet.highlightSearchRange === undefined && (
+              <button
+                className="ml-4 underline"
+                onClick={() =>
+                  runInAction(() => {
+                    const editorState = textEditorStateMobx.get();
+                    const from = editorState.selection.main.from;
+                    const to = editorState.selection.main.to;
+                    if (from !== to) {
+                      textDocumentSheet.highlightSearchRange = [from, to];
+                    }
+                  })
+                }
+              >
+                {textEditorStateMobx.get().selection.main.from !==
+                  textEditorStateMobx.get().selection.main.to && (
+                  <span>Limit range to selection</span>
+                )}
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
+
 const SheetName = observer(
   ({
+    textDocumentSheet,
     sheetConfig,
     rowsCount,
   }: {
+    textDocumentSheet: TextDocumentSheet;
     sheetConfig: SheetConfig;
-    rowsCount: number;
+    rowsCount: number | undefined;
   }) => {
     return (
-      <div className="flex-1 flex border-gray-200 w-full mb-2  focus:border-gray-400">
+      <div className="flex h-7">
         <input
           type="text"
           value={sheetConfig.name}
           onChange={action((e) => {
             sheetConfig.name = e.target.value;
           })}
-          className="font-medium inline text-md border-b outline-none text-gray-600"
+          className="font-medium inline text-md border-b border-transparent focus:border-gray-300 outline-none text-gray-600"
         />
-        <div className="ml-2 py-1 px-2 rounded-lg bg-gray-50 text-sm text-gray-400">
-          <span className="font-medium text-gray-500">{rowsCount}</span> results
-        </div>
+        <Popover.Root modal={true}>
+          <Popover.Anchor asChild={true}>
+            <Popover.Trigger asChild={true}>
+              <button className="text-gray-400 hover:text-gray-500">
+                <SliderIcon />
+              </button>
+            </Popover.Trigger>
+          </Popover.Anchor>
+          <Popover.Content
+            side="top"
+            sideOffset={8}
+            align="end"
+            alignOffset={-8}
+          >
+            <SheetSettingsPopoverContent
+              textDocumentSheet={textDocumentSheet}
+              sheetConfig={sheetConfig}
+            />
+          </Popover.Content>
+        </Popover.Root>
+        {rowsCount !== undefined ? (
+          <div className="ml-2 py-1 px-2 rounded-lg bg-gray-50 text-sm text-gray-400">
+            <span className="font-medium text-gray-500">{rowsCount}</span>{" "}
+            results
+          </div>
+        ) : null}
       </div>
     );
   }
@@ -462,6 +557,7 @@ export const SheetTable = observer(
                             side="top"
                             sideOffset={8}
                             align="end"
+                            alignOffset={-8}
                           >
                             <SheetColumnSettingsPopoverContent
                               sheetConfig={sheetConfig}
@@ -649,9 +745,14 @@ export const SheetComponent = observer(
       [SheetView.NutritionLabel]: NutritionLabel,
     }[sheetView]!;
 
+    const canRenderAsCalendar = sheetConfig.properties.some(
+      (column) => column.name === "date"
+    );
+    const canRenderAsNutritionLabel = sheetConfig.name === "ingredients";
+
     return (
-      <div className="flex flex-col gap-2 flex-1">
-        <div className="flex gap-1">
+      <div className="flex flex-col gap-2 flex-1 border border-gray-200 p-3 rounded">
+        <div className="flex items-center gap-1">
           <button onClick={() => toggleIsExpanded()}>
             <span
               className={`icon icon-expandable bg-gray-500 ${
@@ -660,11 +761,13 @@ export const SheetComponent = observer(
             />
           </button>
 
-          <SheetName sheetConfig={sheetConfig} rowsCount={rows.length} />
-        </div>
-
-        {isExpanded && (
-          <>
+          <SheetName
+            textDocumentSheet={textDocumentSheet}
+            sheetConfig={sheetConfig}
+            rowsCount={isExpanded ? undefined : rows.length}
+          />
+          <div className="grow" />
+          {isExpanded && (canRenderAsCalendar || canRenderAsNutritionLabel) ? (
             <div className="flex justify-between">
               <div></div>
               <div className="flex gap-2 pr-2">
@@ -681,9 +784,7 @@ export const SheetComponent = observer(
                 >
                   <TableIcon className="inline" /> Table
                 </button>
-                {sheetConfig.properties.some(
-                  (column) => column.name === "date"
-                ) ? (
+                {canRenderAsCalendar ? (
                   <button
                     onClick={() => {
                       setSheetView(SheetView.Calendar);
@@ -698,7 +799,7 @@ export const SheetComponent = observer(
                     <CalendarIcon className="inline" /> Calendar
                   </button>
                 ) : null}
-                {sheetConfig.name === "ingredients" ? (
+                {canRenderAsNutritionLabel ? (
                   <button
                     onClick={() => {
                       setSheetView(SheetView.NutritionLabel);
@@ -715,50 +816,17 @@ export const SheetComponent = observer(
                 ) : null}
               </div>
             </div>
+          ) : null}
+        </div>
+
+        {isExpanded && (
+          <>
             <SheetViewComponent
               textDocument={textDocument}
               sheetConfig={sheetConfig}
               columns={columns}
               rows={rows}
             />
-            <div className="text-sm text-gray-500">
-              <SectionIcon className="inline" /> Highlighting{" "}
-              {textDocumentSheet.highlightSearchRange === undefined
-                ? "whole document"
-                : "limited range"}
-              {textDocumentSheet.highlightSearchRange !== undefined && (
-                <button
-                  className="ml-4 underline"
-                  onClick={() =>
-                    runInAction(() => {
-                      textDocumentSheet.highlightSearchRange = undefined;
-                    })
-                  }
-                >
-                  Clear
-                </button>
-              )}
-              {textDocumentSheet.highlightSearchRange === undefined && (
-                <button
-                  className="ml-4 underline"
-                  onClick={() =>
-                    runInAction(() => {
-                      const editorState = textEditorStateMobx.get();
-                      const from = editorState.selection.main.from;
-                      const to = editorState.selection.main.to;
-                      if (from !== to) {
-                        textDocumentSheet.highlightSearchRange = [from, to];
-                      }
-                    })
-                  }
-                >
-                  {textEditorStateMobx.get().selection.main.from !==
-                    textEditorStateMobx.get().selection.main.to && (
-                    <span>Limit range to selection</span>
-                  )}
-                </button>
-              )}
-            </div>
           </>
         )}
       </div>

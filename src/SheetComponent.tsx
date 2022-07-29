@@ -36,6 +36,7 @@ import {
   CookieIcon,
   SectionIcon,
   QuestionMarkCircledIcon,
+  SliderIcon,
 } from "@radix-ui/react-icons";
 import { NutritionLabel } from "./NutritionLabel";
 import * as Popover from "@radix-ui/react-popover";
@@ -130,12 +131,17 @@ const SheetName = observer(
   }
 );
 
-function FormulaReferenceButton() {
+function FormulaReferenceButton({ className }: { className?: string }) {
   return (
     <Popover.Root>
       <Popover.Anchor asChild={true}>
         <Popover.Trigger asChild={true}>
-          <button className="flex flex-shrink-0 items-center justify-center w-7 text-gray-400 hover:text-gray-600">
+          <button
+            className={classNames(
+              "flex flex-shrink-0 items-center justify-center text-gray-400 hover:text-gray-600",
+              className
+            )}
+          >
             <QuestionMarkCircledIcon />
           </button>
         </Popover.Trigger>
@@ -240,8 +246,11 @@ function FormulaInput({
         minimalSetup,
         EditorView.theme({
           ".cm-content": {
-            padding: "4px 2px",
+            padding: "4px 4px 4px 20px",
+            fontSize: "12px",
             fontFamily: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
+            minHeight: "48px",
+            maxHeight: "96px",
           },
           ".cm-completionIcon": {
             width: "1em",
@@ -251,6 +260,7 @@ function FormulaInput({
         bracketMatching(),
         closeBrackets(),
         autocompletion(),
+        EditorView.lineWrapping,
         new LanguageSupport(javascriptLanguage, [
           javascriptLanguage.data.of({
             autocomplete: FORMULA_REFERENCE.map(
@@ -294,12 +304,82 @@ function FormulaInput({
   }, [value]);
 
   return (
-    <div
-      className="border border-gray-200 grow overflow-auto"
-      ref={rootRef}
-    ></div>
+    <div className="relative">
+      <div
+        className="border-2 border-blue-500 overflow-auto rounded-t"
+        ref={rootRef}
+      ></div>
+      <div className="absolute top-0 left-0 px-1 py-0.5 bg-blue-500 text-white text-sm italic rounded-br">
+        fx
+      </div>
+    </div>
   );
 }
+
+const SheetColumnSettingsPopoverContent = observer(
+  ({
+    sheetConfig,
+    columnIndex,
+    column,
+  }: {
+    sheetConfig: SheetConfig;
+    columnIndex: number;
+    column: any;
+  }) => {
+    const changeFormulaAt = action((changedIndex: number, formula: string) => {
+      sheetConfig.properties = sheetConfig.properties.map((column, index) =>
+        index === changedIndex ? { ...column, formula } : column
+      );
+    });
+
+    const changeNameAt = action((changedIndex: number, name: string) => {
+      sheetConfig.properties = sheetConfig.properties.map((column, index) =>
+        index === changedIndex ? { ...column, name } : column
+      );
+    });
+
+    return (
+      <div className="w-80 bg-white rounded shadow-xl text-sm overflow-hidden">
+        <div className="relative">
+          <FormulaInput
+            value={column.formula}
+            onChange={(value) => {
+              changeFormulaAt(columnIndex, value);
+            }}
+          />
+          <FormulaReferenceButton className="absolute bottom-1 left-1" />
+        </div>
+        <div className="p-2">
+          <div className="flex items-center justify-between gap-2 mb-1">
+            Name
+            <input
+              className="block grow pl-1 py-0.5 self-stretch bg-orange-50 border border-orange-100 text-orange-500 font-medium rounded-sm"
+              value={column.name}
+              onChange={(evt) => changeNameAt(columnIndex, evt.target.value)}
+            />
+          </div>
+          <div className="flex items-center">
+            <div>Display in document as</div>
+            <select
+              value={column.visibility}
+              onChange={action(
+                (e) =>
+                  (column.visibility = e.target.value as PropertyVisibility)
+              )}
+              className="text-blue-500"
+            >
+              {Object.entries(PropertyVisibility).map(([name, value], i) => (
+                <option value={value} key={i}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+    );
+  }
+);
 
 export const SheetTable = observer(
   ({
@@ -315,9 +395,6 @@ export const SheetTable = observer(
   }) => {
     const [sortBy, setSortBy] = useState<
       { columnName: string; direction: "asc" | "desc" } | undefined
-    >(undefined);
-    const [selectedFormulaIndex, setSelectedFormulaIndex] = useState<
-      number | undefined
     >(undefined);
     const hoverHighlights = computed(
       () =>
@@ -335,19 +412,6 @@ export const SheetTable = observer(
         formula: "",
         visibility: PropertyVisibility.Hidden,
       });
-      setSelectedFormulaIndex(columns.length - 1);
-    });
-
-    const changeFormulaAt = action((changedIndex: number, formula: string) => {
-      sheetConfig.properties = sheetConfig.properties.map((column, index) =>
-        index === changedIndex ? { ...column, formula } : column
-      );
-    });
-
-    const changeNameAt = action((changedIndex: number, name: string) => {
-      sheetConfig.properties = sheetConfig.properties.map((column, index) =>
-        index === changedIndex ? { ...column, name } : column
-      );
     });
 
     let sortedRows = rows;
@@ -370,62 +434,43 @@ export const SheetTable = observer(
 
     return (
       <>
-        {selectedFormulaIndex !== undefined && (
-          <div className="flex text-sm items-center overflow-hidden">
-            <input
-              className="pl-1 self-stretch font-mono w-1/5 flex-shrink-0 border border-gray-200"
-              value={columns[selectedFormulaIndex].name}
-              onChange={(evt) =>
-                changeNameAt(selectedFormulaIndex, evt.target.value)
-              }
-            />
-            <span>&nbsp;=&nbsp;</span>
-            <FormulaInput
-              value={columns[selectedFormulaIndex].formula}
-              onChange={(value) => {
-                changeFormulaAt(selectedFormulaIndex, value);
-              }}
-              key={selectedFormulaIndex}
-            />
-            <FormulaReferenceButton />
-            <select
-              value={columns[selectedFormulaIndex].visibility}
-              onChange={action(
-                (e) =>
-                  (columns[selectedFormulaIndex].visibility = e.target
-                    .value as PropertyVisibility)
-              )}
-            >
-              {Object.entries(PropertyVisibility).map(([name, value], i) => (
-                <option value={value} key={i}>
-                  {name}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        <div className="max-h-[250px] overflow-auto relative w-full flex border border-gray-200 ">
+        <div className="max-h-[250px] pb-2 overflow-auto relative w-full flex text-sm">
           <table className="flex-1">
             <thead>
-              <tr
-                className="sticky top-0 border"
-                style={{ outline: "1px solid  rgb(229 231 235)" }}
-              >
+              <tr className="top-0">
                 {columns.map((column, index) => {
                   return (
                     <th
                       key={index}
-                      className={`text-left font-normal px-1 border ${
-                        selectedFormulaIndex === index
-                          ? "bg-blue-100"
-                          : "bg-gray-100"
-                      }`}
-                      onClick={() => setSelectedFormulaIndex(index)}
+                      className={classNames("text-left font-normal pl-1 py-2", {
+                        "opacity-0": index === 0,
+                      })}
                     >
-                      <div className="flex justify-between">
-                        {column.name}
-                        <div className="flex">
+                      <div className="flex gap-1 pr-1 items-center justify-between">
+                        <div className="px-1 rounded-sm bg-orange-100 text-orange-500 font-medium text-[10px]">
+                          {column.name}
+                        </div>
+                        <Popover.Root modal={true}>
+                          <Popover.Anchor asChild={true}>
+                            <Popover.Trigger asChild={true}>
+                              <button className="text-gray-400 hover:text-gray-500">
+                                <SliderIcon />
+                              </button>
+                            </Popover.Trigger>
+                          </Popover.Anchor>
+                          <Popover.Content
+                            side="top"
+                            sideOffset={8}
+                            align="end"
+                          >
+                            <SheetColumnSettingsPopoverContent
+                              sheetConfig={sheetConfig}
+                              columnIndex={index}
+                              column={column}
+                            />
+                          </Popover.Content>
+                        </Popover.Root>
+                        <div className="hidden">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -514,19 +559,47 @@ export const SheetTable = observer(
                   )}
                   key={rowIndex}
                 >
-                  {columns.map((column, index) => {
+                  {columns.map((column, colIndex) => {
                     const value: any = row.data[column.name];
 
                     return (
                       <td
-                        className={`border border-gray-200 px-1 ${
-                          rowIndex !== rows.length - 1
-                            ? "border-l-0"
-                            : "border-l-0 border-b-0"
-                        }`}
-                        key={index}
+                        className={classNames(
+                          "border-x border-x-gray-400 py-0.5 relative",
+                          colIndex === 0 ? "px-2" : "px-1",
+                          rowIndex === 0 && colIndex !== 0
+                            ? "border-t border-t-gray-400"
+                            : undefined,
+                          rowIndex === 0 && colIndex === 0
+                            ? "border-t-transparent"
+                            : undefined,
+                          rowIndex === 0 && colIndex === columns.length - 1
+                            ? "rounded-tr"
+                            : undefined,
+                          rowIndex === sortedRows.length - 1 &&
+                            colIndex === columns.length - 1
+                            ? "rounded-br"
+                            : undefined
+                        )}
+                        key={colIndex}
                       >
                         <ValueDisplay value={value} doc={textDocument.text} />
+                        {rowIndex === 0 && colIndex === 0 ? (
+                          <div className="absolute bottom-full -left-px -right-px h-1 bg-white border-l border-r border-t border-gray-400 rounded-t" />
+                        ) : null}
+                        {rowIndex === sortedRows.length - 1 &&
+                        colIndex === 0 ? (
+                          <div className="absolute top-full -left-px -right-px h-1 bg-white border-l border-r border-b border-gray-400 rounded-b" />
+                        ) : (
+                          <div
+                            className={classNames(
+                              "absolute h-px bottom-0 right-0 left-0",
+                              rowIndex === sortedRows.length - 1
+                                ? "bg-gray-400"
+                                : "bg-gray-100"
+                            )}
+                          />
+                        )}
                       </td>
                     );
                   })}

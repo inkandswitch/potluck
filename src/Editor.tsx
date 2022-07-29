@@ -26,6 +26,7 @@ import {
 } from "./utils";
 import { createRoot, Root } from "react-dom/client";
 import { NumberSliderComponent } from "./NumberSliderComponent";
+import classNames from "classnames";
 
 const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
 const MAX_SUPERSCRIPT_LENGTH = 20;
@@ -108,12 +109,18 @@ class SuperscriptWidget extends WidgetType {
   }
 }
 
+enum InlineWidgetMode {
+  Inline,
+  Replace,
+}
+
 class InlineWidget extends WidgetType {
   reactRoots: Root[] = [];
 
   constructor(
     readonly highlightData: { [key: string]: any },
-    readonly visibleProperties: string[]
+    readonly visibleProperties: string[],
+    readonly mode: InlineWidgetMode = InlineWidgetMode.Inline
   ) {
     super();
   }
@@ -128,7 +135,9 @@ class InlineWidget extends WidgetType {
 
   toDOM() {
     const wrap = document.createElement("span");
-    wrap.className = "rounded-r";
+    wrap.className = classNames("rounded-r", {
+      "ml-1": this.mode === InlineWidgetMode.Inline,
+    });
     wrap.setAttribute("aria-hidden", "true");
     if (this.highlightData === undefined) {
       return wrap;
@@ -154,7 +163,7 @@ class InlineWidget extends WidgetType {
         valueAsText = valueAsText.substring(0, MAX_SUPERSCRIPT_LENGTH) + "...";
       }
       const token = document.createElement("span");
-      token.className = `${ANNOTATION_TOKEN_CLASSNAME} bg-gray-100 ml-1 align-top top-[6px] relative text-gray-800 font-mono text-xs py-[3px] px-1 rounded-sm whitespace-nowrap`;
+      token.className = `${ANNOTATION_TOKEN_CLASSNAME} bg-gray-100 ml-1 first:ml-0 align-top top-[6px] relative text-gray-800 font-mono text-xs py-[3px] px-1 rounded-sm whitespace-nowrap`;
       token.innerText = valueAsText;
       token.setAttribute("data-snippet-property-name", key);
       wrap.appendChild(token);
@@ -166,6 +175,10 @@ class InlineWidget extends WidgetType {
     for (const reactRoot of this.reactRoots) {
       reactRoot.unmount();
     }
+  }
+
+  ignoreEvent(event: Event): boolean {
+    return false;
   }
 }
 
@@ -290,6 +303,47 @@ const highlightDecorations = EditorView.decorations.compute(
                   widget: new InlineWidget(highlight.data, inlineProperties),
                   side: 1,
                 }).range(highlight.span[1])
+              );
+            }
+            const replaceProperties = sheetConfigsMobx
+              .get(highlight.sheetConfigId)!
+              .properties.filter(
+                (property) => property.visibility === PropertyVisibility.Replace
+              )
+              .map((property) => property.name);
+            if (
+              replaceProperties.some(
+                (propertyName) => highlight.data[propertyName]
+              )
+            ) {
+              const spansOverlap = doSpansOverlap(
+                selectionSpan,
+                highlight.span
+              );
+              if (!spansOverlap) {
+                decorations.push(
+                  Decoration.mark({
+                    class: "cm-highlight-replace",
+                  }).range(highlight.span[0], highlight.span[1])
+                );
+              }
+              decorations.push(
+                spansOverlap
+                  ? Decoration.widget({
+                      widget: new SuperscriptWidget(
+                        highlight.data,
+                        replaceProperties
+                      ),
+                      side: 1,
+                    }).range(highlight.span[0])
+                  : Decoration.widget({
+                      widget: new InlineWidget(
+                        highlight.data,
+                        replaceProperties,
+                        InlineWidgetMode.Replace
+                      ),
+                      side: 1,
+                    }).range(highlight.span[1])
               );
             }
           }

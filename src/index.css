@@ -42,6 +42,10 @@
   @apply bg-gray-100
 }
 
+.cm-highlight-replace {
+  @apply hidden;
+}
+
 .rbc-event:hover {
   @apply bg-blue-500;
 }

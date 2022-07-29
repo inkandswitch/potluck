@@ -20,6 +20,7 @@ export enum PropertyVisibility {
   Hidden = "HIDDEN",
   Inline = "INLINE",
   Superscript = "SUPERSCRIPT",
+  Replace = "REPLACE",
 }
 
 export type PropertyDefinition = {
@@ -398,8 +399,8 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "scaledAmount",
         formula:
-          "(scaleFactor && scaleFactor !== 1 && amount) ? `-> ${scaleFactor * amount} ${unit}` : undefined",
-        visibility: PropertyVisibility.Inline,
+          "(scaleFactor && scaleFactor !== 1 && amount) ? `${scaleFactor * amount} ${unit}` : undefined",
+        visibility: PropertyVisibility.Replace,
       },
     ],
   },
@@ -483,8 +484,8 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "scaledQuantity",
         formula:
-          "(scaleFactor && scaleFactor !== 1 && IsNumber(quantity.valueOf())) ? `-> ${quantity * Round(scaleFactor, 2)} ${name}` : undefined",
-        visibility: PropertyVisibility.Inline,
+          "(scaleFactor && scaleFactor !== 1 && IsNumber(quantity.valueOf())) ? `${quantity * Round(scaleFactor, 2)} ${name}` : undefined",
+        visibility: PropertyVisibility.Replace,
       },
     ],
   },

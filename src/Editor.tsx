@@ -426,7 +426,6 @@ export const Editor = observer(
           const highlights = hoverHighlightsMobx
             .toJSON()
             .concat(searchResults.get());
-          console.log({ highlights });
           view.dispatch({
             effects: setHoverHighlightsEffect.of(highlights),
           });

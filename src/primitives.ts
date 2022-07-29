@@ -581,33 +581,54 @@ export const selectedTextDocumentIdBox = observable.box(
   GOCHUJANG_PORK_DOCUMENT_ID
 );
 
-type SearchBoxState = {
-  search: string,
-  mode: "regex" | "string"
+
+type NewSearchMode = {
+  mode: "new"
+  type: "regex" | "string"
+  search: string
 }
 
+type SavedSearchesMode = {
+  mode: "saved"
+  selectedOption: number
+  search: string
+}
+
+type SearchBoxState = NewSearchMode | SavedSearchesMode
+
 export const searchTermBox : IObservableValue<SearchBoxState> = observable.box<SearchBoxState>({
-  search: "",
-  mode: "regex"
+  mode: "new",
+  type: "regex",
+  search: ""
 });
 
-export const searchFormula = computed<string | undefined>(() => {
-  const {search, mode} = searchTermBox.get();
+export function getMatchingSavedSearches (search: string) : SheetConfig[] {
+  return Array.from(sheetConfigsMobx.values()).filter((sheetConfig) => (
+    sheetConfig.name.toLowerCase().includes(search.toLowerCase())
+  ))
+}
 
-  if (search === '') {
+export function getSearchFormula (type: "regex" | "string", search: string) : string | undefined {
+  if (search === "") {
     return
   }
 
   return (
-    mode === "regex"
+    type === "regex"
       ? `MatchRegexp("${search}", "i")`
       : `MatchString("${search}")`
   )
-
-})
+}
 
 export const searchResults = computed<Highlight[]>(() => {
-  const formula = searchFormula.get()
+
+  const searchState = searchTermBox.get()
+
+  if (searchState.mode === "saved") {
+    return []
+  }
+
+  const formula = getSearchFormula(searchState.type, searchState.search)
 
   if (!formula) {
     return []

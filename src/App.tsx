@@ -4,7 +4,7 @@ import {
   getSheetConfigsOfTextDocument,
   Highlight,
   isSheetExpandedMobx,
-  PropertyVisibility,
+  PropertyVisibility, searchFormula,
   searchResults,
   searchTermBox,
   selectedTextDocumentIdBox,
@@ -206,10 +206,12 @@ const PersistenceButton = observer(() => {
 
 const SearchBox = observer(({ textDocumentId }: { textDocumentId: string }) => {
   const textDocument = textDocumentsMobx.get(textDocumentId)!;
-  const searchTerm = searchTermBox.get();
+  const {search, mode} = searchTermBox.get();
   const [searchBoxFocused, setSearchBoxFocused] = useState(false);
   const searchBoxRef = useRef<HTMLInputElement>(null);
   const results = searchResults.get();
+
+  const formula = searchFormula.get()
 
   return (
     <div className="mb-8 relative">
@@ -218,21 +220,25 @@ const SearchBox = observer(({ textDocumentId }: { textDocumentId: string }) => {
         className="border-gray-200 border rounded p-1 w-full mb-2"
         type="text"
         placeholder="Search"
-        value={searchTerm}
+        value={search}
         onFocus={() => setSearchBoxFocused(true)}
         onBlur={() => setSearchBoxFocused(false)}
         // Add a new sheet reflecting the search term
         onKeyDown={(e) => {
           if (e.key === "Enter") {
+            if (!formula) {
+              return
+            }
+
             runInAction(() => {
               const sheetConfigId = generateNanoid();
               const sheetConfig: SheetConfig = {
                 id: sheetConfigId,
-                name: searchTerm,
+                name: search,
                 properties: [
                   {
                     name: "result",
-                    formula: `MatchRegexp("${searchTerm}", "i")`,
+                    formula: formula,
                     visibility: PropertyVisibility.Hidden,
                   },
                 ],
@@ -244,7 +250,7 @@ const SearchBox = observer(({ textDocumentId }: { textDocumentId: string }) => {
                 configId: sheetConfigId,
               });
               isSheetExpandedMobx.set(textDocumentSheetId, true);
-              searchTermBox.set("");
+              searchTermBox.get().search = "";
               searchBoxRef.current?.blur();
             });
           }
@@ -254,11 +260,11 @@ const SearchBox = observer(({ textDocumentId }: { textDocumentId: string }) => {
         }}
         onChange={(e) =>
           runInAction(() => {
-            searchTermBox.set(e.target.value);
+            searchTermBox.get().search = e.target.value;
           })
         }
-      ></input>
-      {searchBoxFocused && searchTerm === "" && (
+      />
+      {searchBoxFocused && !searchFormula && (
         <div className="max-h-48 overflow-y-scroll absolute top-9 w-full bg-white z-10 border border-gray-100 px-4 py-2">
           <div className="text-sm text-gray-500">Saved Searches</div>
           {[...sheetConfigsMobx.entries()].map(([id, sheetConfig]) => (
@@ -282,10 +288,22 @@ const SearchBox = observer(({ textDocumentId }: { textDocumentId: string }) => {
         </div>
       )}
       {results.length > 0 && (
-        <div className="absolute top-2 right-2 bg-white z-10 text-gray-400 text-sm">
+        <div className="absolute top-2 right-[35px] bg-white z-10 text-gray-400 text-sm">
           {results.length} results
         </div>
       )}
+
+      <button
+        className={`
+          absolute right-[5px] top-[5px] rounded pt-[2px] w-[24px] h-[24px]
+          ${mode === "regex" ? "bg-blue-100" : "bg-gray-200"}
+        `}
+        onClick={() => {
+          searchTermBox.get().mode = mode === "regex" ? "string" : "regex"
+        }}
+      >
+        <div className="bg-gray-500 icon icon-asterisk"/>
+      </button>
     </div>
   );
 });

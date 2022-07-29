@@ -21,7 +21,7 @@ import {
   isNaN,
   isNumber,
   round,
-  minBy,
+  minBy, escapeRegExp,
 } from "lodash";
 import {
   getComputedDocumentValues,
@@ -168,7 +168,7 @@ export function evaluateFormula(
       for (const value of values) {
         const text = isString(value) ? value : getTextForHighlight(value);
         const newHighlights = API.MatchRegexp(
-          `\\b${text}s?\\b`,
+          `\\b${escapeRegExp(text)}s?\\b`,
           !isCaseSensitive ? "" : "i"
         ).filter(
           (newHighlight) =>

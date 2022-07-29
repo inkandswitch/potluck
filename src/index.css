@@ -20,6 +20,11 @@
   -webkit-mask-image: url("plus-icon.svg");
 }
 
+.icon-asterisk {
+  mask-image: url('asterisk-icon.svg');
+  -webkit-mask-image: url('asterisk-icon.svg');
+}
+
 .icon-expandable {
   transition: transform 100ms ease-in-out;
   mask-image: url('chevron-forward.svg');

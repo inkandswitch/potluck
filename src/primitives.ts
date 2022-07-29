@@ -1,4 +1,4 @@
-import { autorun, computed, observable, runInAction } from "mobx";
+import { autorun, computed, IObservableValue, observable, runInAction } from "mobx";
 import { EditorState, Text } from "@codemirror/state";
 import { ALL_INGREDIENTS_TEXT } from "./data/all_ingredients";
 import { generateNanoid } from "./utils";
@@ -580,15 +580,41 @@ export function addSheetConfig() {
 export const selectedTextDocumentIdBox = observable.box(
   GOCHUJANG_PORK_DOCUMENT_ID
 );
-export const searchTermBox = observable.box("");
+
+type SearchBoxState = {
+  search: string,
+  mode: "regex" | "string"
+}
+
+export const searchTermBox : IObservableValue<SearchBoxState> = observable.box<SearchBoxState>({
+  search: "",
+  mode: "regex"
+});
+
+export const searchFormula = computed<string | undefined>(() => {
+  const {search, mode} = searchTermBox.get();
+
+  if (search === '') {
+    return
+  }
+
+  return (
+    mode === "regex"
+      ? `MatchRegexp("${search}", "i")`
+      : `MatchString("${search}")`
+  )
+
+})
 
 export const searchResults = computed<Highlight[]>(() => {
-  const searchTerm = searchTermBox.get();
-  if (!searchTerm || searchTerm === "") {
-    return [];
+  const formula = searchFormula.get()
+
+  if (!formula) {
+    return []
   }
+
   const textDocument = textDocumentsMobx.get(selectedTextDocumentIdBox.get())!;
-  const formula = `MatchRegexp("${searchTerm}", "i")`;
+
   let results: Highlight[] = [];
   try {
     results = evaluateFormula(

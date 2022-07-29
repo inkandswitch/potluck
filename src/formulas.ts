@@ -687,14 +687,6 @@ export function evaluateSheet(
   const textDocumentSheet = textDocument.sheets.find(
     (sheet) => sheet.configId === sheetConfig.id
   );
-  if (textDocumentSheet === undefined) {
-    throw new Error(
-      "expected to find sheet of type " +
-        sheetConfig.name +
-        " in text document " +
-        textDocument.name
-    );
-  }
 
   for (const column of sheetConfig.properties) {
     if (resultRows === undefined) {
@@ -707,7 +699,7 @@ export function evaluateSheet(
 
       if (isArray(result)) {
         resultRows = result;
-        if (textDocumentSheet.highlightSearchRange !== undefined) {
+        if (textDocumentSheet?.highlightSearchRange !== undefined) {
           resultRows = result.filter(
             (item) =>
               item.span === undefined ||

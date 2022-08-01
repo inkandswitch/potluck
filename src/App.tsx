@@ -25,7 +25,12 @@ import classNames from "classnames";
 import { getComputedDocumentValues } from "./compute";
 import { generateNanoid } from "./utils";
 import { DirectoryPersistence, FileDropWrapper } from "./persistence";
-import { FileIcon, FileTextIcon, PauseIcon } from "@radix-ui/react-icons";
+import {
+  FileIcon,
+  FileTextIcon,
+  MagnifyingGlassIcon,
+  PauseIcon,
+} from "@radix-ui/react-icons";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { ToastViewport } from "@radix-ui/react-toast";
 import { evaluateFormula } from "./formulas";
@@ -147,7 +152,7 @@ const PersistenceButton = observer(() => {
     DirectoryPersistence | undefined
   >(undefined);
   return (
-    <div className="absolute top-2 right-2 flex gap-2 bg-white bg-opacity-50 p-2 rounded">
+    <div className="absolute top-2 right-8 flex gap-2 bg-white bg-opacity-50 p-2 rounded">
       <Tooltip.Root>
         <Tooltip.Trigger asChild={true}>
           <button
@@ -206,6 +211,28 @@ const PersistenceButton = observer(() => {
         </Tooltip.Root>
       ) : null}
     </div>
+  );
+});
+const SearchButton = observer(() => {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild={true}>
+        <button
+          onClick={action(() => {
+            showSearchPanelBox.set(!showSearchPanelBox.get());
+          })}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
+        >
+          <MagnifyingGlassIcon />
+        </button>
+      </Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
+          cmd-shift-f
+          <Tooltip.Arrow className="fill-gray-700" />
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
   );
 });
 
@@ -447,6 +474,7 @@ const App = observer(() => {
           <DocumentSheets textDocumentId={textDocumentId} />
         </div>
       ) : null}
+      <SearchButton />
       <PersistenceButton />
       <ToastViewport className="fixed top-4 right-4 flex flex-col gap-2" />
     </FileDropWrapper>

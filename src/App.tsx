@@ -14,9 +14,10 @@ import {
   TextDocument,
   textDocumentsMobx,
   getMatchingSavedSearches,
+  showSearchPanelBox,
 } from "./primitives";
 import { observer } from "mobx-react-lite";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SheetComponent, ValueDisplay } from "./SheetComponent";
 import { action, runInAction } from "mobx";
 import { Text } from "@codemirror/state";
@@ -208,171 +209,226 @@ const PersistenceButton = observer(() => {
   );
 });
 
-const SearchBox = observer(({ textDocumentId }: { textDocumentId: string }) => {
-  const textDocument = textDocumentsMobx.get(textDocumentId)!;
-  const searchState = searchTermBox.get();
-  const [searchBoxFocused, setSearchBoxFocused] = useState(false);
-  const searchBoxRef = useRef<HTMLInputElement>(null);
-  const results = searchResults.get();
+const SearchBox = observer(
+  ({
+    textDocumentId,
+    focusOnMountRef,
+  }: {
+    textDocumentId: string;
+    focusOnMountRef: React.MutableRefObject<boolean>;
+  }) => {
+    const textDocument = textDocumentsMobx.get(textDocumentId)!;
+    const searchState = searchTermBox.get();
+    const [searchBoxFocused, setSearchBoxFocused] = useState(false);
+    const searchBoxRef = useRef<HTMLInputElement>(null);
+    const results = searchResults.get();
 
-  let matchingSavedSearches =
-    searchState.mode === "saved" &&
-    getMatchingSavedSearches(searchState.search);
+    let matchingSavedSearches =
+      searchState.mode === "saved" &&
+      getMatchingSavedSearches(searchState.search);
 
-  return (
-    <>
-      <div className="pb-2 flex gap-1">
-        <button
-          className={`px-1 rounded ${
-            searchState.mode === "new" ? "bg-blue-100" : ""
-          }`}
-          onClick={() => {
-            if (searchState.mode !== "new") {
-              searchTermBox.set({
-                mode: "new",
-                search: searchState.search,
-                type: "regex",
-              });
-            }
+    useEffect(() => {
+      if (focusOnMountRef.current) {
+        focusOnMountRef.current = false;
+        searchBoxRef.current!.focus();
+      }
+      function onKeyDown(e: KeyboardEvent) {
+        if (e.metaKey && e.shiftKey && e.key === "f") {
+          searchBoxRef.current!.focus();
+        }
+      }
+      document.addEventListener("keydown", onKeyDown);
+      return () => {
+        document.removeEventListener("keydown", onKeyDown);
+      };
+    }, []);
 
-            searchBoxRef?.current?.focus();
-          }}
-        >
-          new search
-        </button>
-        <button
-          className={`px-1 rounded ${
-            searchState.mode === "saved" ? "bg-blue-100" : ""
-          }`}
-          onClick={() => {
-            if (searchState.mode !== "saved") {
-              searchTermBox.set({
-                mode: "saved",
-                search: searchState.search,
-                selectedOption: 0,
-              });
-            }
-
-            searchBoxRef?.current?.focus();
-          }}
-        >
-          saved searches
-        </button>
-      </div>
-
-      <div className="mb-8 relative">
-        <input
-          ref={searchBoxRef}
-          className="border-gray-200 border rounded p-1 w-full mb-2"
-          type="text"
-          placeholder="Search"
-          value={searchState.search}
-          onFocus={() => setSearchBoxFocused(true)}
-          onBlur={() => setSearchBoxFocused(false)}
-          // Add a new sheet reflecting the search term
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              if (searchState.mode === "saved") {
-                return;
-              }
-
-              const formula = getSearchFormula(
-                searchState.type,
-                searchState.search
-              );
-
-              if (!formula) {
-                return;
-              }
-
-              runInAction(() => {
-                const sheetConfigId = generateNanoid();
-                const sheetConfig: SheetConfig = {
-                  id: sheetConfigId,
-                  name: searchState.search,
-                  properties: [
-                    {
-                      name: "$",
-                      formula: formula,
-                      visibility: PropertyVisibility.Hidden,
-                    },
-                  ],
-                };
-                sheetConfigsMobx.set(sheetConfigId, sheetConfig);
-                const textDocumentSheetId = generateNanoid();
-                textDocument.sheets.unshift({
-                  id: textDocumentSheetId,
-                  configId: sheetConfigId,
+    return (
+      <>
+        <div className="pb-2 flex gap-1">
+          <button
+            className={`px-1 rounded ${
+              searchState.mode === "new" ? "bg-blue-100" : ""
+            }`}
+            onClick={() => {
+              if (searchState.mode !== "new") {
+                searchTermBox.set({
+                  mode: "new",
+                  search: searchState.search,
+                  type: "regex",
                 });
-                isSheetExpandedMobx.set(textDocumentSheetId, true);
-                searchTermBox.get().search = "";
-                searchBoxRef.current?.blur();
-              });
-            }
-            if (e.key === "Escape") {
-              searchBoxRef.current?.blur();
-            }
-          }}
-          onChange={(e) =>
-            runInAction(() => {
-              searchTermBox.get().search = e.target.value;
-            })
-          }
-        />
-        {searchBoxFocused && searchState.mode === "saved" && (
-          <div className="max-h-48 overflow-y-scroll absolute top-9 w-full bg-white z-10 border border-gray-100 px-4 py-2">
-            {getMatchingSavedSearches(searchState.search).map(
-              (sheetConfig, index) => (
-                <div
-                  key={sheetConfig.id}
-                  className="hover:bg-blue-100 hover:cursor-pointer"
-                  onMouseDown={(e) => {
+              }
+
+              searchBoxRef?.current?.focus();
+            }}
+          >
+            new search
+          </button>
+          <button
+            className={`px-1 rounded ${
+              searchState.mode === "saved" ? "bg-blue-100" : ""
+            }`}
+            onClick={() => {
+              if (searchState.mode !== "saved") {
+                searchTermBox.set({
+                  mode: "saved",
+                  search: searchState.search,
+                  selectedOption: 0,
+                });
+              }
+
+              searchBoxRef?.current?.focus();
+            }}
+          >
+            saved searches
+          </button>
+        </div>
+
+        <div className="mb-8 relative">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="grow relative">
+              <input
+                ref={searchBoxRef}
+                className="border-gray-200 border rounded w-full py-1 pl-1 pr-8"
+                type="text"
+                placeholder="Search"
+                value={searchState.search}
+                onFocus={() => setSearchBoxFocused(true)}
+                onBlur={() => setSearchBoxFocused(false)}
+                // Add a new sheet reflecting the search term
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    if (searchState.mode === "saved") {
+                      return;
+                    }
+
+                    const formula = getSearchFormula(
+                      searchState.type,
+                      searchState.search
+                    );
+
+                    if (!formula) {
+                      return;
+                    }
+
                     runInAction(() => {
+                      const sheetConfigId = generateNanoid();
+                      const sheetConfig: SheetConfig = {
+                        id: sheetConfigId,
+                        name: searchState.search,
+                        properties: [
+                          {
+                            name: "$",
+                            formula: formula,
+                            visibility: PropertyVisibility.Hidden,
+                          },
+                        ],
+                      };
+                      sheetConfigsMobx.set(sheetConfigId, sheetConfig);
                       const textDocumentSheetId = generateNanoid();
                       textDocument.sheets.unshift({
                         id: textDocumentSheetId,
-                        configId: sheetConfig.id,
+                        configId: sheetConfigId,
                       });
                       isSheetExpandedMobx.set(textDocumentSheetId, true);
+                      searchTermBox.get().search = "";
+                      searchBoxRef.current?.blur();
+                    });
+                  }
+                  if (e.key === "Escape") {
+                    searchBoxRef.current?.blur();
+                  }
+                }}
+                onChange={(e) =>
+                  runInAction(() => {
+                    searchTermBox.get().search = e.target.value;
+                  })
+                }
+              />
+              {searchState.mode === "new" && (
+                <button
+                  className={`
+          absolute top-[5px] right-[5px] rounded pt-[2px] w-6 h-6
+          ${searchState.type === "regex" ? "bg-blue-100" : "bg-gray-200"}
+        `}
+                  onClick={() => {
+                    searchTermBox.set({
+                      search: searchState.search,
+                      mode: "new",
+                      type: searchState.type === "regex" ? "string" : "regex",
                     });
                   }}
                 >
-                  {sheetConfig.name}
-                </div>
-              )
-            )}
+                  <div className="bg-gray-500 icon icon-asterisk" />
+                </button>
+              )}
+            </div>
+            <button
+              onClick={action(() => {
+                showSearchPanelBox.set(false);
+              })}
+              className="text-sm text-gray-400 hover:text-gray-600"
+            >
+              Done
+            </button>
           </div>
-        )}
-        {results.length > 0 && (
-          <div className="absolute top-2 right-[35px] bg-white z-10 text-gray-400 text-sm">
-            {results.length} results
-          </div>
-        )}
-
-        {searchState.mode === "new" && (
-          <button
-            className={`
-          absolute right-[5px] top-[5px] rounded pt-[2px] w-[24px] h-[24px]
-          ${searchState.type === "regex" ? "bg-blue-100" : "bg-gray-200"}
-        `}
-            onClick={() => {
-              searchTermBox.set({
-                search: searchState.search,
-                mode: "new",
-                type: searchState.type === "regex" ? "string" : "regex",
-              });
-            }}
-          >
-            <div className="bg-gray-500 icon icon-asterisk" />
-          </button>
-        )}
-      </div>
-    </>
-  );
-});
+          {searchBoxFocused && searchState.mode === "saved" && (
+            <div className="max-h-48 overflow-y-scroll absolute top-9 w-full bg-white z-10 border border-gray-100 px-4 py-2">
+              {getMatchingSavedSearches(searchState.search).map(
+                (sheetConfig, index) => (
+                  <div
+                    key={sheetConfig.id}
+                    className="hover:bg-blue-100 hover:cursor-pointer"
+                    onMouseDown={(e) => {
+                      runInAction(() => {
+                        const textDocumentSheetId = generateNanoid();
+                        textDocument.sheets.unshift({
+                          id: textDocumentSheetId,
+                          configId: sheetConfig.id,
+                        });
+                        isSheetExpandedMobx.set(textDocumentSheetId, true);
+                      });
+                    }}
+                  >
+                    {sheetConfig.name}
+                  </div>
+                )
+              )}
+            </div>
+          )}
+          {results.length > 0 && (
+            <div className="absolute top-2 right-[35px] bg-white z-10 text-gray-400 text-sm">
+              {results.length} results
+            </div>
+          )}
+        </div>
+      </>
+    );
+  }
+);
 
 const App = observer(() => {
   const textDocumentId = selectedTextDocumentIdBox.get();
+  const showSearchPanel = showSearchPanelBox.get();
+  const focusSearchOnMountRef = useRef(false);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.metaKey && e.shiftKey && e.key === "f") {
+        if (!showSearchPanelBox.get()) {
+          runInAction(() => {
+            focusSearchOnMountRef.current = true;
+            showSearchPanelBox.set(true);
+          });
+        }
+      }
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
+
   return (
     <FileDropWrapper className="h-screen flex px-4">
       <div className="w-1/2 max-w-lg flex flex-col flex-shrink-0">
@@ -382,10 +438,15 @@ const App = observer(() => {
           key={textDocumentId}
         />
       </div>
-      <div className="grow h-full overflow-auto pl-6 pr-4 pt-24">
-        <SearchBox textDocumentId={textDocumentId} />
-        <DocumentSheets textDocumentId={textDocumentId} />
-      </div>
+      {showSearchPanel ? (
+        <div className="grow h-full overflow-auto pl-6 pr-4 pt-24">
+          <SearchBox
+            textDocumentId={textDocumentId}
+            focusOnMountRef={focusSearchOnMountRef}
+          />
+          <DocumentSheets textDocumentId={textDocumentId} />
+        </div>
+      ) : null}
       <PersistenceButton />
       <ToastViewport className="fixed top-4 right-4 flex flex-col gap-2" />
     </FileDropWrapper>

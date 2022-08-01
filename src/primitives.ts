@@ -666,3 +666,5 @@ export const isSheetExpandedMobx = observable.map<string, boolean>({
   [INGREDIENTS_SHEET_IN_PIZZA_ID]: true,
   [SCALE_SHEET_IN_GOCHUJANG_ID]: true,
 });
+
+export const showSearchPanelBox = observable.box(false);

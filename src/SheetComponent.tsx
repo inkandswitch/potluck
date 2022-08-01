@@ -490,6 +490,15 @@ const SheetColumnSettingsPopoverContent = observer(
       );
     });
 
+    const readableNamesForPropertyVisibility: {
+      [key in PropertyVisibility]: string;
+    } = {
+      [PropertyVisibility.Hidden]: "Hidden",
+      [PropertyVisibility.Inline]: "Next to text",
+      [PropertyVisibility.Superscript]: "Above text",
+      [PropertyVisibility.Replace]: "Replace text",
+    };
+
     return (
       <div className="w-80 bg-white rounded shadow-xl text-sm overflow-hidden">
         <div className="relative">
@@ -518,7 +527,7 @@ const SheetColumnSettingsPopoverContent = observer(
               ) : (
                 <EyeOpenIcon className="inline text-gray-500" />
               )}{" "}
-              Display in document as
+              Display in document:
             </div>
             <select
               value={column.visibility}
@@ -528,9 +537,9 @@ const SheetColumnSettingsPopoverContent = observer(
               )}
               className="text-blue-500"
             >
-              {Object.entries(PropertyVisibility).map(([name, value], i) => (
+              {Object.values(PropertyVisibility).map((value, i) => (
                 <option value={value} key={i}>
-                  {name}
+                  {readableNamesForPropertyVisibility[value]}
                 </option>
               ))}
             </select>

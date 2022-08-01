@@ -104,7 +104,7 @@ class SuperscriptWidget extends WidgetType {
       const token = document.createElement("span");
       switch (this.mode) {
         case SuperscriptWidgetMode.Normal: {
-          token.className = `text-[#3a82f5]`;
+          token.className = `font-[Schoolbell] text-xs text-[#1355ff]`;
           break;
         }
         case SuperscriptWidgetMode.InlineWidgetTemporarilyMoved: {

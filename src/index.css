@@ -70,7 +70,8 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .annotation-token {
-  @apply text-blue-800 font-mono text-sm;
+  @apply font-mono text-sm;
+  color: #1355ff;
   background-image: url(assets/whiteout.svg);
   background-size: contain;
   background-repeat: repeat-x;

@@ -52,7 +52,7 @@
 }
 
 .cm-highlight {
-  padding-bottom: 3px;
+  padding-bottom: 2px;
   background-image: url(assets/splat-underline-2-default.svg);
   background-size: 100% 4px;
   background-position: bottom;
@@ -67,4 +67,11 @@ input[type="range"] {
 input[type="range"]::-webkit-slider-thumb {
   @apply h-2 w-2 rounded-full bg-blue-500 cursor-ew-resize;
   -webkit-appearance: none;
+}
+
+.annotation-token {
+  @apply text-blue-800 font-mono text-sm;
+  background-image: url(assets/whiteout.svg);
+  background-size: contain;
+  background-repeat: repeat-x;
 }

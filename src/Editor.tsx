@@ -104,13 +104,13 @@ class SuperscriptWidget extends WidgetType {
       const token = document.createElement("span");
       switch (this.mode) {
         case SuperscriptWidgetMode.Normal: {
-          token.className = `${ANNOTATION_TOKEN_CLASSNAME} text-[#3a82f5]`;
+          token.className = `text-[#3a82f5]`;
           break;
         }
         case SuperscriptWidgetMode.InlineWidgetTemporarilyMoved: {
-          token.className = `${ANNOTATION_TOKEN_CLASSNAME} bg-gray-100 border border-gray-200 ml-1 first:ml-0 align-top top-[14px] z-10 relative text-gray-800 font-mono text-sm py-[1px] px-1 rounded-sm whitespace-nowrap transition-all`;
+          token.className = `${ANNOTATION_TOKEN_CLASSNAME} ml-1 first:ml-0 align-top top-[14px] z-10 relative py-[1px] px-1 rounded-sm whitespace-nowrap transition-all`;
           setTimeout(() => {
-            token.style.top = "40px";
+            token.style.top = "30px";
           }, 0);
           break;
         }
@@ -183,7 +183,7 @@ class InlineWidget extends WidgetType {
         valueAsText = valueAsText.substring(0, MAX_SUPERSCRIPT_LENGTH) + "...";
       }
       const token = document.createElement("span");
-      token.className = `${ANNOTATION_TOKEN_CLASSNAME} bg-gray-100 border border-gray-200 ml-1 first:ml-0 align-top top-[4px] relative text-gray-800 font-mono text-sm py-[1px] px-1 rounded-sm whitespace-nowrap`;
+      token.className = `${ANNOTATION_TOKEN_CLASSNAME} ml-1 first:ml-0 align-top top-[4px] relative py-[1px] px-1 rounded-sm whitespace-nowrap`;
       token.innerText = valueAsText;
       token.setAttribute("data-snippet-property-name", key);
       wrap.appendChild(token);

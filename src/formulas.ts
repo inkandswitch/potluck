@@ -506,11 +506,11 @@ export function evaluateFormula(
       });
       return componentEntry.component;
     },
-    NumberSlider: (
+    Slider: (
       highlight: Highlight,
-      value: number
+      value: number = 1
     ): HighlightComponent | undefined => {
-      if (highlight === undefined || value === undefined) {
+      if (highlight === undefined) {
         return undefined;
       }
       // TODO: remove highlight component entries that are no longer used

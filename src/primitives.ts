@@ -121,9 +121,11 @@ Bench 35 10x3, felt a bit sore`;
 const COFFEE_TEXT = `Grind 11 g coffee, medium-fine.
 Add 200 g water, brew 2 minutes, plunge!
 
+scale by
+
 Notes:
-6/22: Pretty good, but forgot to swirl.
-6/23: Felt weak and under-extracted. Grind finer?`;
+6/22/22: Pretty good, but forgot to swirl.
+6/23/22: Felt weak and under-extracted. Grind finer?`;
 
 export const textEditorStateMobx = observable.box(
   EditorState.create({ doc: WORKOUT_TEXT })
@@ -332,6 +334,14 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: generateNanoid(),
         configId: DURATIONS_SHEET_CONFIG_ID,
+      },
+      {
+        id: generateNanoid(),
+        configId: SCALE_SHEET_CONFIG_ID,
+      },
+      {
+        id: generateNanoid(),
+        configId: DATE_SHEET_CONFIG_ID,
       },
     ],
   },
@@ -543,7 +553,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "timer",
         formula: "Timer($)",
-        visibility: PropertyVisibility.Hidden,
+        visibility: PropertyVisibility.Inline,
       },
     ],
   },
@@ -558,7 +568,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
       {
         name: "slider",
-        formula: "NumberSlider($, 1)",
+        formula: "Slider($)",
         visibility: PropertyVisibility.Superscript,
       },
       {

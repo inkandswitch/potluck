@@ -49,7 +49,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { EditorView, minimalSetup } from "codemirror";
 import { bracketMatching, LanguageSupport } from "@codemirror/language";
 import { javascriptLanguage } from "@codemirror/lang-javascript";
-import { highlightSpecialChars, keymap } from "@codemirror/view";
+import { highlightSpecialChars, keymap, tooltips } from "@codemirror/view";
 import {
   autocompletion,
   closeBrackets,
@@ -398,11 +398,20 @@ function FormulaInput({
           ".cm-completionIcon": {
             width: "1em",
           },
+          ".cm-completionLabel": {
+            fontFamily: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
+            fontSize: "12px",
+          },
+          ".cm-completionInfo": {
+            fontFamily: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
+            fontSize: "12px",
+          },
         }),
         highlightSpecialChars(),
         bracketMatching(),
         closeBrackets(),
         autocompletion(),
+        tooltips({ parent: document.body }),
         EditorView.lineWrapping,
         new LanguageSupport(javascriptLanguage, [
           javascriptLanguage.data.of({

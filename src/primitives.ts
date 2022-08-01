@@ -585,9 +585,7 @@ export function addSheetConfig() {
   return sheetConfig;
 }
 
-export const selectedTextDocumentIdBox = observable.box(
-  GOCHUJANG_PORK_DOCUMENT_ID
-);
+export const selectedTextDocumentIdBox = observable.box(COFFEE_DOCUMENT_ID);
 
 type NewSearchMode = {
   mode: "new";

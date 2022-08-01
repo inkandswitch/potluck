@@ -401,10 +401,12 @@ export const Editor = observer(
                 }
               }
               for (const componentEntry of highlightComponentEntriesMobx) {
-                componentEntry.span = [
-                  transaction.changes.mapPos(componentEntry.span[0]),
-                  transaction.changes.mapPos(componentEntry.span[1]),
-                ];
+                if (componentEntry.documentId === textDocumentId) {
+                  componentEntry.span = [
+                    transaction.changes.mapPos(componentEntry.span[0]),
+                    transaction.changes.mapPos(componentEntry.span[1]),
+                  ];
+                }
               }
             }
           });

@@ -21,7 +21,8 @@ import {
   isNaN,
   isNumber,
   round,
-  minBy, escapeRegExp,
+  minBy,
+  escapeRegExp,
 } from "lodash";
 import {
   getComputedDocumentValues,
@@ -494,6 +495,7 @@ export function evaluateFormula(
         return existingTimer.component;
       }
       const componentEntry: HighlightComponentEntry = {
+        documentId: textDocument.id,
         componentType: "Timer",
         span: durationHighlight.span,
         text: durationText,
@@ -527,6 +529,7 @@ export function evaluateFormula(
         return existingTimer.component;
       }
       const componentEntry: HighlightComponentEntry = {
+        documentId: textDocument.id,
         componentType: "NumberSlider",
         span: highlight.span,
         text: highlightText,

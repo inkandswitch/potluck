@@ -1,8 +1,7 @@
-import { autorun, computed, IObservableValue, observable, runInAction } from "mobx";
+import { computed, IObservableValue, observable, runInAction } from "mobx";
 import { EditorState, Text } from "@codemirror/state";
 import { ALL_INGREDIENTS_TEXT } from "./data/all_ingredients";
 import { generateNanoid } from "./utils";
-import { EventEmitter } from "eventemitter3";
 import { evaluateFormula } from "./formulas";
 
 export type Span = [from: number, to: number];
@@ -61,6 +60,7 @@ export interface HighlightComponent {
 }
 
 export type HighlightComponentEntry = {
+  documentId: string;
   componentType: string;
   span: Span;
   text: string;
@@ -581,57 +581,57 @@ export const selectedTextDocumentIdBox = observable.box(
   GOCHUJANG_PORK_DOCUMENT_ID
 );
 
-
 type NewSearchMode = {
-  mode: "new"
-  type: "regex" | "string"
-  search: string
-}
+  mode: "new";
+  type: "regex" | "string";
+  search: string;
+};
 
 type SavedSearchesMode = {
-  mode: "saved"
-  selectedOption: number
-  search: string
-}
+  mode: "saved";
+  selectedOption: number;
+  search: string;
+};
 
-type SearchBoxState = NewSearchMode | SavedSearchesMode
+type SearchBoxState = NewSearchMode | SavedSearchesMode;
 
-export const searchTermBox : IObservableValue<SearchBoxState> = observable.box<SearchBoxState>({
-  mode: "new",
-  type: "regex",
-  search: ""
-});
+export const searchTermBox: IObservableValue<SearchBoxState> =
+  observable.box<SearchBoxState>({
+    mode: "new",
+    type: "regex",
+    search: "",
+  });
 
-export function getMatchingSavedSearches (search: string) : SheetConfig[] {
-  return Array.from(sheetConfigsMobx.values()).filter((sheetConfig) => (
+export function getMatchingSavedSearches(search: string): SheetConfig[] {
+  return Array.from(sheetConfigsMobx.values()).filter((sheetConfig) =>
     sheetConfig.name.toLowerCase().includes(search.toLowerCase())
-  ))
+  );
 }
 
-export function getSearchFormula (type: "regex" | "string", search: string) : string | undefined {
+export function getSearchFormula(
+  type: "regex" | "string",
+  search: string
+): string | undefined {
   if (search === "") {
-    return
+    return;
   }
 
-  return (
-    type === "regex"
-      ? `MatchRegexp("${search}", "i")`
-      : `MatchString("${search}")`
-  )
+  return type === "regex"
+    ? `MatchRegexp("${search}", "i")`
+    : `MatchString("${search}")`;
 }
 
 export const searchResults = computed<Highlight[]>(() => {
-
-  const searchState = searchTermBox.get()
+  const searchState = searchTermBox.get();
 
   if (searchState.mode === "saved") {
-    return []
+    return [];
   }
 
-  const formula = getSearchFormula(searchState.type, searchState.search)
+  const formula = getSearchFormula(searchState.type, searchState.search);
 
   if (!formula) {
-    return []
+    return [];
   }
 
   const textDocument = textDocumentsMobx.get(selectedTextDocumentIdBox.get())!;

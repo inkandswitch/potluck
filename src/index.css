@@ -80,7 +80,7 @@ input[type="range"]::-webkit-slider-thumb {
   @apply font-mono text-sm;
   color: #1355ff;
   background-image: url(assets/whiteout.svg);
-  background-size: contain;
+  background-size: auto 100%;
   background-repeat: repeat-x;
   font-family: "Schoolbell", sans-serif;
   font-size: 16px;

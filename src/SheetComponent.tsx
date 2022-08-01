@@ -41,6 +41,8 @@ import {
   EyeOpenIcon,
   EyeClosedIcon,
   EyeNoneIcon,
+  TrashIcon,
+  LetterCaseCapitalizeIcon,
 } from "@radix-ui/react-icons";
 import { NutritionLabel } from "./NutritionLabel";
 import * as Popover from "@radix-ui/react-popover";
@@ -53,6 +55,11 @@ import {
   closeBrackets,
   closeBracketsKeymap,
 } from "@codemirror/autocomplete";
+import {
+  IObservableArray,
+  MobXGlobals,
+  ObservableArrayAdministration,
+} from "mobx/dist/internal";
 
 let i = 1;
 
@@ -181,11 +188,13 @@ const SheetSettingsPopoverContent = observer(
 
 const SheetName = observer(
   ({
+    textDocument,
     textDocumentSheet,
     sheetConfig,
     rowsCount,
     sheetActiveInDoc,
   }: {
+    textDocument: TextDocument;
     textDocumentSheet: TextDocumentSheet;
     sheetConfig: SheetConfig;
     rowsCount: number | undefined;
@@ -199,7 +208,7 @@ const SheetName = observer(
           onChange={action((e) => {
             sheetConfig.name = e.target.value;
           })}
-          className="font-medium inline text-md border-b border-transparent focus:border-gray-300 outline-none text-gray-600 bg-transparent"
+          className="font-mono inline text-sm border-b border-transparent focus:border-gray-300 outline-none text-gray-600 bg-transparent"
         />
         <Popover.Root modal={true}>
           <Popover.Anchor asChild={true}>
@@ -236,6 +245,18 @@ const SheetName = observer(
           ) : (
             <EyeOpenIcon />
           )}
+        </button>
+        <button
+          className="text-gray-400 hover:text-gray-500 ml-4"
+          onClick={() => {
+            runInAction(() => {
+              (
+                textDocument.sheets as IObservableArray<TextDocumentSheet>
+              ).remove(textDocumentSheet);
+            });
+          }}
+        >
+          <TrashIcon />
         </button>
         {rowsCount !== undefined ? (
           <div
@@ -446,7 +467,7 @@ const SheetColumnSettingsPopoverContent = observer(
   }: {
     sheetConfig: SheetConfig;
     columnIndex: number;
-    column: any;
+    column: PropertyDefinition;
   }) => {
     const changeFormulaAt = action((changedIndex: number, formula: string) => {
       sheetConfig.properties = sheetConfig.properties.map((column, index) =>
@@ -473,6 +494,7 @@ const SheetColumnSettingsPopoverContent = observer(
         </div>
         <div className="p-2">
           <div className="flex items-center justify-between gap-2 mb-1">
+            <LetterCaseCapitalizeIcon className="inline" />
             Name
             <input
               className="block grow pl-1 py-0.5 self-stretch bg-orange-50 border border-orange-100 text-orange-500 font-medium rounded-sm"
@@ -480,8 +502,15 @@ const SheetColumnSettingsPopoverContent = observer(
               onChange={(evt) => changeNameAt(columnIndex, evt.target.value)}
             />
           </div>
-          <div className="flex items-center">
-            <div>Display in document as</div>
+          <div className="flex items-center mb-2">
+            <div>
+              {column.visibility === PropertyVisibility.Hidden ? (
+                <EyeClosedIcon className="inline text-gray-500" />
+              ) : (
+                <EyeOpenIcon className="inline text-gray-500" />
+              )}{" "}
+              Display in document as
+            </div>
             <select
               value={column.visibility}
               onChange={action(
@@ -497,6 +526,19 @@ const SheetColumnSettingsPopoverContent = observer(
               ))}
             </select>
           </div>
+          {/* We put the delete button inside the Radix close button so the popover closes upon deleting a*/}
+          <Popover.Close
+            className="text-gray-400 text-xs hover:text-gray-800 p-1"
+            onClick={() => {
+              runInAction(() => {
+                (
+                  sheetConfig.properties as IObservableArray<PropertyDefinition>
+                ).remove(column);
+              });
+            }}
+          >
+            <TrashIcon className="inline" /> Delete property
+          </Popover.Close>
         </div>
       </div>
     );
@@ -801,6 +843,7 @@ export const SheetComponent = observer(
           </button>
 
           <SheetName
+            textDocument={textDocument}
             textDocumentSheet={textDocumentSheet}
             sheetConfig={sheetConfig}
             rowsCount={rows.length}

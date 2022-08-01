@@ -39,10 +39,6 @@
   @apply px-3 py-1 bg-blue-500 text-white rounded;
 }
 
-.cm-highlight {
-  @apply border-b-2 border-gray-300 py-[1px];
-}
-
 .cm-highlight-hover {
   @apply bg-yellow-200
 }
@@ -53,6 +49,14 @@
 
 .rbc-event:hover {
   @apply bg-blue-500;
+}
+
+.cm-highlight {
+  padding-bottom: 3px;
+  background-image: url(assets/splat-underline-2-default.svg);
+  background-size: 100% 4px;
+  background-position: bottom;
+  background-repeat: no-repeat;
 }
 
 input[type="range"] {

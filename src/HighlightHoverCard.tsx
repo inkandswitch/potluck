@@ -37,7 +37,7 @@ export const HighlightHoverCardContent = observer(
               )}
             </span>
           ) : null}
-          <span className="border-b-2 border-gray-300 py-[1px] bg-yellow-200">
+          <span className="cm-highlight py-[1px] bg-yellow-200">
             {getTextForHighlight(highlight)}
           </span>
           {extraContextText.length > 0 ? <span>{extraContextText}</span> : null}

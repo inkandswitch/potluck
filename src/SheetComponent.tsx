@@ -85,7 +85,7 @@ export function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
 
     return (
       <HighlightHoverCard highlight={value}>
-        <span className="bg-white py-0.5 px-2 border border-gray-200 hover:bg-yellow-200 font-sans cursor-default rounded-md">
+        <span className="cm-highlight bg-white py-0.5 px-2 border border-gray-200 hover:bg-yellow-200 font-sans cursor-default rounded-md">
           {text}
         </span>
       </HighlightHoverCard>

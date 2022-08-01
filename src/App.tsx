@@ -424,7 +424,7 @@ const SearchBox = observer(
             </div>
           )}
           {results.length > 0 && (
-            <div className="absolute top-2 right-[35px] bg-white z-10 text-gray-400 text-sm">
+            <div className="absolute top-2 right-[75px] bg-white z-10 text-gray-400 text-sm">
               {results.length} results
             </div>
           )}

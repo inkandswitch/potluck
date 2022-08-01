@@ -344,7 +344,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     name: "numbers",
     properties: [
       {
-        name: "value",
+        name: "$",
         formula: 'MatchRegexp("[0-9]+")',
         visibility: PropertyVisibility.Hidden,
       },
@@ -381,7 +381,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     name: "quantity",
     properties: [
       {
-        name: "unit",
+        name: "$",
         formula:
           // There are two layers of escaping going on here; todo: improve the situation by auto-escaping user input?
           'MatchRegexp("\\\\b(cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|gram|g|milliliter|ml)s?\\\\b")',
@@ -389,7 +389,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
       {
         name: "amount",
-        formula: "PrevOfType(unit, 'numbers', 20)",
+        formula: "PrevOfType($, 'numbers', 20)",
         visibility: PropertyVisibility.Hidden,
       },
       {
@@ -400,7 +400,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "scaledAmount",
         formula:
-          "(scaleFactor && scaleFactor !== 1 && amount) ? `${scaleFactor * amount} ${unit}` : undefined",
+          "(scaleFactor && scaleFactor !== 1 && amount) ? `${scaleFactor * amount} ${$}` : undefined",
         visibility: PropertyVisibility.Replace,
       },
     ],
@@ -410,14 +410,14 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     name: "workouts",
     properties: [
       {
-        name: "activity",
+        name: "$",
         formula: 'MatchRegexp("squat|bench|rowing|triceps|elliptical", "i")',
         visibility: PropertyVisibility.Hidden,
       },
       {
         name: "numbers",
         formula:
-          'Filter(NextUntil(activity, HasType("workouts")), SameLine(activity))',
+          'Filter(NextUntil(activity, HasType("workouts")), SameLine($))',
         visibility: PropertyVisibility.Hidden,
       },
       {
@@ -437,7 +437,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
       {
         name: "date",
-        formula: 'PrevOfType(activity, "dates")',
+        formula: 'PrevOfType($, "dates")',
         visibility: PropertyVisibility.Hidden,
       },
       {
@@ -457,24 +457,24 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     name: "ingredients",
     properties: [
       {
-        name: "name",
+        name: "$",
         formula:
-          'MatchHighlight(DataFromDoc("all ingredients", "allIngredients", "name"))',
+          'MatchHighlight(DataFromDoc("all ingredients", "allIngredients", "$"))',
         visibility: PropertyVisibility.Hidden,
       },
       {
         name: "matched",
-        formula: "name.data.matchedHighlight",
+        formula: "$.data.matchedHighlight",
         visibility: PropertyVisibility.Hidden,
       },
       {
         name: "USDA Name",
-        formula: "USDAFoodName(name)",
+        formula: "USDAFoodName($)",
         visibility: PropertyVisibility.Hidden,
       },
       {
         name: "quantity",
-        formula: 'PrevOfType(name, ["quantity", "numbers"], 20)',
+        formula: 'PrevOfType($, ["quantity", "numbers"], 20)',
         visibility: PropertyVisibility.Hidden,
       },
       {
@@ -485,7 +485,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "scaledQuantity",
         formula:
-          "(scaleFactor && scaleFactor !== 1 && IsNumber(quantity.valueOf())) ? `${quantity * Round(scaleFactor, 2)} ${name}` : undefined",
+          "(scaleFactor && scaleFactor !== 1 && IsNumber(quantity.valueOf())) ? `${quantity * Round(scaleFactor, 2)} ${$}` : undefined",
         visibility: PropertyVisibility.Replace,
       },
     ],
@@ -495,14 +495,13 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     name: "allIngredients",
     properties: [
       {
-        name: "name",
+        name: "$",
         formula: 'SplitLines(",")',
         visibility: PropertyVisibility.Hidden,
       },
       {
         name: "officialName",
-        formula:
-          'First(Filter(MatchRegexp("USDA name: (.*),?"), SameLine(name)))',
+        formula: 'First(Filter(MatchRegexp("USDA name: (.*),?"), SameLine($)))',
         visibility: PropertyVisibility.Hidden,
       },
     ],
@@ -512,13 +511,13 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     name: "markdown",
     properties: [
       {
-        name: "text",
+        name: "$",
         formula: "Markdown()",
         visibility: PropertyVisibility.Hidden,
       },
       {
         name: "type",
-        formula: "text.data.type",
+        formula: "$.data.type",
         visibility: PropertyVisibility.Hidden,
       },
     ],
@@ -528,13 +527,13 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     name: "durations",
     properties: [
       {
-        name: "value",
+        name: "$",
         formula: `MatchRegexp("((\\\\d+\\\\s+(hours?|minutes?|seconds?))\\\\s*)*(\\\\d+\\\\s+(hours?|minutes?|seconds?))")`,
         visibility: PropertyVisibility.Hidden,
       },
       {
         name: "timer",
-        formula: "Timer(value)",
+        formula: "Timer($)",
         visibility: PropertyVisibility.Hidden,
       },
     ],
@@ -544,13 +543,13 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     name: "scale",
     properties: [
       {
-        name: "match",
+        name: "$",
         formula: 'MatchRegexp("scale by")',
         visibility: PropertyVisibility.Hidden,
       },
       {
         name: "slider",
-        formula: "NumberSlider(match, 1)",
+        formula: "NumberSlider($, 1)",
         visibility: PropertyVisibility.Superscript,
       },
       {

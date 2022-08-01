@@ -526,6 +526,7 @@ export const SheetTable = observer(
         compareColumnValues(a, b, columnName, sortMethod, direction)
       );
     }
+    const [isSomePopoverShown, setIsSomePopoverShown] = useState(false);
 
     return (
       <>
@@ -537,85 +538,99 @@ export const SheetTable = observer(
                   return (
                     <th
                       key={index}
-                      className={classNames("text-left font-normal pl-1 py-2", {
-                        "opacity-0": index === 0,
-                      })}
+                      className={classNames("text-left font-normal pl-1 py-2")}
                     >
                       <div className="flex gap-1 pr-1 items-center justify-between">
-                        <div className="px-1 rounded-sm bg-orange-100 text-orange-500 font-medium text-[10px]">
+                        <div
+                          className={classNames(
+                            "px-1 rounded-sm bg-orange-100 text-orange-500 font-medium text-[10px]",
+                            {
+                              hidden: index === 0 && !isSomePopoverShown,
+                            }
+                          )}
+                        >
                           {column.name}
                         </div>
-                        <Popover.Root modal={true}>
-                          <Popover.Anchor asChild={true}>
-                            <Popover.Trigger asChild={true}>
-                              <button className="text-gray-400 hover:text-gray-500">
-                                <SliderIcon />
+                        {index !== 0 ? (
+                          <>
+                            <Popover.Root
+                              onOpenChange={(open) => {
+                                setIsSomePopoverShown(open);
+                              }}
+                              modal={true}
+                            >
+                              <Popover.Anchor asChild={true}>
+                                <Popover.Trigger asChild={true}>
+                                  <button className="text-gray-400 hover:text-gray-500">
+                                    <SliderIcon />
+                                  </button>
+                                </Popover.Trigger>
+                              </Popover.Anchor>
+                              <Popover.Content
+                                side="top"
+                                sideOffset={8}
+                                align="end"
+                                alignOffset={-8}
+                              >
+                                <SheetColumnSettingsPopoverContent
+                                  sheetConfig={sheetConfig}
+                                  columnIndex={index}
+                                  column={column}
+                                />
+                              </Popover.Content>
+                            </Popover.Root>
+                            <div className="hidden">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (
+                                    sortBy?.columnName === column.name &&
+                                    sortBy.direction === "asc"
+                                  ) {
+                                    setSortBy(undefined);
+                                  } else {
+                                    setSortBy({
+                                      columnName: column.name,
+                                      direction: "asc",
+                                    });
+                                  }
+                                }}
+                                className={classNames(
+                                  sortBy?.columnName === column.name &&
+                                    sortBy.direction === "asc"
+                                    ? "opacity-100"
+                                    : "opacity-20 hover:opacity-60"
+                                )}
+                              >
+                                <ArrowDownIcon />
                               </button>
-                            </Popover.Trigger>
-                          </Popover.Anchor>
-                          <Popover.Content
-                            side="top"
-                            sideOffset={8}
-                            align="end"
-                            alignOffset={-8}
-                          >
-                            <SheetColumnSettingsPopoverContent
-                              sheetConfig={sheetConfig}
-                              columnIndex={index}
-                              column={column}
-                            />
-                          </Popover.Content>
-                        </Popover.Root>
-                        <div className="hidden">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (
-                                sortBy?.columnName === column.name &&
-                                sortBy.direction === "asc"
-                              ) {
-                                setSortBy(undefined);
-                              } else {
-                                setSortBy({
-                                  columnName: column.name,
-                                  direction: "asc",
-                                });
-                              }
-                            }}
-                            className={classNames(
-                              sortBy?.columnName === column.name &&
-                                sortBy.direction === "asc"
-                                ? "opacity-100"
-                                : "opacity-20 hover:opacity-60"
-                            )}
-                          >
-                            <ArrowDownIcon />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (
-                                sortBy?.columnName === column.name &&
-                                sortBy.direction === "desc"
-                              ) {
-                                setSortBy(undefined);
-                              } else {
-                                setSortBy({
-                                  columnName: column.name,
-                                  direction: "desc",
-                                });
-                              }
-                            }}
-                            className={classNames(
-                              sortBy?.columnName === column.name &&
-                                sortBy.direction === "desc"
-                                ? "opacity-100"
-                                : "opacity-20 hover:opacity-60"
-                            )}
-                          >
-                            <ArrowUpIcon />
-                          </button>
-                        </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (
+                                    sortBy?.columnName === column.name &&
+                                    sortBy.direction === "desc"
+                                  ) {
+                                    setSortBy(undefined);
+                                  } else {
+                                    setSortBy({
+                                      columnName: column.name,
+                                      direction: "desc",
+                                    });
+                                  }
+                                }}
+                                className={classNames(
+                                  sortBy?.columnName === column.name &&
+                                    sortBy.direction === "desc"
+                                    ? "opacity-100"
+                                    : "opacity-20 hover:opacity-60"
+                                )}
+                              >
+                                <ArrowUpIcon />
+                              </button>
+                            </div>
+                          </>
+                        ) : null}
                       </div>
                     </th>
                   );

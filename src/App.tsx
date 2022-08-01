@@ -4,14 +4,16 @@ import {
   getSheetConfigsOfTextDocument,
   Highlight,
   isSheetExpandedMobx,
-  PropertyVisibility, getSearchFormula,
+  PropertyVisibility,
+  getSearchFormula,
   searchResults,
   searchTermBox,
   selectedTextDocumentIdBox,
   SheetConfig,
   sheetConfigsMobx,
   TextDocument,
-  textDocumentsMobx, getMatchingSavedSearches,
+  textDocumentsMobx,
+  getMatchingSavedSearches,
 } from "./primitives";
 import { observer } from "mobx-react-lite";
 import { useRef, useState } from "react";
@@ -140,7 +142,9 @@ const DocumentSheets = observer(
 );
 
 const PersistenceButton = observer(() => {
-  const [directoryPersistence, setDirectoryPersistence] = useState<DirectoryPersistence | undefined>(undefined);
+  const [directoryPersistence, setDirectoryPersistence] = useState<
+    DirectoryPersistence | undefined
+  >(undefined);
   return (
     <div className="absolute top-2 right-2 flex gap-2 bg-white bg-opacity-50 p-2 rounded">
       <Tooltip.Root>
@@ -211,39 +215,45 @@ const SearchBox = observer(({ textDocumentId }: { textDocumentId: string }) => {
   const searchBoxRef = useRef<HTMLInputElement>(null);
   const results = searchResults.get();
 
-  let matchingSavedSearches = searchState.mode === 'saved' && getMatchingSavedSearches(searchState.search)
+  let matchingSavedSearches =
+    searchState.mode === "saved" &&
+    getMatchingSavedSearches(searchState.search);
 
   return (
     <>
       <div className="pb-2 flex gap-1">
         <button
-          className={`px-1 rounded ${searchState.mode === 'new' ? "bg-blue-100" : ""}`}
+          className={`px-1 rounded ${
+            searchState.mode === "new" ? "bg-blue-100" : ""
+          }`}
           onClick={() => {
-            if (searchState.mode !== 'new') {
+            if (searchState.mode !== "new") {
               searchTermBox.set({
                 mode: "new",
                 search: searchState.search,
-                type: "regex"
-              })
+                type: "regex",
+              });
             }
 
-            searchBoxRef?.current?.focus()
+            searchBoxRef?.current?.focus();
           }}
         >
           new search
         </button>
         <button
-          className={`px-1 rounded ${searchState.mode === 'saved' ? "bg-blue-100" : ""}`}
+          className={`px-1 rounded ${
+            searchState.mode === "saved" ? "bg-blue-100" : ""
+          }`}
           onClick={() => {
-            if (searchState.mode !== 'saved') {
+            if (searchState.mode !== "saved") {
               searchTermBox.set({
                 mode: "saved",
                 search: searchState.search,
-                selectedOption: 0
-              })
+                selectedOption: 0,
+              });
             }
 
-            searchBoxRef?.current?.focus()
+            searchBoxRef?.current?.focus();
           }}
         >
           saved searches
@@ -263,13 +273,16 @@ const SearchBox = observer(({ textDocumentId }: { textDocumentId: string }) => {
           onKeyDown={(e) => {
             if (e.key === "Enter") {
               if (searchState.mode === "saved") {
-                return
+                return;
               }
 
-              const formula = getSearchFormula(searchState.type, searchState.search);
+              const formula = getSearchFormula(
+                searchState.type,
+                searchState.search
+              );
 
               if (!formula) {
-                return
+                return;
               }
 
               runInAction(() => {
@@ -279,7 +292,7 @@ const SearchBox = observer(({ textDocumentId }: { textDocumentId: string }) => {
                   name: searchState.search,
                   properties: [
                     {
-                      name: "result",
+                      name: "$",
                       formula: formula,
                       visibility: PropertyVisibility.Hidden,
                     },
@@ -308,24 +321,26 @@ const SearchBox = observer(({ textDocumentId }: { textDocumentId: string }) => {
         />
         {searchBoxFocused && searchState.mode === "saved" && (
           <div className="max-h-48 overflow-y-scroll absolute top-9 w-full bg-white z-10 border border-gray-100 px-4 py-2">
-            {getMatchingSavedSearches(searchState.search).map((sheetConfig, index) => (
-              <div
-                key={sheetConfig.id}
-                className="hover:bg-blue-100 hover:cursor-pointer"
-                onMouseDown={(e) => {
-                  runInAction(() => {
-                    const textDocumentSheetId = generateNanoid();
-                    textDocument.sheets.unshift({
-                      id: textDocumentSheetId,
-                      configId: sheetConfig.id,
+            {getMatchingSavedSearches(searchState.search).map(
+              (sheetConfig, index) => (
+                <div
+                  key={sheetConfig.id}
+                  className="hover:bg-blue-100 hover:cursor-pointer"
+                  onMouseDown={(e) => {
+                    runInAction(() => {
+                      const textDocumentSheetId = generateNanoid();
+                      textDocument.sheets.unshift({
+                        id: textDocumentSheetId,
+                        configId: sheetConfig.id,
+                      });
+                      isSheetExpandedMobx.set(textDocumentSheetId, true);
                     });
-                    isSheetExpandedMobx.set(textDocumentSheetId, true);
-                  });
-                }}
-              >
-                {sheetConfig.name}
-              </div>
-            ))}
+                  }}
+                >
+                  {sheetConfig.name}
+                </div>
+              )
+            )}
           </div>
         )}
         {results.length > 0 && (
@@ -344,8 +359,8 @@ const SearchBox = observer(({ textDocumentId }: { textDocumentId: string }) => {
               searchTermBox.set({
                 search: searchState.search,
                 mode: "new",
-                type: searchState.type === "regex" ? "string" : "regex"
-              })
+                type: searchState.type === "regex" ? "string" : "regex",
+              });
             }}
           >
             <div className="bg-gray-500 icon icon-asterisk" />

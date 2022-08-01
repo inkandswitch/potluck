@@ -97,7 +97,7 @@ const TextDocumentSelector = observer(() => {
         <option value={NEW_OPTION_ID}>New text document</option>
       </select>
       <button
-        className="ml-4 text-gray-400 hover:text-gray-600"
+        className="ml-4 text-gray-400 hover:text-gray-600 text-xs"
         onClick={() => {
           runInAction(() => {
             const currentDoc = textDocumentsMobx.get(
@@ -117,7 +117,7 @@ const TextDocumentSelector = observer(() => {
           });
         }}
       >
-        <span className="text-xl">⎘</span> copy as template
+        <span className="text-lg">⎘</span> copy as template
       </button>
     </div>
   );

@@ -329,6 +329,10 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
         id: generateNanoid(),
         configId: QUANTITY_SHEET_CONFIG_ID,
       },
+      {
+        id: generateNanoid(),
+        configId: DURATIONS_SHEET_CONFIG_ID,
+      },
     ],
   },
   [ALL_INGREDIENTS_DOCUMENT_ID]: {

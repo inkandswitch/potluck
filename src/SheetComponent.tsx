@@ -62,11 +62,11 @@ export type SheetViewProps = {
 
 export function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
   if (value instanceof Error) {
-    return <span className="text-red-500">#Err</span>;
+    return <span className="text-red-500 font-mono">#Err</span>;
   }
 
   if (isHighlightComponent(value)) {
-    return <span>{value.render()}</span>;
+    return <span className="font-mono">{value.render()}</span>;
   }
 
   if (isValueRowHighlight(value)) {
@@ -74,7 +74,7 @@ export function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
 
     return (
       <HighlightHoverCard highlight={value}>
-        <span className="border-b-2 border-gray-300 py-[1px] hover:bg-yellow-200">
+        <span className="bg-white py-0.5 px-2 border border-gray-200 hover:bg-yellow-200 font-sans cursor-default rounded-md">
           {text}
         </span>
       </HighlightHoverCard>
@@ -103,7 +103,7 @@ export function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
     );
   }
 
-  return <span>{JSON.stringify(value)}</span>;
+  return <span className="font-mono">{JSON.stringify(value)}</span>;
 }
 
 const SheetSettingsPopoverContent = observer(
@@ -661,7 +661,7 @@ export const SheetTable = observer(
                     return (
                       <td
                         className={classNames(
-                          "border-x border-x-gray-400 py-0.5 relative",
+                          "border-x border-x-gray-400 py-0.5 relative bg-gray-100",
                           colIndex === 0 ? "px-2" : "px-1",
                           rowIndex === 0 && colIndex !== 0
                             ? "border-t border-t-gray-400"
@@ -681,11 +681,11 @@ export const SheetTable = observer(
                       >
                         <ValueDisplay value={value} doc={textDocument.text} />
                         {rowIndex === 0 && colIndex === 0 ? (
-                          <div className="absolute bottom-full -left-px -right-px h-1 bg-white border-l border-r border-t border-gray-400 rounded-t" />
+                          <div className="absolute bottom-full -left-px -right-px h-1 bg-gray-100 border-l border-r border-t border-gray-400 rounded-t" />
                         ) : null}
                         {rowIndex === sortedRows.length - 1 &&
                         colIndex === 0 ? (
-                          <div className="absolute top-full -left-px -right-px h-1 bg-white border-l border-r border-b border-gray-400 rounded-b" />
+                          <div className="absolute top-full -left-px -right-px h-1 bg-gray-100 border-l border-r border-b border-gray-400 rounded-b" />
                         ) : (
                           <div
                             className={classNames(

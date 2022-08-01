@@ -766,7 +766,7 @@ export const SheetComponent = observer(
     const canRenderAsNutritionLabel = sheetConfig.name === "ingredients";
 
     return (
-      <div className="flex flex-col gap-2 flex-1 border border-gray-200 p-3 rounded">
+      <div className="flex flex-col gap-2 flex-1 border border-gray-200 p-2 rounded">
         <div className="flex items-center gap-1">
           <button onClick={() => toggleIsExpanded()}>
             <span
@@ -779,7 +779,7 @@ export const SheetComponent = observer(
           <SheetName
             textDocumentSheet={textDocumentSheet}
             sheetConfig={sheetConfig}
-            rowsCount={isExpanded ? undefined : rows.length}
+            rowsCount={rows.length}
           />
           <div className="grow" />
           {isExpanded && (canRenderAsCalendar || canRenderAsNutritionLabel) ? (

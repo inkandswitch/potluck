@@ -58,6 +58,7 @@ export type SheetViewProps = {
   sheetConfig: SheetConfig;
   columns: PropertyDefinition[];
   rows: SheetValueRow[];
+  rowsActiveInDoc: SheetValueRow[];
 };
 
 export function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
@@ -180,10 +181,12 @@ const SheetName = observer(
     textDocumentSheet,
     sheetConfig,
     rowsCount,
+    sheetActiveInDoc,
   }: {
     textDocumentSheet: TextDocumentSheet;
     sheetConfig: SheetConfig;
     rowsCount: number | undefined;
+    sheetActiveInDoc: boolean;
   }) => {
     return (
       <div className="flex h-7">
@@ -193,7 +196,7 @@ const SheetName = observer(
           onChange={action((e) => {
             sheetConfig.name = e.target.value;
           })}
-          className="font-medium inline text-md border-b border-transparent focus:border-gray-300 outline-none text-gray-600"
+          className="font-medium inline text-md border-b border-transparent focus:border-gray-300 outline-none text-gray-600 bg-transparent"
         />
         <Popover.Root modal={true}>
           <Popover.Anchor asChild={true}>
@@ -216,7 +219,12 @@ const SheetName = observer(
           </Popover.Content>
         </Popover.Root>
         {rowsCount !== undefined ? (
-          <div className="ml-2 py-1 px-2 rounded-lg bg-gray-50 text-sm text-gray-400">
+          <div
+            className={classNames(
+              "ml-2 py-1 px-2 rounded-lg text-sm text-gray-400",
+              sheetActiveInDoc ? "bg-blue-100" : "bg-gray-50"
+            )}
+          >
             <span className="font-medium text-gray-500">{rowsCount}</span>{" "}
             results
           </div>
@@ -482,24 +490,11 @@ export const SheetTable = observer(
     sheetConfig,
     columns,
     rows,
-  }: {
-    textDocument: TextDocument;
-    sheetConfig: SheetConfig;
-    columns: PropertyDefinition[];
-    rows: SheetValueRow[];
-  }) => {
+    rowsActiveInDoc,
+  }: SheetViewProps) => {
     const [sortBy, setSortBy] = useState<
       { columnName: string; direction: "asc" | "desc" } | undefined
     >(undefined);
-    const hoverHighlights = computed(
-      () =>
-        rows.filter(
-          (row) =>
-            isValueRowHighlight(row) &&
-            doSpansOverlap(row.span, textEditorSelectionSpanComputed.get())
-        ),
-      { equals: comparer.shallow }
-    ).get();
 
     const addColumn = action(() => {
       sheetConfig.properties.push({
@@ -666,7 +661,7 @@ export const SheetTable = observer(
                   })}
                   className={classNames(
                     "hover:bg-blue-50",
-                    hoverHighlights.includes(row) ? "bg-blue-100" : "bg-gray-50"
+                    rowsActiveInDoc.includes(row) ? "bg-blue-100" : "bg-gray-50"
                   )}
                   key={rowIndex}
                 >
@@ -765,6 +760,16 @@ export const SheetComponent = observer(
     );
     const canRenderAsNutritionLabel = sheetConfig.name === "ingredients";
 
+    const rowsActiveInDoc = computed(
+      () =>
+        rows.filter(
+          (row) =>
+            isValueRowHighlight(row) &&
+            doSpansOverlap(row.span, textEditorSelectionSpanComputed.get())
+        ),
+      { equals: comparer.shallow }
+    ).get();
+
     return (
       <div className="flex flex-col gap-2 flex-1 border border-gray-200 p-2 rounded">
         <div className="flex items-center gap-1">
@@ -780,6 +785,7 @@ export const SheetComponent = observer(
             textDocumentSheet={textDocumentSheet}
             sheetConfig={sheetConfig}
             rowsCount={rows.length}
+            sheetActiveInDoc={rowsActiveInDoc.length > 0}
           />
           <div className="grow" />
           {isExpanded && (canRenderAsCalendar || canRenderAsNutritionLabel) ? (
@@ -841,6 +847,7 @@ export const SheetComponent = observer(
               sheetConfig={sheetConfig}
               columns={columns}
               rows={rows}
+              rowsActiveInDoc={rowsActiveInDoc}
             />
           </>
         )}

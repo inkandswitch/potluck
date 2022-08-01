@@ -74,4 +74,6 @@ input[type="range"]::-webkit-slider-thumb {
   background-image: url(assets/whiteout.svg);
   background-size: contain;
   background-repeat: repeat-x;
+  font-family: "Schoolbell", sans-serif;
+  font-size: 16px;
 }

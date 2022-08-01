@@ -651,7 +651,7 @@ export const SheetTable = observer(
                   })}
                   className={classNames(
                     "hover:bg-blue-50",
-                    hoverHighlights.includes(row) ? "bg-blue-100" : undefined
+                    hoverHighlights.includes(row) ? "bg-blue-100" : "bg-gray-50"
                   )}
                   key={rowIndex}
                 >
@@ -661,7 +661,7 @@ export const SheetTable = observer(
                     return (
                       <td
                         className={classNames(
-                          "border-x border-x-gray-400 py-0.5 relative bg-gray-100",
+                          "border-x border-x-gray-400 py-0.5 relative",
                           colIndex === 0 ? "px-2" : "px-1",
                           rowIndex === 0 && colIndex !== 0
                             ? "border-t border-t-gray-400"

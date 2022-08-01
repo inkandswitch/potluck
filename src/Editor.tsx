@@ -31,12 +31,19 @@ import classNames from "classnames";
 
 const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
 const MAX_SUPERSCRIPT_LENGTH = 20;
+
+enum SuperscriptWidgetMode {
+  Normal,
+  InlineWidgetTemporarilyMoved, // We show inline widgets above the text while the user edits inside
+}
+
 class SuperscriptWidget extends WidgetType {
   reactRoots: Root[] = [];
 
   constructor(
     readonly highlightData: { [key: string]: any },
-    readonly visibleProperties: string[]
+    readonly visibleProperties: string[],
+    readonly mode: SuperscriptWidgetMode = SuperscriptWidgetMode.Normal
   ) {
     super();
   }
@@ -95,7 +102,16 @@ class SuperscriptWidget extends WidgetType {
         valueAsText = valueAsText.substring(0, MAX_SUPERSCRIPT_LENGTH) + "...";
       }
       const token = document.createElement("span");
-      token.className = `${ANNOTATION_TOKEN_CLASSNAME} text-[#3a82f5]`;
+      switch (this.mode) {
+        case SuperscriptWidgetMode.Normal: {
+          token.className = `${ANNOTATION_TOKEN_CLASSNAME} text-[#3a82f5]`;
+          break;
+        }
+        case SuperscriptWidgetMode.InlineWidgetTemporarilyMoved: {
+          token.className = `${ANNOTATION_TOKEN_CLASSNAME} bg-gray-100 border border-gray-200 ml-1 first:ml-0 align-top top-[40px] z-10 relative text-gray-800 font-mono text-sm py-[1px] px-1 rounded-sm whitespace-nowrap`;
+          break;
+        }
+      }
       token.innerText = valueAsText;
       token.setAttribute("data-snippet-property-name", key);
       wrap.appendChild(token);
@@ -164,7 +180,7 @@ class InlineWidget extends WidgetType {
         valueAsText = valueAsText.substring(0, MAX_SUPERSCRIPT_LENGTH) + "...";
       }
       const token = document.createElement("span");
-      token.className = `${ANNOTATION_TOKEN_CLASSNAME} bg-gray-100 ml-1 first:ml-0 align-top top-[6px] relative text-gray-800 font-mono text-xs py-[3px] px-1 rounded-sm whitespace-nowrap`;
+      token.className = `${ANNOTATION_TOKEN_CLASSNAME} bg-gray-100 border border-gray-200 ml-1 first:ml-0 align-top top-[4px] relative text-gray-800 font-mono text-sm py-[1px] px-1 rounded-sm whitespace-nowrap`;
       token.innerText = valueAsText;
       token.setAttribute("data-snippet-property-name", key);
       wrap.appendChild(token);
@@ -333,7 +349,8 @@ const highlightDecorations = EditorView.decorations.compute(
                   ? Decoration.widget({
                       widget: new SuperscriptWidget(
                         highlight.data,
-                        replaceProperties
+                        replaceProperties,
+                        SuperscriptWidgetMode.InlineWidgetTemporarilyMoved
                       ),
                       side: 1,
                     }).range(highlight.span[0])

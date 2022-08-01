@@ -38,6 +38,9 @@ import {
   SectionIcon,
   QuestionMarkCircledIcon,
   SliderIcon,
+  EyeOpenIcon,
+  EyeClosedIcon,
+  EyeNoneIcon,
 } from "@radix-ui/react-icons";
 import { NutritionLabel } from "./NutritionLabel";
 import * as Popover from "@radix-ui/react-popover";
@@ -218,10 +221,26 @@ const SheetName = observer(
             />
           </Popover.Content>
         </Popover.Root>
+        <button
+          className="text-gray-400 hover:text-gray-500 ml-4"
+          onClick={() => {
+            runInAction(
+              () =>
+                (textDocumentSheet.hideHighlightsInDocument =
+                  !textDocumentSheet.hideHighlightsInDocument)
+            );
+          }}
+        >
+          {textDocumentSheet.hideHighlightsInDocument ? (
+            <EyeNoneIcon />
+          ) : (
+            <EyeOpenIcon />
+          )}
+        </button>
         {rowsCount !== undefined ? (
           <div
             className={classNames(
-              "ml-2 py-1 px-2 rounded-lg text-sm text-gray-400",
+              "ml-4 py-1 px-2 rounded-lg text-sm text-gray-400",
               sheetActiveInDoc ? "bg-blue-100" : "bg-gray-50"
             )}
           >

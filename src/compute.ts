@@ -68,9 +68,18 @@ export const editorSelectionHighlightsComputed = computed(
       return [];
     }
     const documentValueRows = getComputedDocumentValues(textDocumentId).get();
-    return Object.values(documentValueRows)
-      .map((sheetValueRows) =>
-        sheetValueRows.filter((r): r is Highlight => isValueRowHighlight(r))
+    return Object.entries(documentValueRows)
+      .map(([sheetConfigId, sheetValueRows]) =>
+        sheetValueRows.filter((r): r is Highlight => {
+          const textDocumentSheet = textDocument.sheets.find(
+            (sheet) => sheet.configId === sheetConfigId
+          )!;
+          if (textDocumentSheet.hideHighlightsInDocument) {
+            return false;
+          } else {
+            return isValueRowHighlight(r);
+          }
+        })
       )
       .flat();
   },

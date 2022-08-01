@@ -45,6 +45,7 @@ export type TextDocumentSheet = {
   id: string;
   configId: string;
   highlightSearchRange?: Span;
+  hideHighlightsInDocument?: boolean;
 };
 
 export type TextDocument = {
@@ -236,6 +237,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: generateNanoid(),
         configId: NUMBER_SHEET_CONFIG_ID,
+        hideHighlightsInDocument: true,
       },
       {
         id: DATE_SHEET_IN_WORKOUT_ID,
@@ -260,6 +262,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: generateNanoid(),
         configId: NUMBER_SHEET_CONFIG_ID,
+        hideHighlightsInDocument: true,
       },
       {
         id: generateNanoid(),
@@ -280,6 +283,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: generateNanoid(),
         configId: NUMBER_SHEET_CONFIG_ID,
+        hideHighlightsInDocument: true,
       },
       {
         id: QUANTITY_SHEET_IN_GOCHUJANG_ID,
@@ -303,6 +307,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: generateNanoid(),
         configId: NUMBER_SHEET_CONFIG_ID,
+        hideHighlightsInDocument: true,
       },
       {
         id: generateNanoid(),
@@ -318,6 +323,7 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: generateNanoid(),
         configId: NUMBER_SHEET_CONFIG_ID,
+        hideHighlightsInDocument: true,
       },
       {
         id: generateNanoid(),

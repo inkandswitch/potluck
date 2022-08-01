@@ -108,7 +108,10 @@ class SuperscriptWidget extends WidgetType {
           break;
         }
         case SuperscriptWidgetMode.InlineWidgetTemporarilyMoved: {
-          token.className = `${ANNOTATION_TOKEN_CLASSNAME} bg-gray-100 border border-gray-200 ml-1 first:ml-0 align-top top-[40px] z-10 relative text-gray-800 font-mono text-sm py-[1px] px-1 rounded-sm whitespace-nowrap`;
+          token.className = `${ANNOTATION_TOKEN_CLASSNAME} bg-gray-100 border border-gray-200 ml-1 first:ml-0 align-top top-[14px] z-10 relative text-gray-800 font-mono text-sm py-[1px] px-1 rounded-sm whitespace-nowrap transition-all`;
+          setTimeout(() => {
+            token.style.top = "40px";
+          }, 0);
           break;
         }
       }

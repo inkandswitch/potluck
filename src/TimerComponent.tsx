@@ -1,8 +1,8 @@
 import { action, computed, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
-import playPng from "./play.png";
-import pausePng from "./pause.png";
+import playIcon from "./play-icon.svg";
+import pauseIcon from "./pause-icon.svg";
 import { generateNanoid } from "./utils";
 
 function formatDuration(durationSeconds: number) {
@@ -61,7 +61,7 @@ const Timer = observer(
             })}
             className="flex-shrink-0"
           >
-            <img src={playPng} width="11px" height="11px" />
+            <img src={playIcon} width="11px" height="11px" />
           </button>
         ) : (
           <button
@@ -71,7 +71,7 @@ const Timer = observer(
             })}
             className="flex-shrink-0"
           >
-            <img src={pausePng} width="11px" height="11px" />
+            <img src={pauseIcon} width="11px" height="11px" />
           </button>
         )}
         <span className="font-[Schoolbell] text-[#1355ff] text-lg">

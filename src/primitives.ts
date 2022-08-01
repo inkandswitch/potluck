@@ -422,8 +422,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
       {
         name: "numbers",
-        formula:
-          'Filter(NextUntil(activity, HasType("workouts")), SameLine($))',
+        formula: 'Filter(NextUntil($, HasType("workouts")), SameLine($))',
         visibility: PropertyVisibility.Hidden,
       },
       {

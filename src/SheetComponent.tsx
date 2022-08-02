@@ -850,7 +850,7 @@ export const SheetComponent = observer(
     ).get();
 
     return (
-      <div className="flex flex-col gap-2 flex-1 border border-gray-200 p-2 rounded">
+      <div className="flex flex-col gap-2 flex-1 bg-gray-50 border border-gray-200 p-2 rounded">
         <div className="flex items-center gap-1">
           <button onClick={() => toggleIsExpanded()}>
             <span

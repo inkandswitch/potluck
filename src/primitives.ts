@@ -678,4 +678,5 @@ export const isSheetExpandedMobx = observable.map<string, boolean>({
   [SCALE_SHEET_IN_GOCHUJANG_ID]: true,
 });
 
+export const showDocumentSidebarBox = observable.box(true);
 export const showSearchPanelBox = observable.box(false);

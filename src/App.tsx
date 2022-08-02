@@ -15,6 +15,7 @@ import {
   textDocumentsMobx,
   getMatchingSavedSearches,
   showSearchPanelBox,
+  showDocumentSidebarBox,
 } from "./primitives";
 import { observer } from "mobx-react-lite";
 import { useEffect, useRef, useState } from "react";
@@ -26,28 +27,32 @@ import { getComputedDocumentValues } from "./compute";
 import { generateNanoid } from "./utils";
 import { DirectoryPersistence, FileDropWrapper } from "./persistence";
 import {
+  Cross1Icon,
   FileIcon,
   FileTextIcon,
+  HamburgerMenuIcon,
   MagnifyingGlassIcon,
   PauseIcon,
+  PlusIcon,
 } from "@radix-ui/react-icons";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { ToastViewport } from "@radix-ui/react-toast";
 import { evaluateFormula } from "./formulas";
+import { DocumentSidebar } from "./DocumentSidebar";
 
 const NEW_OPTION_ID = "new";
 
 const TextDocumentName = observer(
   ({ textDocument }: { textDocument: TextDocument }) => {
     return (
-      <div>
+      <div className="pt-3">
         <input
           type="text"
           value={textDocument.name}
           onChange={action((e) => {
             textDocument.name = e.target.value;
           })}
-          className="text-md border-b border-gray-100 w-full mb-4 pb-0.5 outline-none focus:border-gray-300"
+          className="font-bold text-md pl-4 py-2 w-full outline-none"
         />
       </div>
     );
@@ -61,7 +66,7 @@ const TextDocumentComponent = observer(
     return (
       <div className="grow flex flex-col overflow-hidden">
         <TextDocumentName textDocument={textDocument} />
-        <div className="grow pb-4 overflow-hidden">
+        <div className="grow pl-2 overflow-hidden">
           <Editor textDocumentId={textDocumentId} />
         </div>
       </div>
@@ -152,7 +157,7 @@ const PersistenceButton = observer(() => {
     DirectoryPersistence | undefined
   >(undefined);
   return (
-    <div className="absolute top-2 right-8 flex gap-2 bg-white bg-opacity-50 p-2 rounded">
+    <div className="flex gap-2 bg-white bg-opacity-50 p-2 rounded">
       <Tooltip.Root>
         <Tooltip.Trigger asChild={true}>
           <button
@@ -221,7 +226,7 @@ const SearchButton = observer(() => {
           onClick={action(() => {
             showSearchPanelBox.set(!showSearchPanelBox.get());
           })}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"
+          className="text-gray-400 hover:text-gray-700"
         >
           <MagnifyingGlassIcon />
         </button>
@@ -457,25 +462,62 @@ const App = observer(() => {
   }, []);
 
   return (
-    <FileDropWrapper className="h-screen flex px-4">
-      <div className="w-1/2 max-w-lg flex flex-col flex-shrink-0">
-        <TextDocumentSelector />
+    <FileDropWrapper className="h-screen flex">
+      <DocumentSidebar />
+      <div
+        className={classNames(
+          "flex flex-shrink-0 flex-col overflow-hidden",
+          showSearchPanel ? "w-2/5" : "grow"
+        )}
+      >
+        <div className="flex flex-shrink-0 items-center h-12 border-b border-gray-200 px-4 gap-2">
+          <button
+            onClick={action(() => {
+              showDocumentSidebarBox.set(!showDocumentSidebarBox.get());
+            })}
+          >
+            <HamburgerMenuIcon />
+          </button>
+          <button
+            onClick={action(() => {
+              const newDocumentId = generateNanoid();
+              textDocumentsMobx.set(newDocumentId, {
+                id: newDocumentId,
+                name: "Untitled",
+                text: Text.empty,
+                sheets: [],
+              });
+              selectedTextDocumentIdBox.set(newDocumentId);
+            })}
+          >
+            <PlusIcon />
+          </button>
+          <div className="grow" />
+          <PersistenceButton />
+          <SearchButton />
+        </div>
         <TextDocumentComponent
           textDocumentId={textDocumentId}
           key={textDocumentId}
         />
       </div>
       {showSearchPanel ? (
-        <div className="grow h-full overflow-auto pl-6 pr-4 pt-24">
+        <div className="bg-gray-100 grow h-full overflow-auto pl-6 pr-4 pt-8">
           <SearchBox
             textDocumentId={textDocumentId}
             focusOnMountRef={focusSearchOnMountRef}
           />
           <DocumentSheets textDocumentId={textDocumentId} />
+          <button
+            onClick={action(() => {
+              showSearchPanelBox.set(false);
+            })}
+            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+          >
+            <Cross1Icon />
+          </button>
         </div>
       ) : null}
-      <SearchButton />
-      <PersistenceButton />
       <ToastViewport className="fixed top-4 right-4 flex flex-col gap-2" />
     </FileDropWrapper>
   );

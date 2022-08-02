@@ -13,12 +13,16 @@ import {
   sheetConfigsMobx,
   TextDocument,
   textDocumentsMobx,
-  getMatchingSavedSearches,
+  getMatchingSheetConfigs,
   showSearchPanelBox,
   showDocumentSidebarBox,
+  getPendingSearches,
+  pendingSearchesComputed,
+  savePendingSearchToSheet,
+  selectedPendingSearchComputed,
 } from "./primitives";
 import { observer } from "mobx-react-lite";
-import { useEffect, useRef, useState } from "react";
+import { KeyboardEventHandler, useEffect, useRef, useState } from "react";
 import { SheetComponent, ValueDisplay } from "./SheetComponent";
 import { action, runInAction } from "mobx";
 import { Text } from "@codemirror/state";
@@ -254,10 +258,7 @@ const SearchBox = observer(
     const [searchBoxFocused, setSearchBoxFocused] = useState(false);
     const searchBoxRef = useRef<HTMLInputElement>(null);
     const results = searchResults.get();
-
-    let matchingSavedSearches =
-      searchState.mode === "saved" &&
-      getMatchingSavedSearches(searchState.search);
+    const selectedPendingSearch = selectedPendingSearchComputed.get();
 
     useEffect(() => {
       if (focusOnMountRef.current) {
@@ -275,48 +276,49 @@ const SearchBox = observer(
       };
     }, []);
 
+    const handleInputKeydown = (e: KeyboardEvent) => {
+      runInAction(() => {
+        if (e.key === "Enter") {
+          if (selectedPendingSearch !== undefined) {
+            savePendingSearchToSheet(selectedPendingSearch, textDocument);
+          }
+          searchTermBox.get().search = "";
+          searchBoxRef.current?.blur();
+        }
+        if (e.key === "Escape") {
+          searchBoxRef.current?.blur();
+        }
+        if (e.key === "ArrowUp") {
+          if (
+            searchState.selectedSearchIndex !== undefined &&
+            searchState.selectedSearchIndex > 0
+          ) {
+            searchTermBox.set({
+              ...searchState,
+              selectedSearchIndex: searchState.selectedSearchIndex - 1,
+            });
+            e.preventDefault();
+          }
+        }
+        if (e.key === "ArrowDown") {
+          if (
+            searchState.selectedSearchIndex !== undefined &&
+            searchState.selectedSearchIndex <
+              pendingSearchesComputed.get().length - 1
+          ) {
+            searchTermBox.set({
+              ...searchState,
+              selectedSearchIndex: searchState.selectedSearchIndex + 1,
+            });
+            e.preventDefault();
+          }
+        }
+      });
+    };
+
     return (
       <>
-        <div className="pb-2 flex gap-1">
-          <button
-            className={`px-1 rounded ${
-              searchState.mode === "new" ? "bg-blue-100" : ""
-            }`}
-            onClick={() => {
-              if (searchState.mode !== "new") {
-                searchTermBox.set({
-                  mode: "new",
-                  search: searchState.search,
-                  type: "regex",
-                });
-              }
-
-              searchBoxRef?.current?.focus();
-            }}
-          >
-            new search
-          </button>
-          <button
-            className={`px-1 rounded ${
-              searchState.mode === "saved" ? "bg-blue-100" : ""
-            }`}
-            onClick={() => {
-              if (searchState.mode !== "saved") {
-                searchTermBox.set({
-                  mode: "saved",
-                  search: searchState.search,
-                  selectedOption: 0,
-                });
-              }
-
-              searchBoxRef?.current?.focus();
-            }}
-          >
-            saved searches
-          </button>
-        </div>
-
-        <div className="mb-8 relative">
+        <div className="mt-2 mb-8 relative">
           <div className="flex items-center gap-2 mb-2">
             <div className="grow relative">
               <input
@@ -325,103 +327,106 @@ const SearchBox = observer(
                 type="text"
                 placeholder="Search"
                 value={searchState.search}
-                onFocus={() => setSearchBoxFocused(true)}
-                onBlur={() => setSearchBoxFocused(false)}
-                // Add a new sheet reflecting the search term
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    if (searchState.mode === "saved") {
-                      return;
-                    }
-
-                    const formula = getSearchFormula(
-                      searchState.type,
-                      searchState.search
-                    );
-
-                    if (!formula) {
-                      return;
-                    }
-
-                    runInAction(() => {
-                      const sheetConfigId = generateNanoid();
-                      const sheetConfig: SheetConfig = {
-                        id: sheetConfigId,
-                        name: searchState.search,
-                        properties: [
-                          {
-                            name: "$",
-                            formula: formula,
-                            visibility: PropertyVisibility.Hidden,
-                          },
-                        ],
-                      };
-                      sheetConfigsMobx.set(sheetConfigId, sheetConfig);
-                      const textDocumentSheetId = generateNanoid();
-                      textDocument.sheets.unshift({
-                        id: textDocumentSheetId,
-                        configId: sheetConfigId,
-                      });
-                      isSheetExpandedMobx.set(textDocumentSheetId, true);
-                      searchTermBox.get().search = "";
-                      searchBoxRef.current?.blur();
-                    });
-                  }
-                  if (e.key === "Escape") {
-                    searchBoxRef.current?.blur();
-                  }
+                onFocus={() => {
+                  searchTermBox.set({
+                    ...searchState,
+                    selectedSearchIndex: 0,
+                  });
+                  setSearchBoxFocused(true);
                 }}
-                onChange={(e) =>
+                onBlur={() => {
                   runInAction(() => {
-                    searchTermBox.get().search = e.target.value;
-                  })
-                }
-              />
-              {searchState.mode === "new" && (
-                <button
-                  className={`
-          absolute top-[5px] right-[5px] rounded pt-[2px] w-6 h-6
-          ${searchState.type === "regex" ? "bg-blue-100" : "bg-gray-200"}
-        `}
-                  onClick={() => {
                     searchTermBox.set({
-                      search: searchState.search,
-                      mode: "new",
-                      type: searchState.type === "regex" ? "string" : "regex",
+                      ...searchState,
+                      selectedSearchIndex: undefined,
+                    });
+                  });
+                  setSearchBoxFocused(false);
+                }}
+                // Add a new sheet reflecting the search term
+                onKeyDown={
+                  handleInputKeydown as unknown as KeyboardEventHandler<HTMLInputElement>
+                }
+                onChange={(e) => {
+                  searchTermBox.set({
+                    ...searchState,
+                    search: e.target.value,
+                  });
+                }}
+              />
+              <button
+                className={`
+          absolute top-[5px] right-[5px] rounded pt-[2px] w-6 h-6
+          ${searchState.mode === "regex" ? "bg-blue-100" : "bg-gray-200"}
+        `}
+                onClick={() => {
+                  searchTermBox.set({
+                    ...searchState,
+                    mode: searchState.mode === "regex" ? "string" : "regex",
+                  });
+                }}
+              >
+                <div className="bg-gray-500 icon icon-asterisk" />
+              </button>
+            </div>
+          </div>
+          {searchBoxFocused && (
+            <div className="max-h-36 overflow-y-scroll absolute top-9 w-full bg-white z-10 border border-gray-100 p-1 rounded-sm">
+              {pendingSearchesComputed.get().map((pendingSearch, index) => (
+                <div
+                  key={
+                    pendingSearch._type === "saved"
+                      ? pendingSearch.sheetConfig.id
+                      : index
+                  }
+                  className={classNames(
+                    "cursor-pointer rounded-sm px-2 py-1",
+                    searchState.selectedSearchIndex === index && "bg-blue-100"
+                  )}
+                  onMouseOver={() => {
+                    runInAction(() => {
+                      searchTermBox.set({
+                        ...searchState,
+                        selectedSearchIndex: index,
+                      });
+                    });
+                  }}
+                  onMouseOut={() => {
+                    runInAction(() => {
+                      searchTermBox.set({
+                        ...searchState,
+                        selectedSearchIndex: undefined,
+                      });
+                    });
+                  }}
+                  onMouseDown={(e) => {
+                    runInAction(() => {
+                      savePendingSearchToSheet(pendingSearch, textDocument);
                     });
                   }}
                 >
-                  <div className="bg-gray-500 icon icon-asterisk" />
-                </button>
-              )}
-            </div>
-          </div>
-          {searchBoxFocused && searchState.mode === "saved" && (
-            <div className="max-h-48 overflow-y-scroll absolute top-9 w-full bg-white z-10 border border-gray-100 px-4 py-2">
-              {getMatchingSavedSearches(searchState.search).map(
-                (sheetConfig, index) => (
-                  <div
-                    key={sheetConfig.id}
-                    className="hover:bg-blue-100 hover:cursor-pointer"
-                    onMouseDown={(e) => {
-                      runInAction(() => {
-                        const textDocumentSheetId = generateNanoid();
-                        textDocument.sheets.unshift({
-                          id: textDocumentSheetId,
-                          configId: sheetConfig.id,
-                        });
-                        isSheetExpandedMobx.set(textDocumentSheetId, true);
-                      });
-                    }}
-                  >
-                    {sheetConfig.name}
-                  </div>
-                )
-              )}
+                  {pendingSearch._type === "saved" ? (
+                    <div className="text-sm flex">
+                      <div className=" text-gray-400 mr-2 w-12">Saved</div>
+                      <div>{pendingSearch.sheetConfig.name}</div>
+                    </div>
+                  ) : (
+                    <div className="text-sm flex">
+                      <div className=" text-gray-400 mr-2 w-12">New</div>{" "}
+                      <div>
+                        <span className="font-medium">
+                          "{pendingSearch.search}"
+                        </span>{" "}
+                        {pendingSearch.mode === "regex" && "(as regex)"}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
-          {results.length > 0 && (
-            <div className="absolute top-2 right-[75px] bg-white z-10 text-gray-400 text-sm">
+          {selectedPendingSearch !== undefined && (
+            <div className="absolute top-2 right-[55px] bg-white z-10 text-gray-400 text-sm">
               {results.length} results
             </div>
           )}

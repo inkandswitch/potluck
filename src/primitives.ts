@@ -597,32 +597,109 @@ export function addSheetConfig() {
 
 export const selectedTextDocumentIdBox = observable.box(COFFEE_DOCUMENT_ID);
 
-type NewSearchMode = {
-  mode: "new";
-  type: "regex" | "string";
+type SearchBoxState = {
   search: string;
+  mode: "regex" | "string";
+  selectedSearchIndex: number | undefined;
 };
-
-type SavedSearchesMode = {
-  mode: "saved";
-  selectedOption: number;
-  search: string;
-};
-
-type SearchBoxState = NewSearchMode | SavedSearchesMode;
 
 export const searchTermBox: IObservableValue<SearchBoxState> =
   observable.box<SearchBoxState>({
-    mode: "new",
-    type: "regex",
     search: "",
+    mode: "regex",
+    selectedSearchIndex: undefined,
   });
 
-export function getMatchingSavedSearches(search: string): SheetConfig[] {
+type PendingSearch =
+  | { _type: "saved"; sheetConfig: SheetConfig }
+  | { _type: "new"; search: string; mode: "regex" | "string" };
+
+/** Get all the pending searches to suggest for a given string entered into the searchbox */
+export function getPendingSearches(
+  search: string,
+  mode: "regex" | "string"
+): PendingSearch[] {
+  let newSearches: PendingSearch[];
+  if (search.length > 0) {
+    newSearches = [{ _type: "new", search, mode }];
+  } else {
+    newSearches = [];
+  }
+
+  return [
+    ...newSearches,
+    ...getMatchingSheetConfigs(search).map((sheetConfig) => ({
+      _type: "saved" as const,
+      sheetConfig,
+    })),
+  ];
+}
+
+export function getMatchingSheetConfigs(search: string): SheetConfig[] {
   return Array.from(sheetConfigsMobx.values()).filter((sheetConfig) =>
     sheetConfig.name.toLowerCase().includes(search.toLowerCase())
   );
 }
+
+export const pendingSearchesComputed = computed<PendingSearch[]>(() => {
+  const search = searchTermBox.get().search;
+  const mode = searchTermBox.get().mode;
+  return getPendingSearches(search, mode);
+});
+
+export const selectedPendingSearchComputed = computed<
+  PendingSearch | undefined
+>(() => {
+  const pendingSearches = pendingSearchesComputed.get();
+  const selectedSearchIndex = searchTermBox.get().selectedSearchIndex;
+  if (selectedSearchIndex === undefined) {
+    return undefined;
+  }
+  return pendingSearches[selectedSearchIndex];
+});
+
+export const savePendingSearchToSheet = (
+  pendingSearch: PendingSearch,
+  textDocument: TextDocument
+) => {
+  runInAction(() => {
+    if (pendingSearch._type === "new") {
+      const formula = getSearchFormula(
+        pendingSearch.mode,
+        pendingSearch.search
+      );
+      if (formula === undefined) {
+        return;
+      }
+      const sheetConfigId = generateNanoid();
+      const sheetConfig: SheetConfig = {
+        id: sheetConfigId,
+        name: pendingSearch.search,
+        properties: [
+          {
+            name: "$",
+            formula,
+            visibility: PropertyVisibility.Hidden,
+          },
+        ],
+      };
+      sheetConfigsMobx.set(sheetConfigId, sheetConfig);
+      const textDocumentSheetId = generateNanoid();
+      textDocument.sheets.unshift({
+        id: textDocumentSheetId,
+        configId: sheetConfigId,
+      });
+      isSheetExpandedMobx.set(textDocumentSheetId, true);
+    } else {
+      const textDocumentSheetId = generateNanoid();
+      textDocument.sheets.unshift({
+        id: textDocumentSheetId,
+        configId: pendingSearch.sheetConfig.id,
+      });
+      isSheetExpandedMobx.set(textDocumentSheetId, true);
+    }
+  });
+};
 
 export function getSearchFormula(
   type: "regex" | "string",
@@ -638,15 +715,21 @@ export function getSearchFormula(
 }
 
 export const searchResults = computed<Highlight[]>(() => {
-  const searchState = searchTermBox.get();
+  const pendingSearch = selectedPendingSearchComputed.get();
 
-  if (searchState.mode === "saved") {
+  if (pendingSearch === undefined) {
     return [];
   }
 
-  const formula = getSearchFormula(searchState.type, searchState.search);
+  let formula: string | undefined;
 
-  if (!formula) {
+  if (pendingSearch._type === "new") {
+    formula = getSearchFormula(pendingSearch.mode, pendingSearch.search);
+  } else {
+    formula = pendingSearch.sheetConfig.properties[0].formula;
+  }
+
+  if (formula === undefined) {
     return [];
   }
 

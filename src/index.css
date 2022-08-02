@@ -53,7 +53,7 @@
 
 .cm-highlight {
   padding-bottom: 2px;
-  background-image: url(assets/splat-underline-2-default.svg);
+  background-image: url(./splat-underline-2-default.svg);
   background-size: 100% 4px;
   background-position: bottom;
   background-repeat: no-repeat;
@@ -79,7 +79,7 @@ input[type="range"]::-webkit-slider-thumb {
 .annotation-token {
   @apply font-mono text-sm;
   color: #1355ff;
-  background-image: url(assets/whiteout.svg);
+  background-image: url(./whiteout.svg);
   background-size: auto 100%;
   background-repeat: repeat-x;
   font-family: "Schoolbell", sans-serif;

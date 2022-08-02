@@ -23,10 +23,14 @@ export const HighlightHoverCardContent = observer(
         Math.min(highlightLineEnd + extraLinesToShow, textDocument.text.lines)
       ).to
     );
+
+    const startLine = textDocument.text.lineAt(highlight.span[0]).number
+    const endLine = textDocument.text.lineAt(highlight.span[1]).number
+
     return (
       <>
         <div className="text-xs uppercase font-mono text-gray-400 mb-1">
-          {highlight.documentId}[{highlight.span[0]}-{highlight.span[1]}]
+          {textDocument.name} (Line  {startLine === endLine ? startLine : `${startLine} - ${endLine}`})
         </div>
         <div className="whitespace-pre-wrap">
           {highlight.span[0] > startPosOfHighlightLine ? (

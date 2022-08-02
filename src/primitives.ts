@@ -315,6 +315,10 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
         id: SCALE_SHEET_IN_GOCHUJANG_ID,
         configId: SCALE_SHEET_CONFIG_ID,
       },
+      {
+        id: generateNanoid(),
+        configId: DURATIONS_SHEET_CONFIG_ID,
+      },
     ],
   },
   [PIZZA_DOCUMENT_ID]: {
@@ -480,12 +484,12 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     properties: [
       {
         name: "$",
-        formula: 'MatchRegexp("[0-9]+")',
+        formula: 'MatchRegexp("[0-9][0-9\\.]*")',
         visibility: PropertyVisibility.Hidden,
       },
       {
         name: "value",
-        formula: "ParseInt($)",
+        formula: "ParseFloat($)",
         visibility: PropertyVisibility.Hidden,
       },
       {
@@ -501,7 +505,12 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
     properties: [
       {
         name: "$",
-        formula: 'MatchRegexp("[0-9]+")',
+        formula: 'MatchRegexp("[0-9][0-9\\.]*")',
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "value",
+        formula: "ParseFloat($)",
         visibility: PropertyVisibility.Hidden,
       },
     ],
@@ -556,7 +565,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       {
         name: "scaledAmount",
         formula:
-          "(scaleFactor && scaleFactor !== 1 && amount) ? `${scaleFactor * amount} ${$}` : undefined",
+          "(scaleFactor && scaleFactor !== 1 && amount) ? `${scaleFactor * amount} ${$}${amount.data.value === 1 ? 's' : ''}` : undefined",
         visibility: PropertyVisibility.Replace,
       },
     ],

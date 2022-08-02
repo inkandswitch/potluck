@@ -288,6 +288,21 @@ export function evaluateFormula(
       );
     },
 
+    TextAfter: (highlight: Highlight, until: string = "\n"): Highlight => {
+      let endIndex = textDocument.text
+        .sliceString(0)
+        .indexOf(until, highlight.span[1]);
+      if (endIndex === -1) {
+        endIndex = textDocument.text.sliceString(0).length;
+      }
+      return {
+        documentId: textDocument.id,
+        sheetConfigId: sheetConfig.id,
+        span: [highlight.span[1], endIndex],
+        data: {},
+      };
+    },
+
     NextUntil: (highlight: Highlight, stopCondition: any): Highlight[] => {
       const textDocument = textDocumentsMobx.get(highlight.documentId);
 
@@ -623,6 +638,11 @@ export const FORMULA_REFERENCE = [
     name: "HasTextOnRight",
     args: ["text: string", "highlight: Highlight"],
     return: "boolean",
+  },
+  {
+    name: "TextAfter",
+    args: ["highlight: Highlight", "until: string"],
+    return: "Highlight",
   },
   {
     name: "SameLine",

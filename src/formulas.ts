@@ -303,6 +303,28 @@ export function evaluateFormula(
       };
     },
 
+    TextBefore: (highlight: Highlight, until: string = "\n"): Highlight => {
+      const indicesWhereUntilOccurs = [
+        ...textDocument.text
+          .sliceString(0, highlight.span[0])
+          .matchAll(new RegExp(until, "gi")),
+      ].map((a) => a.index);
+
+      let startIndex: number;
+      if (indicesWhereUntilOccurs.length === 0) {
+        startIndex = 0;
+      } else {
+        startIndex = indicesWhereUntilOccurs.slice(-1)[0]!;
+      }
+
+      return {
+        documentId: textDocument.id,
+        sheetConfigId: sheetConfig.id,
+        span: [startIndex, highlight.span[0]],
+        data: {},
+      };
+    },
+
     NextUntil: (highlight: Highlight, stopCondition: any): Highlight[] => {
       const textDocument = textDocumentsMobx.get(highlight.documentId);
 
@@ -641,6 +663,11 @@ export const FORMULA_REFERENCE = [
   },
   {
     name: "TextAfter",
+    args: ["highlight: Highlight", "until: string"],
+    return: "Highlight",
+  },
+  {
+    name: "TextBefore",
     args: ["highlight: Highlight", "until: string"],
     return: "Highlight",
   },

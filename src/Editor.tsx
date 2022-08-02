@@ -110,7 +110,9 @@ class SuperscriptWidget extends WidgetType {
         case SuperscriptWidgetMode.InlineWidgetTemporarilyMoved: {
           token.className = `${ANNOTATION_TOKEN_CLASSNAME} ml-1 first:ml-0 align-top top-[14px] z-10 relative py-[1px] px-1 rounded-sm whitespace-nowrap transition-all`;
           setTimeout(() => {
-            token.style.top = "30px";
+            token.style.top = "0px";
+            token.style.opacity = "70%";
+            token.style.boxShadow = "rgb(100 100 100 / 57%) 0px 0px 5px";
           }, 0);
           break;
         }
@@ -262,7 +264,7 @@ const highlightDecorations = EditorView.decorations.compute(
     const selectionRange = state.selection.asSingle().main;
     const selectionSpan: Span = [selectionRange.from, selectionRange.to];
     const highlights = state.field(highlightsField);
-    const documentId = state.facet(textDocumentIdFacet)
+    const documentId = state.facet(textDocumentIdFacet);
     const selectionHighlights = highlights.filter(
       (highlight) =>
         isValueRowHighlight(highlight) &&
@@ -273,12 +275,13 @@ const highlightDecorations = EditorView.decorations.compute(
       [
         ...selectionHighlights.flatMap((highlight) => {
           return Object.values(highlight.data).flatMap((columnValue) =>
-            isValueRowHighlight(columnValue) && columnValue.documentId === documentId
+            isValueRowHighlight(columnValue) &&
+            columnValue.documentId === documentId
               ? [
-                Decoration.mark({
-                  class: "cm-highlight-hover",
-                }).range(columnValue.span[0], columnValue.span[1]),
-              ]
+                  Decoration.mark({
+                    class: "cm-highlight-hover",
+                  }).range(columnValue.span[0], columnValue.span[1]),
+                ]
               : []
           );
         }),
@@ -351,21 +354,21 @@ const highlightDecorations = EditorView.decorations.compute(
               decorations.push(
                 spansOverlap
                   ? Decoration.widget({
-                    widget: new SuperscriptWidget(
-                      highlight.data,
-                      replaceProperties,
-                      SuperscriptWidgetMode.InlineWidgetTemporarilyMoved
-                    ),
-                    side: 1,
-                  }).range(highlight.span[0])
+                      widget: new SuperscriptWidget(
+                        highlight.data,
+                        replaceProperties,
+                        SuperscriptWidgetMode.InlineWidgetTemporarilyMoved
+                      ),
+                      side: 1,
+                    }).range(highlight.span[0])
                   : Decoration.widget({
-                    widget: new InlineWidget(
-                      highlight.data,
-                      replaceProperties,
-                      InlineWidgetMode.Replace
-                    ),
-                    side: 1,
-                  }).range(highlight.span[1])
+                      widget: new InlineWidget(
+                        highlight.data,
+                        replaceProperties,
+                        InlineWidgetMode.Replace
+                      ),
+                      side: 1,
+                    }).range(highlight.span[1])
               );
             }
           }
@@ -450,9 +453,11 @@ export const Editor = observer(
             .toJSON()
             .concat(searchResults.get());
           view.dispatch({
-            effects: setHoverHighlightsEffect.of(highlights.filter((h) => {
-              return h.documentId === textDocumentId
-            })),
+            effects: setHoverHighlightsEffect.of(
+              highlights.filter((h) => {
+                return h.documentId === textDocumentId;
+              })
+            ),
           });
         }),
       ];

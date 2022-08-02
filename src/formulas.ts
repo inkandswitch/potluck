@@ -209,7 +209,7 @@ export function evaluateFormula(
       return highlights;
     },
 
-    HighlightsOfType: (type: string) => {
+    FindAll: (type: string) => {
       const typeSheetConfig = Array.from(sheetConfigsMobx.values()).find(
         (sheetConfig) => sheetConfig.name === type
       );
@@ -218,6 +218,11 @@ export function evaluateFormula(
         return [];
       }
       return getComputedSheetValue(textDocument.id, typeSheetConfig.id).get();
+    },
+
+    Find: (type: string) => {
+      const allHighlights = API.FindAll(type);
+      return allHighlights[0];
     },
 
     NextOfType: (
@@ -585,7 +590,7 @@ export const FORMULA_REFERENCE = [
     return: "Highlight[]",
   },
   {
-    name: "HighlightsOfType",
+    name: "FindAll",
     args: ["type: string"],
     return: "Highlight[]",
   },

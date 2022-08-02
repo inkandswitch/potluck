@@ -414,7 +414,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
       {
         name: "scaleFactor",
-        formula: 'First(HighlightsOfType("scale"))?.data.sliderValue',
+        formula: 'Find("scale")?.data.sliderValue',
         visibility: PropertyVisibility.Hidden,
       },
       {
@@ -498,7 +498,7 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
       },
       {
         name: "scaleFactor",
-        formula: 'First(HighlightsOfType("scale"))?.data.sliderValue',
+        formula: 'Find("scale")?.data.sliderValue',
         visibility: PropertyVisibility.Hidden,
       },
       {

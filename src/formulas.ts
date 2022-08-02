@@ -390,6 +390,10 @@ export function evaluateFormula(
       );
     }),
 
+    TextOfHighlight: (highlight: Highlight): string => {
+      return getTextForHighlight(highlight) ?? "";
+    },
+
     Filter: curry((list: any[], condition: any): any[] => {
       return list.filter((item: any) => evalCondition(condition, item));
     }),
@@ -670,6 +674,11 @@ export const FORMULA_REFERENCE = [
     name: "TextBefore",
     args: ["highlight: Highlight", "until: string"],
     return: "Highlight",
+  },
+  {
+    name: "TextOfHighlight",
+    args: ["highlight: Highlight"],
+    return: "string",
   },
   {
     name: "SameLine",

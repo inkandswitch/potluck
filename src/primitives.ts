@@ -208,9 +208,26 @@ Bake pizza until cheese is melted and crust is golden brown on bottom and sides 
 Step 5
 To serve, top pizza with 3 scallions, thinly sliced; cut into squares.`;
 
+const DOUGH_TEXT = `number of dough balls: 10
+ball weight: 40
+water %: 50%
+salt: 3%
+oil: 1%
+proof hours: 3
+room temp: 75 F
+
+---
+
+Flour:
+Water:
+Salt:
+Yeast:
+Oil`;
+
 export const WORKOUT_DOCUMENT_ID = "workout";
 export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork";
 export const PIZZA_DOCUMENT_ID = generateNanoid();
+export const DOUGH_DOCUMENT_ID = generateNanoid();
 export const COFFEE_DOCUMENT_ID = generateNanoid();
 export const ALL_INGREDIENTS_DOCUMENT_ID = "all ingredients";
 export const WORKOUT_SHEET_CONFIG_ID = generateNanoid();
@@ -220,6 +237,9 @@ export const ICE_CREAM_DOCUMENT_ID = "ice cream";
 export const INGREDIENTS_SHEET_CONFIG_ID = generateNanoid();
 export const ALL_INGREDIENTS_SHEET_CONFIG_ID = generateNanoid();
 export const MARKDOWN_SHEET_CONFIG_ID = generateNanoid();
+export const FLOUR_CONFIG_ID = generateNanoid();
+export const WATER_CONFIG_ID = generateNanoid();
+export const DOUGH_INPUTS_CONFIG_ID = generateNanoid();
 export const DURATIONS_SHEET_CONFIG_ID = generateNanoid();
 export const DATE_SHEET_CONFIG_ID = generateNanoid();
 export const SCALE_SHEET_CONFIG_ID = generateNanoid();
@@ -356,9 +376,125 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       },
     ],
   },
+  [DOUGH_DOCUMENT_ID]: {
+    id: DOUGH_DOCUMENT_ID,
+    name: "ooni pizza dough",
+    text: Text.of(DOUGH_TEXT.split("\n")),
+    sheets: [
+      {
+        id: generateNanoid(),
+        configId: DOUGH_INPUTS_CONFIG_ID,
+      },
+      {
+        id: generateNanoid(),
+        configId: FLOUR_CONFIG_ID,
+      },
+      {
+        id: generateNanoid(),
+        configId: WATER_CONFIG_ID,
+      },
+    ],
+  },
 });
 let nextSheetIndex = 1;
 export const sheetConfigsMobx = observable.map<string, SheetConfig>({
+  [FLOUR_CONFIG_ID]: {
+    id: FLOUR_CONFIG_ID,
+    name: "flour",
+    properties: [
+      {
+        name: "$",
+        formula: 'MatchRegexp("Flour:", "i")',
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "numberOfBalls",
+        formula:
+          'FindAll("dough inputs").find(h => TextOfHighlight(h.data.label).includes("dough balls")).data.value',
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "water",
+        formula:
+          'FindAll("dough inputs").find(h => TextOfHighlight(h.data.label).includes("water %")).data.value / 100',
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "gramsPerBall",
+        formula: "450",
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "total",
+        formula: "numberOfBalls * gramsPerBall * (1 - water)",
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "display",
+        formula: "`${Math.round(total)} grams`",
+        visibility: PropertyVisibility.Inline,
+      },
+    ],
+  },
+  [WATER_CONFIG_ID]: {
+    id: WATER_CONFIG_ID,
+    name: "water",
+    properties: [
+      {
+        name: "$",
+        formula: 'MatchRegexp("Water:", "i")',
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "numberOfBalls",
+        formula:
+          'FindAll("dough inputs").find(h => TextOfHighlight(h.data.label).includes("dough balls")).data.value',
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "water",
+        formula:
+          'FindAll("dough inputs").find(h => TextOfHighlight(h.data.label).includes("water %")).data.value / 100',
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "gramsPerBall",
+        formula: "450",
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "total",
+        formula: "numberOfBalls * gramsPerBall * water",
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "display",
+        formula: "`${Math.round(total)} grams`",
+        visibility: PropertyVisibility.Inline,
+      },
+    ],
+  },
+  [DOUGH_INPUTS_CONFIG_ID]: {
+    id: DOUGH_INPUTS_CONFIG_ID,
+    name: "dough inputs",
+    properties: [
+      {
+        name: "$",
+        formula: 'MatchRegexp("[0-9]+")',
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "value",
+        formula: "ParseInt($)",
+        visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "label",
+        formula: "TextBefore($)",
+        visibility: PropertyVisibility.Hidden,
+      },
+    ],
+  },
   [NUMBER_SHEET_CONFIG_ID]: {
     id: NUMBER_SHEET_CONFIG_ID,
     name: "numbers",

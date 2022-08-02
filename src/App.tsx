@@ -395,14 +395,6 @@ const SearchBox = observer(
                 </button>
               )}
             </div>
-            <button
-              onClick={action(() => {
-                showSearchPanelBox.set(false);
-              })}
-              className="text-sm text-gray-400 hover:text-gray-600"
-            >
-              Done
-            </button>
           </div>
           {searchBoxFocused && searchState.mode === "saved" && (
             <div className="max-h-48 overflow-y-scroll absolute top-9 w-full bg-white z-10 border border-gray-100 px-4 py-2">

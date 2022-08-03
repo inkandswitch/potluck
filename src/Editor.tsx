@@ -469,7 +469,10 @@ export const Editor = observer(
     }, [textDocument]);
 
     return (
-      <div className="text-lg h-full bg-white  overflow-auto" ref={editorRef} />
+      <div
+        className="text-lg max-w-xl h-full bg-white  overflow-auto"
+        ref={editorRef}
+      />
     );
   }
 );

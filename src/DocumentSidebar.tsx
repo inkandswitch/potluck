@@ -7,7 +7,82 @@ import {
   TextDocument,
   textDocumentsMobx,
 } from "./primitives";
+import { useState } from "react";
 import { FileTextIcon } from "@radix-ui/react-icons";
+import { DirectoryPersistence } from "./persistence";
+import * as Tooltip from "@radix-ui/react-tooltip";
+import {
+  CheckCircledIcon,
+  CircleBackslashIcon,
+  UpdateIcon,
+} from "@radix-ui/react-icons";
+
+const PersistenceButton = observer(() => {
+  const [directoryPersistence, setDirectoryPersistence] = useState<
+    DirectoryPersistence | undefined
+  >(undefined);
+  return (
+    <div className="flex gap-2 bg-white bg-opacity-50 p-2 rounded">
+      <Tooltip.Root>
+        <Tooltip.Trigger asChild={true}>
+          <button
+            onClick={() => {
+              if (directoryPersistence !== undefined) {
+                directoryPersistence.destroy();
+              }
+
+              async function go() {
+                const d = new DirectoryPersistence();
+                await d.init();
+                setDirectoryPersistence(d);
+              }
+
+              go();
+            }}
+            className="text-gray-600 hover:text-gray-700"
+          >
+            {directoryPersistence !== undefined ? (
+              <CheckCircledIcon className="text-green-500" />
+            ) : (
+              <UpdateIcon />
+            )}
+          </button>
+        </Tooltip.Trigger>
+        <Tooltip.Portal>
+          <Tooltip.Content className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
+            {directoryPersistence !== undefined
+              ? "Syncing with filesystem"
+              : "Sync with filesystem"}
+            <Tooltip.Arrow className="fill-gray-700" />
+          </Tooltip.Content>
+        </Tooltip.Portal>
+      </Tooltip.Root>
+      {directoryPersistence !== undefined ? (
+        <Tooltip.Root>
+          <Tooltip.Trigger asChild={true}>
+            <button
+              onClick={() => {
+                if (directoryPersistence !== undefined) {
+                  directoryPersistence.destroy();
+                }
+                setDirectoryPersistence(undefined);
+              }}
+              className="text-gray-400 hover:text-gray-700"
+            >
+              <CircleBackslashIcon />
+            </button>
+          </Tooltip.Trigger>
+          <Tooltip.Portal>
+            <Tooltip.Content className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
+              Stop syncing
+              <Tooltip.Arrow className="fill-gray-700" />
+            </Tooltip.Content>
+          </Tooltip.Portal>
+        </Tooltip.Root>
+      ) : null}
+    </div>
+  );
+});
 
 const DocumentSidebarItem = observer(
   ({ textDocument }: { textDocument: TextDocument }) => {
@@ -56,6 +131,8 @@ export const DocumentSidebar = observer(() => {
             v0.5
           </span>
         </div>
+
+        <PersistenceButton />
       </div>
       {values(textDocumentsMobx).map((textDocument) => (
         <DocumentSidebarItem

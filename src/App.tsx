@@ -29,15 +29,12 @@ import { Text } from "@codemirror/state";
 import classNames from "classnames";
 import { getComputedDocumentValues } from "./compute";
 import { generateNanoid } from "./utils";
-import { DirectoryPersistence, FileDropWrapper } from "./persistence";
+import { FileDropWrapper } from "./persistence";
 import {
-  CheckCircledIcon,
-  CircleBackslashIcon,
   Cross1Icon,
   HamburgerMenuIcon,
   MagnifyingGlassIcon,
   Pencil2Icon,
-  UpdateIcon,
 } from "@radix-ui/react-icons";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { ToastViewport } from "@radix-ui/react-toast";
@@ -156,72 +153,6 @@ const DocumentSheets = observer(
   }
 );
 
-const PersistenceButton = observer(() => {
-  const [directoryPersistence, setDirectoryPersistence] = useState<
-    DirectoryPersistence | undefined
-  >(undefined);
-  return (
-    <div className="flex gap-2 bg-white bg-opacity-50 p-2 rounded">
-      <Tooltip.Root>
-        <Tooltip.Trigger asChild={true}>
-          <button
-            onClick={() => {
-              if (directoryPersistence !== undefined) {
-                directoryPersistence.destroy();
-              }
-
-              async function go() {
-                const d = new DirectoryPersistence();
-                await d.init();
-                setDirectoryPersistence(d);
-              }
-
-              go();
-            }}
-            className="text-gray-600 hover:text-gray-700"
-          >
-            {directoryPersistence !== undefined ? (
-              <CheckCircledIcon className="text-green-500" />
-            ) : (
-              <UpdateIcon />
-            )}
-          </button>
-        </Tooltip.Trigger>
-        <Tooltip.Portal>
-          <Tooltip.Content className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
-            {directoryPersistence !== undefined
-              ? "Syncing with filesystem"
-              : "Sync with filesystem"}
-            <Tooltip.Arrow className="fill-gray-700" />
-          </Tooltip.Content>
-        </Tooltip.Portal>
-      </Tooltip.Root>
-      {directoryPersistence !== undefined ? (
-        <Tooltip.Root>
-          <Tooltip.Trigger asChild={true}>
-            <button
-              onClick={() => {
-                if (directoryPersistence !== undefined) {
-                  directoryPersistence.destroy();
-                }
-                setDirectoryPersistence(undefined);
-              }}
-              className="text-gray-400 hover:text-gray-700"
-            >
-              <CircleBackslashIcon />
-            </button>
-          </Tooltip.Trigger>
-          <Tooltip.Portal>
-            <Tooltip.Content className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
-              Stop syncing
-              <Tooltip.Arrow className="fill-gray-700" />
-            </Tooltip.Content>
-          </Tooltip.Portal>
-        </Tooltip.Root>
-      ) : null}
-    </div>
-  );
-});
 const SearchButton = observer(() => {
   const isShowingSearchPanelBox = showSearchPanelBox.get();
 
@@ -498,7 +429,6 @@ const App = observer(() => {
             <Pencil2Icon className="text-gray-600" />
           </button>
           <div className="grow" />
-          <PersistenceButton />
           <SearchButton />
         </div>
         <TextDocumentComponent

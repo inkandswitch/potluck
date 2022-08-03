@@ -810,12 +810,12 @@ export function evaluateSheet(
         break;
       }
     } else {
-      resultRows = resultRows.map((row) => {
+      resultRows = resultRows.map((row, _index) => {
         const result = evaluateFormula(
           textDocument,
           sheetConfig,
           column.formula,
-          { ...row }
+          { ...row, _index }
         );
 
         return { ...row, [column.name]: result };

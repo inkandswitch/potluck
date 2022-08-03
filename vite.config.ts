@@ -9,7 +9,7 @@ import dsv from "@rollup/plugin-dsv";
 // https://github.com/vitejs/vite/issues/8341
 const ignored = () => {
   return {
-    name: "watch-node-modules",
+    name: "ignored-overrides",
     configureServer: (server: ViteDevServer): void => {
       server.watcher.options = {
         ...server.watcher.options,

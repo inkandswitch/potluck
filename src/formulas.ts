@@ -38,7 +38,7 @@ import {
 import { OFFICIAL_FOODS } from "./data/officialFoods";
 // @ts-ignore
 import FuzzySet from "fuzzyset";
-import Prism from "prismjs";
+import Prism, { highlight } from "prismjs";
 import { createTimerComponent } from "./TimerComponent";
 import { runInAction } from "mobx";
 import { createNumberSliderComponent } from "./NumberSliderComponent";
@@ -811,8 +811,7 @@ export function evaluateSheet(
         resultRows = [{ [column.name]: result }];
       }
 
-
-      // flatten nested data of first highlight, this is necessary so
+      // flatten nested data of first highlight, this is necessary so named groups are directly accessible in the table
       resultRows = resultRows.map((row) => {
         const value = Object.values(row)[0]
 
@@ -845,14 +844,14 @@ export function evaluateSheet(
   // Stretch the bounds of this Highlight so it contains all the highlights in its row.
   // Need to be careful to only consider child Highlights which are in this doc, not other docs
   return (resultRows ?? []).map((rowData) => {
-    let from, to;
+    let from, to
 
     for (const value of Object.values(rowData)) {
       if (
         value &&
         value.span &&
         value.documentId &&
-        value.documentId === textDocument.id //
+        value.documentId === textDocument.id
       ) {
         const [valueFrom, valueTo] = value.span;
 
@@ -865,6 +864,7 @@ export function evaluateSheet(
         }
       }
     }
+
 
     return {
       documentId: textDocument.id,

@@ -1,10 +1,10 @@
 import { computed, IObservableValue, observable, runInAction } from "mobx";
 import { EditorState, Text } from "@codemirror/state";
-import { ALL_INGREDIENTS_TEXT } from "./data/all_ingredients";
 import { generateNanoid } from "./utils";
 import { evaluateFormula } from "./formulas";
 import { getStateFromFiles } from "./persistence";
 import { DefaultFiles } from "./DefaultState";
+import { matchPatternInDocument } from "./patterns";
 
 export type Span = [from: number, to: number];
 
@@ -274,5 +274,5 @@ export const hoverHighlightsMobx = observable.array<Highlight>([]);
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({});
 
-export const showDocumentSidebarBox = observable.box(true);
-export const showSearchPanelBox = observable.box(false);
+export const showDocumentSidebarBox = observable.box(false);
+export const showSearchPanelBox = observable.box(true);

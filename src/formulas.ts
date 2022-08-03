@@ -42,6 +42,7 @@ import Prism from "prismjs";
 import { createTimerComponent } from "./TimerComponent";
 import { runInAction } from "mobx";
 import { createNumberSliderComponent } from "./NumberSliderComponent";
+import { matchPatternInDocument } from "./patterns";
 
 const foodNameMatchSet = new FuzzySet(
   OFFICIAL_FOODS.map((food: any) => food.description),
@@ -158,6 +159,10 @@ export function evaluateFormula(
       }
 
       return highlights;
+    },
+
+    MatchPattern: (patternString: string): Highlight[] => {
+      return matchPatternInDocument(patternString, textDocument, sheetConfig.id)
     },
 
     // this method is not curried because it has an optional isCaseSensitive parameter

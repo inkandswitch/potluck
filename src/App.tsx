@@ -507,20 +507,25 @@ const App = observer(() => {
         />
       </div>
       {showSearchPanel ? (
-        <div className="border-l border-gray-200 bg-gray-100 grow h-full overflow-auto pl-6 pr-4 pt-8">
-          <SearchBox
-            textDocumentId={textDocumentId}
-            focusOnMountRef={focusSearchOnMountRef}
-          />
-          <DocumentSheets textDocumentId={textDocumentId} />
-          <button
-            onClick={action(() => {
-              showSearchPanelBox.set(false);
-            })}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-          >
-            <Cross1Icon />
-          </button>
+        <div className="border-l border-gray-200 bg-gray-100 grow h-full overflow-auto">
+          <div className="flex items-center justify-between px-2 h-12 border-b border-gray-200 px-4">
+            <div className="text-sm font-medium text-gray-400">Searches</div>
+            <button
+              onClick={action(() => {
+                showSearchPanelBox.set(false);
+              })}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <Cross1Icon />
+            </button>
+          </div>
+          <div className="p-4">
+            <SearchBox
+              textDocumentId={textDocumentId}
+              focusOnMountRef={focusSearchOnMountRef}
+            />
+            <DocumentSheets textDocumentId={textDocumentId} />
+          </div>
         </div>
       ) : null}
       <ToastViewport className="fixed top-4 right-4 flex flex-col gap-2" />

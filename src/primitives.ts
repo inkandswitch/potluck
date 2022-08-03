@@ -4,7 +4,6 @@ import { generateNanoid } from "./utils";
 import { evaluateFormula } from "./formulas";
 import { getStateFromFiles } from "./persistence";
 import { DefaultFiles } from "./DefaultState";
-import { matchPatternInDocument } from "./patterns";
 
 export type Span = [from: number, to: number];
 

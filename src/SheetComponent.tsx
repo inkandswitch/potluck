@@ -18,7 +18,13 @@ import {
   TextDocumentSheet,
   textEditorStateMobx,
 } from "./primitives";
-import { doSpansOverlap, getTextForHighlight, isHighlightComponent, isNumericish, isValueRowHighlight, } from "./utils";
+import {
+  doSpansOverlap,
+  getTextForHighlight,
+  isHighlightComponent,
+  isNumericish,
+  isValueRowHighlight,
+} from "./utils";
 import { FORMULA_REFERENCE } from "./formulas";
 import { SheetCalendar } from "./SheetCalendar";
 import { HighlightHoverCard } from "./HighlightHoverCard";
@@ -45,8 +51,12 @@ import { EditorView, minimalSetup } from "codemirror";
 import { bracketMatching, LanguageSupport } from "@codemirror/language";
 import { javascriptLanguage } from "@codemirror/lang-javascript";
 import { highlightSpecialChars, keymap, tooltips } from "@codemirror/view";
-import { autocompletion, closeBrackets, closeBracketsKeymap, } from "@codemirror/autocomplete";
-import { IObservableArray, } from "mobx/dist/internal";
+import {
+  autocompletion,
+  closeBrackets,
+  closeBracketsKeymap,
+} from "@codemirror/autocomplete";
+import { IObservableArray } from "mobx/dist/internal";
 import { getPatternExprGroupNames } from "./patterns";
 
 let i = 1;
@@ -150,7 +160,7 @@ const SheetSettingsPopoverContent = observer(
                 }
               >
                 {textEditorStateMobx.get().selection.main.from !==
-                textEditorStateMobx.get().selection.main.to && (
+                  textEditorStateMobx.get().selection.main.to && (
                   <span>Limit range to selection</span>
                 )}
               </button>
@@ -549,7 +559,9 @@ export const SheetTable = observer(
     rows,
     rowsActiveInDoc,
   }: SheetViewProps) => {
-    const [sortBy, setSortBy] = useState<{ columnName: string; direction: "asc" | "desc" } | undefined>(undefined);
+    const [sortBy, setSortBy] = useState<
+      { columnName: string; direction: "asc" | "desc" } | undefined
+    >(undefined);
 
     const addColumn = action(() => {
       sheetConfig.properties.push({
@@ -570,28 +582,30 @@ export const SheetTable = observer(
         columnName === "date"
           ? SortMethod.Date
           : isNumericish(firstRowColumnValue)
-            ? SortMethod.Numeric
-            : SortMethod.Alphabetical;
+          ? SortMethod.Numeric
+          : SortMethod.Alphabetical;
       sortedRows = [...rows].sort((a, b) =>
         compareColumnValues(a, b, columnName, sortMethod, direction)
       );
     }
 
-    const headFormula = columns[0].formula
+    const headFormula = columns[0].formula;
 
-    const groupNames = getPatternExprGroupNames(headFormula)
+    const groupNames = getPatternExprGroupNames(headFormula);
 
-    const groupColumnsOffset = groupNames.length
+    const groupColumnsOffset = groupNames.length;
 
-    const columnsWithPatternGroups = (
-      columns.slice(0, 1)
-        .concat(groupNames.map((name) => ({
+    const columnsWithPatternGroups = columns
+      .slice(0, 1)
+      .concat(
+        groupNames.map((name) => ({
           name,
           isPatternGroup: true,
           formula: "",
-          visibility: PropertyVisibility.Hidden
-        }))))
-        .concat(columns.slice(1))
+          visibility: PropertyVisibility.Hidden,
+        }))
+      )
+      .concat(columns.slice(1));
 
     return (
       <>
@@ -603,7 +617,7 @@ export const SheetTable = observer(
                 style={{ zIndex: 1 }}
               >
                 {columnsWithPatternGroups.map((column, index) => {
-                  const isEditable = index !== 0 && !column.isPatternGroup
+                  const isEditable = index !== 0 && !column.isPatternGroup;
 
                   return (
                     <th
@@ -665,7 +679,7 @@ export const SheetTable = observer(
                                 }}
                                 className={classNames(
                                   sortBy?.columnName === column.name &&
-                                  sortBy.direction === "asc"
+                                    sortBy.direction === "asc"
                                     ? "opacity-100"
                                     : "opacity-20 hover:opacity-60"
                                 )}
@@ -689,7 +703,7 @@ export const SheetTable = observer(
                                 }}
                                 className={classNames(
                                   sortBy?.columnName === column.name &&
-                                  sortBy.direction === "desc"
+                                    sortBy.direction === "desc"
                                     ? "opacity-100"
                                     : "opacity-20 hover:opacity-60"
                                 )}
@@ -701,7 +715,7 @@ export const SheetTable = observer(
                         ) : null}
                       </div>
                     </th>
-                  )
+                  );
                 })}
                 <th className="bg-gray-50 w-[28px]">
                   <button
@@ -725,8 +739,8 @@ export const SheetTable = observer(
                       childrenHighlights.length > 0
                         ? childrenHighlights
                         : isValueRowHighlight(row)
-                          ? [row]
-                          : []
+                        ? [row]
+                        : []
                     );
                   })}
                   onMouseLeave={action(() => {

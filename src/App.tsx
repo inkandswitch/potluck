@@ -31,13 +31,13 @@ import { getComputedDocumentValues } from "./compute";
 import { generateNanoid } from "./utils";
 import { DirectoryPersistence, FileDropWrapper } from "./persistence";
 import {
+  CheckCircledIcon,
+  CircleBackslashIcon,
   Cross1Icon,
-  FileIcon,
-  FileTextIcon,
   HamburgerMenuIcon,
   MagnifyingGlassIcon,
-  PauseIcon,
-  PlusIcon,
+  Pencil2Icon,
+  UpdateIcon,
 } from "@radix-ui/react-icons";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { ToastViewport } from "@radix-ui/react-toast";
@@ -178,20 +178,20 @@ const PersistenceButton = observer(() => {
 
               go();
             }}
-            className="text-gray-400 hover:text-gray-700"
+            className="text-gray-600 hover:text-gray-700"
           >
             {directoryPersistence !== undefined ? (
-              <FileTextIcon />
+              <CheckCircledIcon className="text-green-500" />
             ) : (
-              <FileIcon />
+              <UpdateIcon />
             )}
           </button>
         </Tooltip.Trigger>
         <Tooltip.Portal>
           <Tooltip.Content className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
             {directoryPersistence !== undefined
-              ? "syncing with filesystem"
-              : "sync with filesystem"}
+              ? "Syncing with filesystem"
+              : "Sync with filesystem"}
             <Tooltip.Arrow className="fill-gray-700" />
           </Tooltip.Content>
         </Tooltip.Portal>
@@ -208,12 +208,12 @@ const PersistenceButton = observer(() => {
               }}
               className="text-gray-400 hover:text-gray-700"
             >
-              <PauseIcon />
+              <CircleBackslashIcon />
             </button>
           </Tooltip.Trigger>
           <Tooltip.Portal>
             <Tooltip.Content className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
-              stop syncing
+              Stop syncing
               <Tooltip.Arrow className="fill-gray-700" />
             </Tooltip.Content>
           </Tooltip.Portal>
@@ -223,25 +223,32 @@ const PersistenceButton = observer(() => {
   );
 });
 const SearchButton = observer(() => {
+  const isShowingSearchPanelBox = showSearchPanelBox.get();
+
   return (
-    <Tooltip.Root>
-      <Tooltip.Trigger asChild={true}>
-        <button
-          onClick={action(() => {
-            showSearchPanelBox.set(!showSearchPanelBox.get());
-          })}
-          className="text-gray-400 hover:text-gray-700"
-        >
-          <MagnifyingGlassIcon />
-        </button>
-      </Tooltip.Trigger>
-      <Tooltip.Portal>
-        <Tooltip.Content className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
-          cmd-shift-f
-          <Tooltip.Arrow className="fill-gray-700" />
-        </Tooltip.Content>
-      </Tooltip.Portal>
-    </Tooltip.Root>
+    <>
+      {!isShowingSearchPanelBox && (
+        <Tooltip.Root>
+          <Tooltip.Trigger asChild={true}>
+            <button
+              onClick={action(() => {
+                showSearchPanelBox.set(!isShowingSearchPanelBox);
+              })}
+              className="text-gray-600 hover:text-gray-700"
+            >
+              <MagnifyingGlassIcon />
+            </button>
+          </Tooltip.Trigger>
+          <Tooltip.Portal>
+            <Tooltip.Content className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
+              ⌘ <span className="text-gray-500">+</span> ⇧{" "}
+              <span className="text-gray-500">+</span> F
+              <Tooltip.Arrow className="fill-gray-700" />
+            </Tooltip.Content>
+          </Tooltip.Portal>
+        </Tooltip.Root>
+      )}
+    </>
   );
 });
 
@@ -467,14 +474,15 @@ const App = observer(() => {
           showSearchPanel ? "w-2/5" : "grow"
         )}
       >
-        <div className="flex flex-shrink-0 items-center h-12 border-b border-gray-200 px-4 gap-2">
+        <div className="flex flex-shrink-0 items-center h-12 border-b border-gray-200 px-4 gap-3">
           <button
             onClick={action(() => {
               showDocumentSidebarBox.set(!showDocumentSidebarBox.get());
             })}
           >
-            <HamburgerMenuIcon />
+            <HamburgerMenuIcon className="text-gray-600" />
           </button>
+
           <button
             onClick={action(() => {
               const newDocumentId = generateNanoid();
@@ -487,7 +495,7 @@ const App = observer(() => {
               selectedTextDocumentIdBox.set(newDocumentId);
             })}
           >
-            <PlusIcon />
+            <Pencil2Icon className="text-gray-600" />
           </button>
           <div className="grow" />
           <PersistenceButton />

@@ -75,60 +75,6 @@ const TextDocumentComponent = observer(
   }
 );
 
-const TextDocumentSelector = observer(() => {
-  return (
-    <div className="pt-4 pb-2">
-      <select
-        onChange={action((e) => {
-          let newDocumentId = e.target.value;
-          if (newDocumentId === NEW_OPTION_ID) {
-            newDocumentId = generateNanoid();
-            textDocumentsMobx.set(newDocumentId, {
-              id: newDocumentId,
-              name: "Untitled",
-              text: Text.empty,
-              sheets: [],
-            });
-          }
-          selectedTextDocumentIdBox.set(newDocumentId);
-        })}
-        value={selectedTextDocumentIdBox.get()}
-        className="border border-gray-200 rounded p-1"
-      >
-        {[...textDocumentsMobx.values()].map((textDocument) => (
-          <option value={textDocument.id} key={textDocument.id}>
-            {textDocument.name}
-          </option>
-        ))}
-        <option value={NEW_OPTION_ID}>New text document</option>
-      </select>
-      <button
-        className="ml-4 text-gray-400 hover:text-gray-600 text-xs"
-        onClick={() => {
-          runInAction(() => {
-            const currentDoc = textDocumentsMobx.get(
-              selectedTextDocumentIdBox.get()
-            )!;
-            const newDocumentId = generateNanoid();
-            textDocumentsMobx.set(newDocumentId, {
-              id: newDocumentId,
-              name: `Copy of ${currentDoc.name}`,
-              text: Text.empty,
-              sheets: currentDoc.sheets.map((sheet) => ({
-                ...sheet,
-                highlightSearchRange: undefined,
-              })),
-            });
-            selectedTextDocumentIdBox.set(newDocumentId);
-          });
-        }}
-      >
-        <span className="text-lg">⎘</span> copy as template
-      </button>
-    </div>
-  );
-});
-
 const DocumentSheets = observer(
   ({ textDocumentId }: { textDocumentId: string }) => {
     const textDocument = textDocumentsMobx.get(textDocumentId)!;

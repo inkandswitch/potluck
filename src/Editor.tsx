@@ -38,6 +38,7 @@ import {
 } from "./utils";
 import { createRoot, Root } from "react-dom/client";
 import { NumberSliderComponent } from "./NumberSliderComponent";
+import { TimerComponent } from "./TimerComponent";
 import classNames from "classnames";
 import { Pattern, patternToString } from "./patterns";
 import { sortBy } from "lodash";
@@ -161,8 +162,21 @@ class InlineWidget extends WidgetType {
   }
 
   eq(other: WidgetType): boolean {
+    // BIG HACK
+    // For timer, we don't want to keep swapping out the DOM to avoid flickers.
+    if (
+      other instanceof InlineWidget &&
+      Object.values(this.highlightData).some(
+        (value) => value instanceof TimerComponent
+      ) &&
+      Object.values(other.highlightData).some(
+        (value) => value instanceof TimerComponent
+      )
+    ) {
+      return true;
+    }
     return (
-      other instanceof SuperscriptWidget &&
+      other instanceof InlineWidget &&
       comparer.structural(this.highlightData, other.highlightData) &&
       comparer.structural(this.visibleProperties, other.visibleProperties)
     );

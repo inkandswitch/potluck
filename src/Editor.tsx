@@ -1,5 +1,16 @@
-import { Decoration, EditorView, ViewPlugin, WidgetType } from "@codemirror/view";
-import { EditorState, Facet, SelectionRange, StateEffect, StateField } from "@codemirror/state";
+import {
+  Decoration,
+  EditorView,
+  ViewPlugin,
+  WidgetType,
+} from "@codemirror/view";
+import {
+  EditorState,
+  Facet,
+  SelectionRange,
+  StateEffect,
+  StateField,
+} from "@codemirror/state";
 import { minimalSetup } from "codemirror";
 import { useEffect, useRef } from "react";
 import { autorun, comparer, runInAction } from "mobx";
@@ -17,7 +28,7 @@ import {
   textDocumentsMobx,
   textEditorStateMobx,
 } from "./primitives";
-import { editorSelectionHighlightsComputed, } from "./compute";
+import { editorSelectionHighlightsComputed } from "./compute";
 import {
   doSpansOverlap,
   generateNanoid,
@@ -280,10 +291,10 @@ const highlightDecorations = EditorView.decorations.compute(
             isValueRowHighlight(columnValue) &&
             columnValue.documentId === documentId
               ? [
-                Decoration.mark({
-                  class: "cm-highlight-hover",
-                }).range(columnValue.span[0], columnValue.span[1]),
-              ]
+                  Decoration.mark({
+                    class: "cm-highlight-hover",
+                  }).range(columnValue.span[0], columnValue.span[1]),
+                ]
               : []
           );
         }),
@@ -375,21 +386,21 @@ const highlightDecorations = EditorView.decorations.compute(
               decorations.push(
                 spansOverlap
                   ? Decoration.widget({
-                    widget: new SuperscriptWidget(
-                      highlight.data,
-                      replaceProperties,
-                      SuperscriptWidgetMode.InlineWidgetTemporarilyMoved
-                    ),
-                    side: 1,
-                  }).range(highlight.span[0])
+                      widget: new SuperscriptWidget(
+                        highlight.data,
+                        replaceProperties,
+                        SuperscriptWidgetMode.InlineWidgetTemporarilyMoved
+                      ),
+                      side: 1,
+                    }).range(highlight.span[0])
                   : Decoration.widget({
-                    widget: new InlineWidget(
-                      highlight.data,
-                      replaceProperties,
-                      InlineWidgetMode.Replace
-                    ),
-                    side: 1,
-                  }).range(highlight.span[1])
+                      widget: new InlineWidget(
+                        highlight.data,
+                        replaceProperties,
+                        InlineWidgetMode.Replace
+                      ),
+                      side: 1,
+                    }).range(highlight.span[1])
               );
             }
           }
@@ -401,26 +412,24 @@ const highlightDecorations = EditorView.decorations.compute(
   }
 );
 
-const extractPatternFromHighlightPlugin = ViewPlugin.fromClass(class {
-}, {
+const extractPatternFromHighlightPlugin = ViewPlugin.fromClass(class {}, {
   eventHandlers: {
     keydown(event, view) {
       if (event.key === "h" && event.metaKey) {
+        event.preventDefault();
 
-        event.preventDefault()
-
-        const range = view.state.selection.ranges[0]
+        const range = view.state.selection.ranges[0];
 
         if (!range) {
-          return
+          return;
         }
 
-        const pattern = patternFromRange(range, view.state)
-        const textDocumentId = view.state.facet(textDocumentIdFacet)
-        const textDocument = textDocumentsMobx.get(textDocumentId)
+        const pattern = patternFromRange(range, view.state);
+        const textDocumentId = view.state.facet(textDocumentIdFacet);
+        const textDocument = textDocumentsMobx.get(textDocumentId);
 
         if (!textDocument) {
-          return
+          return;
         }
 
         runInAction(() => {
@@ -429,62 +438,67 @@ const extractPatternFromHighlightPlugin = ViewPlugin.fromClass(class {
               {
                 name: "$",
                 formula: `MatchPattern("${patternToString(pattern)}")`,
-                visibility: PropertyVisibility.Hidden
-              }
-            ]
-          })
+                visibility: PropertyVisibility.Hidden,
+              },
+            ],
+          });
 
-          const sheetId = generateNanoid()
+          const sheetId = generateNanoid();
 
           textDocument.sheets.push({
             id: sheetId,
-            configId: newSheetConfig.id
-          })
+            configId: newSheetConfig.id,
+          });
 
-          isSheetExpandedMobx.set(sheetId, true)
-        })
+          isSheetExpandedMobx.set(sheetId, true);
+        });
       }
-    }
-  }
-})
+    },
+  },
+});
 
 function patternFromRange(range: SelectionRange, state: EditorState): Pattern {
-  const highlights = state.field(highlightsField)
+  const highlights = state.field(highlightsField);
 
   const containedHighlights = sortBy(
-    highlights.filter(({ span }) => (
-      span[0] >= range.from && span[1] <= range.to
-    )),
-
+    highlights.filter(
+      ({ span }) => span[0] >= range.from && span[1] <= range.to
+    ),
     ({ span }) => span[0]
-  )
+  );
 
   let pattern: Pattern = [];
-  let prevEnd = range.from
+  let prevEnd = range.from;
 
   for (const highlight of containedHighlights) {
     if (prevEnd !== highlight.span[0]) {
-      pattern.push({ type: "text", text: state.doc.sliceString(prevEnd, highlight.span[0]) })
+      pattern.push({
+        type: "text",
+        text: state.doc.sliceString(prevEnd, highlight.span[0]),
+      });
     }
 
-    prevEnd = highlight.span[1]
+    prevEnd = highlight.span[1];
 
-    const sheetConfig = sheetConfigsMobx.get(highlight.sheetConfigId)
+    const sheetConfig = sheetConfigsMobx.get(highlight.sheetConfigId);
 
     pattern.push({
       type: "group",
       expr: {
         type: "highlightName",
         name: sheetConfig!.name,
-      }
-    })
+      },
+    });
   }
 
   if (prevEnd !== range.to) {
-    pattern.push({ type: "text", text: state.doc.sliceString(prevEnd, range.to) })
+    pattern.push({
+      type: "text",
+      text: state.doc.sliceString(prevEnd, range.to),
+    });
   }
 
-  return pattern
+  return pattern;
 }
 
 export const Editor = observer(
@@ -514,7 +528,7 @@ export const Editor = observer(
           highlightDecorations,
           hoverHighlightsField,
           textDocumentIdFacet.of(textDocumentId),
-          extractPatternFromHighlightPlugin
+          extractPatternFromHighlightPlugin,
         ],
         parent: editorRef.current!,
         dispatch(transaction) {

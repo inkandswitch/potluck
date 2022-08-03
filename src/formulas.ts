@@ -162,7 +162,11 @@ export function evaluateFormula(
     },
 
     MatchPattern: (patternString: string): Highlight[] => {
-      return matchPatternInDocument(patternString, textDocument, sheetConfig.id)
+      return matchPatternInDocument(
+        patternString,
+        textDocument,
+        sheetConfig.id
+      );
     },
 
     // this method is not curried because it has an optional isCaseSensitive parameter
@@ -813,16 +817,16 @@ export function evaluateSheet(
 
       // flatten nested data of first highlight, this is necessary so named groups are directly accessible in the table
       resultRows = resultRows.map((row) => {
-        const value = Object.values(row)[0]
+        const value = Object.values(row)[0];
 
-        const tempRow = {...row}
+        const tempRow = { ...row };
 
         Object.entries(value.data || {}).forEach(([name, value]) => {
-          tempRow[name] = value
-        })
+          tempRow[name] = value;
+        });
 
-        return tempRow
-      })
+        return tempRow;
+      });
 
       if (evalOnlyFirstColumn) {
         break;
@@ -844,7 +848,7 @@ export function evaluateSheet(
   // Stretch the bounds of this Highlight so it contains all the highlights in its row.
   // Need to be careful to only consider child Highlights which are in this doc, not other docs
   return (resultRows ?? []).map((rowData) => {
-    let from, to
+    let from, to;
 
     for (const value of Object.values(rowData)) {
       if (
@@ -864,7 +868,6 @@ export function evaluateSheet(
         }
       }
     }
-
 
     return {
       documentId: textDocument.id,

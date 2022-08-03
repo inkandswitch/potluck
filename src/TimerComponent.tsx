@@ -127,7 +127,7 @@ class TimerComponentData {
   }
 }
 
-class TimerComponent {
+export class TimerComponent {
   id = generateNanoid();
   durationSeconds: number;
   state = observable({

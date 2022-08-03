@@ -95,7 +95,7 @@ export const SheetCalendar = observer(
     );
     const [defaultDate] = useState(() => getDateForRow(rows[rows.length - 1]));
     return (
-      <div className="h-[512px]">
+      <div className="h-[512px] p-2">
         <Calendar
           defaultDate={defaultDate}
           events={events}

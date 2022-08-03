@@ -200,15 +200,17 @@ const SheetName = observer(
     rowsCount: number | undefined;
     sheetActiveInDoc: boolean;
   }) => {
+    const firstColumn = sheetConfig.properties[0];
     return (
-      <div className="flex h-7">
-        <input
-          type="text"
-          value={sheetConfig.name}
-          onChange={action((e) => {
-            sheetConfig.name = e.target.value;
+      <>
+        <SearchFormulaInput
+          value={firstColumn.formula}
+          onChange={action((value) => {
+            sheetConfig.properties = sheetConfig.properties.map(
+              (column, index) =>
+                index === 0 ? { ...column, formula: value } : column
+            );
           })}
-          className="font-mono inline text-sm border-b border-transparent focus:border-gray-300 outline-none text-gray-600 bg-transparent"
         />
         <Popover.Root modal={true}>
           <Popover.Anchor asChild={true}>
@@ -231,7 +233,7 @@ const SheetName = observer(
           </Popover.Content>
         </Popover.Root>
         <button
-          className="text-gray-400 hover:text-gray-500 ml-4"
+          className="text-gray-400 hover:text-gray-500"
           onClick={() => {
             runInAction(
               () =>
@@ -247,7 +249,7 @@ const SheetName = observer(
           )}
         </button>
         <button
-          className="text-gray-400 hover:text-gray-500 ml-4"
+          className="text-gray-400 hover:text-gray-500"
           onClick={() => {
             runInAction(() => {
               (
@@ -261,7 +263,7 @@ const SheetName = observer(
         {rowsCount !== undefined ? (
           <div
             className={classNames(
-              "ml-4 py-1 px-2 rounded-lg text-sm text-gray-400",
+              "rounded text-sm text-gray-400 whitespace-nowrap px-1",
               sheetActiveInDoc ? "bg-blue-100" : "bg-gray-50"
             )}
           >
@@ -269,7 +271,7 @@ const SheetName = observer(
             results
           </div>
         ) : null}
-      </div>
+      </>
     );
   }
 );
@@ -371,16 +373,15 @@ function compareColumnValues(
     : rv;
 }
 
-function FormulaInput({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-}) {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const valueRef = useRef(value);
+function useFormulaInput(
+  rootRef: React.MutableRefObject<HTMLDivElement | null>,
+  value: string,
+  onChange: (value: string) => void,
+  cmContentTheme: any,
+  useLineWrapping = false
+) {
   const viewRef = useRef<EditorView | undefined>(undefined);
+  const valueRef = useRef(value);
 
   useEffect(() => {
     const view = new EditorView({
@@ -388,13 +389,7 @@ function FormulaInput({
       extensions: [
         minimalSetup,
         EditorView.theme({
-          ".cm-content": {
-            padding: "4px 4px 4px 20px",
-            fontSize: "12px",
-            fontFamily: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
-            minHeight: "48px",
-            maxHeight: "96px",
-          },
+          ".cm-content": cmContentTheme,
           ".cm-completionIcon": {
             width: "1em",
           },
@@ -412,7 +407,7 @@ function FormulaInput({
         closeBrackets(),
         autocompletion(),
         tooltips({ parent: document.body }),
-        EditorView.lineWrapping,
+        useLineWrapping ? [EditorView.lineWrapping] : [],
         new LanguageSupport(javascriptLanguage, [
           javascriptLanguage.data.of({
             autocomplete: FORMULA_REFERENCE.map(
@@ -454,7 +449,44 @@ function FormulaInput({
       });
     }
   }, [value]);
+}
 
+function SearchFormulaInput({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  useFormulaInput(rootRef, value, onChange, {
+    fontSize: "14px",
+    fontFamily: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
+  });
+  return <div className="grow overflow-auto mr-2" ref={rootRef}></div>;
+}
+
+function FormulaInput({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  const rootRef = useRef<HTMLDivElement>(null);
+  useFormulaInput(
+    rootRef,
+    value,
+    onChange,
+    {
+      padding: "4px 4px 4px 20px",
+      fontSize: "12px",
+      fontFamily: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
+      minHeight: "48px",
+      maxHeight: "96px",
+    },
+    true
+  );
   return (
     <div className="relative">
       <div
@@ -600,39 +632,33 @@ export const SheetTable = observer(
         compareColumnValues(a, b, columnName, sortMethod, direction)
       );
     }
-    const [isSomePopoverShown, setIsSomePopoverShown] = useState(false);
 
     return (
       <>
-        <div className="max-h-[250px] pb-2 overflow-auto relative w-full flex text-sm">
+        <div className="max-h-[250px] overflow-auto relative w-full flex text-sm">
           <table className="flex-1">
             <thead>
-              <tr className="top-0">
+              <tr className="sticky top-0 bg-gray-100" style={{ zIndex: 1 }}>
                 {columns.map((column, index) => {
                   return (
                     <th
                       key={index}
-                      className={classNames("text-left font-normal pl-1 py-2")}
+                      className={classNames(
+                        "border-y border-r border-gray-200 text-left font-normal pl-1 py-1",
+                        index !== 0 ? "border-l" : undefined
+                      )}
                     >
                       <div className="flex gap-1 pr-1 items-center justify-between">
                         <div
                           className={classNames(
-                            "px-1 rounded-sm bg-orange-100 text-orange-500 font-medium text-[10px]",
-                            {
-                              hidden: index === 0 && !isSomePopoverShown,
-                            }
+                            "px-1 rounded-sm bg-orange-100 text-orange-500 font-medium text-[10px]"
                           )}
                         >
                           {column.name}
                         </div>
                         {index !== 0 ? (
                           <>
-                            <Popover.Root
-                              onOpenChange={(open) => {
-                                setIsSomePopoverShown(open);
-                              }}
-                              modal={true}
-                            >
+                            <Popover.Root modal={true}>
                               <Popover.Anchor asChild={true}>
                                 <Popover.Trigger asChild={true}>
                                   <button className="text-gray-400 hover:text-gray-500">
@@ -709,7 +735,7 @@ export const SheetTable = observer(
                     </th>
                   );
                 })}
-                <th className="bg-white w-[28px]">
+                <th className="bg-gray-50 w-[28px]">
                   <button
                     onClick={() => addColumn()}
                     className="flex h-[25px] items-center justify-center w-full opacity-50 hover:opacity-100"
@@ -750,41 +776,15 @@ export const SheetTable = observer(
                     return (
                       <td
                         className={classNames(
-                          "border-x border-x-gray-400 py-0.5 relative",
-                          colIndex === 0 ? "px-2" : "px-1",
-                          rowIndex === 0 && colIndex !== 0
-                            ? "border-t border-t-gray-400"
-                            : undefined,
-                          rowIndex === 0 && colIndex === 0
-                            ? "border-t-transparent"
-                            : undefined,
-                          rowIndex === 0 && colIndex === columns.length - 1
-                            ? "rounded-tr"
-                            : undefined,
-                          rowIndex === sortedRows.length - 1 &&
-                            colIndex === columns.length - 1
-                            ? "rounded-br"
+                          "border border-gray-200 py-1 relative",
+                          colIndex === 0 ? "border-l-transparent" : undefined,
+                          rowIndex === sortedRows.length - 1
+                            ? "border-b-transparent"
                             : undefined
                         )}
                         key={colIndex}
                       >
                         <ValueDisplay value={value} doc={textDocument.text} />
-                        {rowIndex === 0 && colIndex === 0 ? (
-                          <div className="absolute bottom-full -left-px -right-px h-1 bg-gray-100 border-l border-r border-t border-gray-400 rounded-t" />
-                        ) : null}
-                        {rowIndex === sortedRows.length - 1 &&
-                        colIndex === 0 ? (
-                          <div className="absolute top-full -left-px -right-px h-1 bg-gray-100 border-l border-r border-b border-gray-400 rounded-b" />
-                        ) : (
-                          <div
-                            className={classNames(
-                              "absolute h-px bottom-0 right-0 left-0",
-                              rowIndex === sortedRows.length - 1
-                                ? "bg-gray-400"
-                                : "bg-gray-100"
-                            )}
-                          />
-                        )}
                       </td>
                     );
                   })}
@@ -850,78 +850,88 @@ export const SheetComponent = observer(
     ).get();
 
     return (
-      <div className="flex flex-col gap-2 flex-1 bg-gray-50 border border-gray-200 p-2 rounded">
-        <div className="flex items-center gap-1">
-          <button onClick={() => toggleIsExpanded()}>
-            <span
-              className={`icon icon-expandable bg-gray-500 ${
-                isExpanded ? "is-expanded" : ""
-              }`}
-            />
-          </button>
-
-          <SheetName
-            textDocument={textDocument}
-            textDocumentSheet={textDocumentSheet}
-            sheetConfig={sheetConfig}
-            rowsCount={rows.length}
-            sheetActiveInDoc={rowsActiveInDoc.length > 0}
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <input
+            type="text"
+            value={sheetConfig.name}
+            onChange={action((e) => {
+              sheetConfig.name = e.target.value;
+            })}
+            className="text-[11px] outline-none bg-transparent text-gray-500 focus:text-gray-600"
           />
-          <div className="grow" />
           {isExpanded && (canRenderAsCalendar || canRenderAsNutritionLabel) ? (
-            <div className="flex justify-between">
-              <div></div>
-              <div className="flex gap-2 pr-2">
+            <div className="flex gap-2 pr-1">
+              <button
+                onClick={() => {
+                  setSheetView(SheetView.Table);
+                }}
+                className={classNames(
+                  "transition text-sm",
+                  sheetView !== SheetView.Table
+                    ? "opacity-40 hover:opacity-100"
+                    : undefined
+                )}
+              >
+                <TableIcon />
+              </button>
+              {canRenderAsCalendar ? (
                 <button
                   onClick={() => {
-                    setSheetView(SheetView.Table);
+                    setSheetView(SheetView.Calendar);
                   }}
                   className={classNames(
                     "transition text-sm",
-                    sheetView !== SheetView.Table
+                    sheetView !== SheetView.Calendar
                       ? "opacity-40 hover:opacity-100"
                       : undefined
                   )}
                 >
-                  <TableIcon className="inline" /> Table
+                  <CalendarIcon />
                 </button>
-                {canRenderAsCalendar ? (
-                  <button
-                    onClick={() => {
-                      setSheetView(SheetView.Calendar);
-                    }}
-                    className={classNames(
-                      "transition text-sm",
-                      sheetView !== SheetView.Calendar
-                        ? "opacity-40 hover:opacity-100"
-                        : undefined
-                    )}
-                  >
-                    <CalendarIcon className="inline" /> Calendar
-                  </button>
-                ) : null}
-                {canRenderAsNutritionLabel ? (
-                  <button
-                    onClick={() => {
-                      setSheetView(SheetView.NutritionLabel);
-                    }}
-                    className={classNames(
-                      "transition text-sm",
-                      sheetView !== SheetView.NutritionLabel
-                        ? "opacity-40 hover:opacity-100"
-                        : undefined
-                    )}
-                  >
-                    <CookieIcon className="inline" /> Nutrition
-                  </button>
-                ) : null}
-              </div>
+              ) : null}
+              {canRenderAsNutritionLabel ? (
+                <button
+                  onClick={() => {
+                    setSheetView(SheetView.NutritionLabel);
+                  }}
+                  className={classNames(
+                    "transition text-sm",
+                    sheetView !== SheetView.NutritionLabel
+                      ? "opacity-40 hover:opacity-100"
+                      : undefined
+                  )}
+                >
+                  <CookieIcon />
+                </button>
+              ) : null}
             </div>
           ) : null}
         </div>
+        <div className="flex flex-col flex-1 bg-gray-50 border border-gray-200 rounded overflow-hidden">
+          <div
+            className={classNames(
+              "flex items-center gap-2 px-2 py-1 overflow-hidden",
+              isExpanded ? "border-b border-gray-100" : undefined
+            )}
+          >
+            <button className="flex" onClick={() => toggleIsExpanded()}>
+              <span
+                className={`icon icon-expandable bg-gray-500 ${
+                  isExpanded ? "is-expanded" : ""
+                }`}
+              />
+            </button>
+            <SheetName
+              textDocument={textDocument}
+              textDocumentSheet={textDocumentSheet}
+              sheetConfig={sheetConfig}
+              rowsCount={rows.length}
+              sheetActiveInDoc={rowsActiveInDoc.length > 0}
+            />
+          </div>
 
-        {isExpanded && (
-          <>
+          {isExpanded && (
             <SheetViewComponent
               textDocument={textDocument}
               sheetConfig={sheetConfig}
@@ -929,8 +939,8 @@ export const SheetComponent = observer(
               rows={rows}
               rowsActiveInDoc={rowsActiveInDoc}
             />
-          </>
-        )}
+          )}
+        </div>
       </div>
     );
   }

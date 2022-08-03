@@ -463,7 +463,7 @@ const App = observer(() => {
       <DocumentSidebar />
       <div
         className={classNames(
-          "flex flex-col overflow-hidden",
+          "flex flex-col overflow-hidden flex-shrink-0",
           showSearchPanel ? "w-2/5" : "grow"
         )}
       >

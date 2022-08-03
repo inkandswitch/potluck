@@ -25,6 +25,14 @@ export function getTextForHighlight(highlight: Highlight) {
   return textDocument?.text.sliceString(highlight.span[0], highlight.span[1]);
 }
 
+export function getIntValue(value: any) {
+  if (isValueRowHighlight(value)) {
+    value = getTextForHighlight(value)
+  }
+
+  return parseInt(value, 10)
+}
+
 export function isValueRowHighlight(valueRow: any): valueRow is Highlight {
   return (
     typeof valueRow === "object" &&

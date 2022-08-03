@@ -37,12 +37,13 @@ import {
   CookieIcon,
   SectionIcon,
   QuestionMarkCircledIcon,
-  SliderIcon,
   EyeOpenIcon,
   EyeClosedIcon,
   EyeNoneIcon,
   TrashIcon,
   LetterCaseCapitalizeIcon,
+  MixerVerticalIcon,
+  DotsVerticalIcon,
 } from "@radix-ui/react-icons";
 import { NutritionLabel } from "./NutritionLabel";
 import * as Popover from "@radix-ui/react-popover";
@@ -119,29 +120,17 @@ export function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
 
 const SheetSettingsPopoverContent = observer(
   ({
+    textDocument,
     textDocumentSheet,
     sheetConfig,
   }: {
+    textDocument: TextDocument;
     textDocumentSheet: TextDocumentSheet;
     sheetConfig: SheetConfig;
   }) => {
-    const firstColumn = sheetConfig.properties[0];
-
     return (
-      <div className="w-80 bg-white rounded shadow-xl text-sm overflow-hidden">
-        <div className="relative">
-          <FormulaInput
-            value={firstColumn.formula}
-            onChange={action((value) => {
-              sheetConfig.properties = sheetConfig.properties.map(
-                (column, index) =>
-                  index === 0 ? { ...column, formula: value } : column
-              );
-            })}
-          />
-          <FormulaReferenceButton className="absolute bottom-1 left-1" />
-        </div>
-        <div className="p-2">
+      <div className="w-64 bg-white rounded shadow-xl text-sm overflow-hidden p-2">
+        <div className="">
           <div className="text-sm text-gray-500">
             <SectionIcon className="inline" /> Highlighting{" "}
             {textDocumentSheet.highlightSearchRange === undefined
@@ -181,28 +170,56 @@ const SheetSettingsPopoverContent = observer(
             )}
           </div>
         </div>
+        <div className="mt-2">
+          <button
+            className="flex items-center gap-1 text-red-400 hover:text-red-500"
+            onClick={() => {
+              runInAction(() => {
+                (
+                  textDocument.sheets as IObservableArray<TextDocumentSheet>
+                ).remove(textDocumentSheet);
+              });
+            }}
+          >
+            <TrashIcon /> Delete sheet
+          </button>
+        </div>
       </div>
     );
   }
 );
 
-const SheetName = observer(
+const SheetFormulaBar = observer(
   ({
     textDocument,
     textDocumentSheet,
     sheetConfig,
-    rowsCount,
-    sheetActiveInDoc,
   }: {
     textDocument: TextDocument;
     textDocumentSheet: TextDocumentSheet;
     sheetConfig: SheetConfig;
-    rowsCount: number | undefined;
-    sheetActiveInDoc: boolean;
   }) => {
+    const isExpanded = isSheetExpandedMobx.get(textDocumentSheet.id);
+
+    const toggleIsExpanded = action(() => {
+      isSheetExpandedMobx.set(textDocumentSheet.id, !isExpanded);
+    });
+
     const firstColumn = sheetConfig.properties[0];
     return (
-      <>
+      <div
+        className={classNames(
+          "bg-white flex items-center gap-2 pl-2 overflow-hidden",
+          isExpanded ? "h-8 border-b border-gray-200" : "h-full"
+        )}
+      >
+        <button className="flex" onClick={() => toggleIsExpanded()}>
+          <span
+            className={`icon icon-expandable bg-gray-500 ${
+              isExpanded ? "is-expanded" : ""
+            }`}
+          />
+        </button>
         <SearchFormulaInput
           value={firstColumn.formula}
           onChange={action((value) => {
@@ -212,66 +229,7 @@ const SheetName = observer(
             );
           })}
         />
-        <Popover.Root modal={true}>
-          <Popover.Anchor asChild={true}>
-            <Popover.Trigger asChild={true}>
-              <button className="text-gray-400 hover:text-gray-500">
-                <SliderIcon />
-              </button>
-            </Popover.Trigger>
-          </Popover.Anchor>
-          <Popover.Content
-            side="top"
-            sideOffset={8}
-            align="end"
-            alignOffset={-8}
-          >
-            <SheetSettingsPopoverContent
-              textDocumentSheet={textDocumentSheet}
-              sheetConfig={sheetConfig}
-            />
-          </Popover.Content>
-        </Popover.Root>
-        <button
-          className="text-gray-400 hover:text-gray-500"
-          onClick={() => {
-            runInAction(
-              () =>
-                (textDocumentSheet.hideHighlightsInDocument =
-                  !textDocumentSheet.hideHighlightsInDocument)
-            );
-          }}
-        >
-          {textDocumentSheet.hideHighlightsInDocument ? (
-            <EyeNoneIcon />
-          ) : (
-            <EyeOpenIcon />
-          )}
-        </button>
-        <button
-          className="text-gray-400 hover:text-gray-500"
-          onClick={() => {
-            runInAction(() => {
-              (
-                textDocument.sheets as IObservableArray<TextDocumentSheet>
-              ).remove(textDocumentSheet);
-            });
-          }}
-        >
-          <TrashIcon />
-        </button>
-        {rowsCount !== undefined ? (
-          <div
-            className={classNames(
-              "rounded text-sm text-gray-400 whitespace-nowrap px-1",
-              sheetActiveInDoc ? "bg-blue-100" : "bg-gray-50"
-            )}
-          >
-            <span className="font-medium text-gray-500">{rowsCount}</span>{" "}
-            results
-          </div>
-        ) : null}
-      </>
+      </div>
     );
   }
 );
@@ -463,7 +421,7 @@ function SearchFormulaInput({
     fontSize: "14px",
     fontFamily: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
   });
-  return <div className="grow overflow-auto mr-2" ref={rootRef}></div>;
+  return <div className="grow overflow-auto" ref={rootRef}></div>;
 }
 
 function FormulaInput({
@@ -638,103 +596,107 @@ export const SheetTable = observer(
         <div className="max-h-[250px] overflow-auto relative w-full flex text-sm">
           <table className="flex-1">
             <thead>
-              <tr className="sticky top-0 bg-gray-100" style={{ zIndex: 1 }}>
-                {columns.map((column, index) => {
-                  return (
-                    <th
-                      key={index}
-                      className={classNames(
-                        "border-y border-r border-gray-200 text-left font-normal pl-1 py-1",
-                        index !== 0 ? "border-l" : undefined
-                      )}
-                    >
-                      <div className="flex gap-1 pr-1 items-center justify-between">
-                        <div
-                          className={classNames(
-                            "px-1 rounded-sm bg-orange-100 text-orange-500 font-medium text-[10px]"
-                          )}
-                        >
-                          {column.name}
-                        </div>
-                        {index !== 0 ? (
-                          <>
-                            <Popover.Root modal={true}>
-                              <Popover.Anchor asChild={true}>
-                                <Popover.Trigger asChild={true}>
-                                  <button className="text-gray-400 hover:text-gray-500">
-                                    <SliderIcon />
-                                  </button>
-                                </Popover.Trigger>
-                              </Popover.Anchor>
-                              <Popover.Content
-                                side="top"
-                                sideOffset={8}
-                                align="end"
-                                alignOffset={-8}
-                              >
-                                <SheetColumnSettingsPopoverContent
-                                  sheetConfig={sheetConfig}
-                                  columnIndex={index}
-                                  column={column}
-                                />
-                              </Popover.Content>
-                            </Popover.Root>
-                            <div className="hidden">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (
-                                    sortBy?.columnName === column.name &&
-                                    sortBy.direction === "asc"
-                                  ) {
-                                    setSortBy(undefined);
-                                  } else {
-                                    setSortBy({
-                                      columnName: column.name,
-                                      direction: "asc",
-                                    });
-                                  }
-                                }}
-                                className={classNames(
-                                  sortBy?.columnName === column.name &&
-                                    sortBy.direction === "asc"
-                                    ? "opacity-100"
-                                    : "opacity-20 hover:opacity-60"
-                                )}
-                              >
-                                <ArrowDownIcon />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (
-                                    sortBy?.columnName === column.name &&
-                                    sortBy.direction === "desc"
-                                  ) {
-                                    setSortBy(undefined);
-                                  } else {
-                                    setSortBy({
-                                      columnName: column.name,
-                                      direction: "desc",
-                                    });
-                                  }
-                                }}
-                                className={classNames(
-                                  sortBy?.columnName === column.name &&
-                                    sortBy.direction === "desc"
-                                    ? "opacity-100"
-                                    : "opacity-20 hover:opacity-60"
-                                )}
-                              >
-                                <ArrowUpIcon />
-                              </button>
-                            </div>
-                          </>
-                        ) : null}
+              <tr
+                className="sticky h-[31px] top-0 bg-gray-100"
+                style={{ zIndex: 1 }}
+              >
+                {columns.map((column, index) => (
+                  <th
+                    key={index}
+                    className={classNames(
+                      "border-b border-r border-gray-200 text-left font-normal pl-1.5",
+                      index !== 0 ? "border-l" : undefined
+                    )}
+                  >
+                    <div className="flex gap-1 pr-1 items-center justify-between">
+                      <div
+                        className={classNames(
+                          "px-1 rounded-sm font-medium text-xs border",
+                          index === 0
+                            ? "bg-indigo-100 text-indigo-500 border-indigo-200"
+                            : "bg-orange-100 text-orange-500 border-orange-200"
+                        )}
+                      >
+                        {column.name}
                       </div>
-                    </th>
-                  );
-                })}
+                      {index !== 0 ? (
+                        <>
+                          <Popover.Root modal={true}>
+                            <Popover.Anchor asChild={true}>
+                              <Popover.Trigger asChild={true}>
+                                <button className="text-gray-400 hover:text-gray-500">
+                                  <MixerVerticalIcon />
+                                </button>
+                              </Popover.Trigger>
+                            </Popover.Anchor>
+                            <Popover.Content
+                              side="top"
+                              sideOffset={8}
+                              align="end"
+                              alignOffset={-8}
+                            >
+                              <SheetColumnSettingsPopoverContent
+                                sheetConfig={sheetConfig}
+                                columnIndex={index}
+                                column={column}
+                              />
+                            </Popover.Content>
+                          </Popover.Root>
+                          <div className="hidden">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (
+                                  sortBy?.columnName === column.name &&
+                                  sortBy.direction === "asc"
+                                ) {
+                                  setSortBy(undefined);
+                                } else {
+                                  setSortBy({
+                                    columnName: column.name,
+                                    direction: "asc",
+                                  });
+                                }
+                              }}
+                              className={classNames(
+                                sortBy?.columnName === column.name &&
+                                  sortBy.direction === "asc"
+                                  ? "opacity-100"
+                                  : "opacity-20 hover:opacity-60"
+                              )}
+                            >
+                              <ArrowDownIcon />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (
+                                  sortBy?.columnName === column.name &&
+                                  sortBy.direction === "desc"
+                                ) {
+                                  setSortBy(undefined);
+                                } else {
+                                  setSortBy({
+                                    columnName: column.name,
+                                    direction: "desc",
+                                  });
+                                }
+                              }}
+                              className={classNames(
+                                sortBy?.columnName === column.name &&
+                                  sortBy.direction === "desc"
+                                  ? "opacity-100"
+                                  : "opacity-20 hover:opacity-60"
+                              )}
+                            >
+                              <ArrowUpIcon />
+                            </button>
+                          </div>
+                        </>
+                      ) : null}
+                    </div>
+                  </th>
+                ))}
                 <th className="bg-gray-50 w-[28px]">
                   <button
                     onClick={() => addColumn()}
@@ -776,7 +738,7 @@ export const SheetTable = observer(
                     return (
                       <td
                         className={classNames(
-                          "border border-gray-200 py-1 relative",
+                          "border border-gray-200 px-1 py-1 relative",
                           colIndex === 0 ? "border-l-transparent" : undefined,
                           rowIndex === sortedRows.length - 1
                             ? "border-b-transparent"
@@ -824,10 +786,6 @@ export const SheetComponent = observer(
 
     const isExpanded = isSheetExpandedMobx.get(id);
 
-    const toggleIsExpanded = action(() => {
-      isSheetExpandedMobx.set(id, !isExpanded);
-    });
-
     const SheetViewComponent: FC<SheetViewProps> = {
       [SheetView.Table]: SheetTable,
       [SheetView.Calendar]: SheetCalendar,
@@ -851,14 +809,14 @@ export const SheetComponent = observer(
 
     return (
       <div>
-        <div className="flex items-center justify-between mb-1">
+        <div className="pl-8 flex items-center justify-between mb-2">
           <input
             type="text"
             value={sheetConfig.name}
             onChange={action((e) => {
               sheetConfig.name = e.target.value;
             })}
-            className="text-[11px] outline-none bg-transparent text-gray-500 focus:text-gray-600"
+            className="text-xs font-semibold outline-none bg-transparent text-gray-500 focus:text-gray-600"
           />
           {isExpanded && (canRenderAsCalendar || canRenderAsNutritionLabel) ? (
             <div className="flex gap-2 pr-1">
@@ -908,38 +866,84 @@ export const SheetComponent = observer(
             </div>
           ) : null}
         </div>
-        <div className="flex flex-col flex-1 bg-gray-50 border border-gray-200 rounded overflow-hidden">
+        <div className="flex">
+          <div className="w-8 flex-shrink-0">
+            <div
+              className={classNames(
+                "rounded-tl bg-gray-100 h-[33px] border-l border-y border-gray-200",
+                !isExpanded ? "rounded-bl" : undefined
+              )}
+            >
+              <button
+                className="text-gray-400 hover:text-gray-500 flex w-full h-full items-center justify-center"
+                onClick={() => {
+                  runInAction(
+                    () =>
+                      (textDocumentSheet.hideHighlightsInDocument =
+                        !textDocumentSheet.hideHighlightsInDocument)
+                  );
+                }}
+              >
+                {textDocumentSheet.hideHighlightsInDocument ? (
+                  <EyeNoneIcon />
+                ) : (
+                  <EyeOpenIcon />
+                )}
+              </button>
+            </div>
+            {isExpanded ? (
+              <div className="rounded-bl bg-gray-100 h-[31px] border-b border-l border-gray-200">
+                <Popover.Root modal={true}>
+                  <Popover.Anchor asChild={true}>
+                    <Popover.Trigger asChild={true}>
+                      <button className="text-gray-400 hover:text-gray-600 flex w-full h-full items-center justify-center">
+                        <DotsVerticalIcon />
+                      </button>
+                    </Popover.Trigger>
+                  </Popover.Anchor>
+                  <Popover.Portal>
+                    <Popover.Content side="bottom" sideOffset={4} align="start">
+                      <SheetSettingsPopoverContent
+                        textDocument={textDocument}
+                        textDocumentSheet={textDocumentSheet}
+                        sheetConfig={sheetConfig}
+                      />
+                    </Popover.Content>
+                  </Popover.Portal>
+                </Popover.Root>
+              </div>
+            ) : null}
+          </div>
           <div
             className={classNames(
-              "flex items-center gap-2 px-2 py-1 overflow-hidden",
-              isExpanded ? "border-b border-gray-100" : undefined
+              "flex flex-col flex-1 bg-gray-50 border border-gray-200 rounded-r overflow-hidden",
+              isExpanded ? "rounded-bl" : undefined
             )}
           >
-            <button className="flex" onClick={() => toggleIsExpanded()}>
-              <span
-                className={`icon icon-expandable bg-gray-500 ${
-                  isExpanded ? "is-expanded" : ""
-                }`}
-              />
-            </button>
-            <SheetName
+            <SheetFormulaBar
               textDocument={textDocument}
               textDocumentSheet={textDocumentSheet}
               sheetConfig={sheetConfig}
-              rowsCount={rows.length}
-              sheetActiveInDoc={rowsActiveInDoc.length > 0}
             />
-          </div>
 
-          {isExpanded && (
-            <SheetViewComponent
-              textDocument={textDocument}
-              sheetConfig={sheetConfig}
-              columns={columns}
-              rows={rows}
-              rowsActiveInDoc={rowsActiveInDoc}
-            />
+            {isExpanded && (
+              <SheetViewComponent
+                textDocument={textDocument}
+                sheetConfig={sheetConfig}
+                columns={columns}
+                rows={rows}
+                rowsActiveInDoc={rowsActiveInDoc}
+              />
+            )}
+          </div>
+        </div>
+        <div
+          className={classNames(
+            "text-xs whitespace-nowrap mt-1 ml-8",
+            rowsActiveInDoc.length > 0 ? "text-blue-500" : "text-gray-400"
           )}
+        >
+          {rows.length} result{rows.length !== 1 ? "s" : ""}
         </div>
       </div>
     );

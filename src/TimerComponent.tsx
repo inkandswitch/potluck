@@ -74,7 +74,7 @@ const Timer = observer(
             <img src={pauseIcon} width="11px" height="11px" />
           </button>
         )}
-        <span className="font-[Schoolbell] text-[#1355ff] text-lg">
+        <span className="font-[Schoolbell] text-[#1355ff] text-lg leading-6">
           {secondsRemaining !== undefined ? (
             <span className={secondsRemaining < 0 ? "text-red-500" : undefined}>
               {formatDuration(Math.abs(secondsRemaining))}

@@ -138,7 +138,7 @@ const DocumentSheets = observer(
     const documentValueRows = getComputedDocumentValues(textDocumentId).get();
     return (
       <>
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-8">
           {textDocument.sheets.map((sheet) => {
             return (
               <SheetComponent
@@ -499,7 +499,7 @@ const App = observer(() => {
         />
       </div>
       {showSearchPanel ? (
-        <div className="bg-gray-100 grow h-full overflow-auto pl-6 pr-4 pt-8">
+        <div className="border-l border-gray-200 bg-gray-50 grow h-full overflow-auto px-4 pt-12 pb-8">
           <SearchBox
             textDocumentId={textDocumentId}
             focusOnMountRef={focusSearchOnMountRef}

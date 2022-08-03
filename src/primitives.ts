@@ -29,6 +29,7 @@ export enum PropertyVisibility {
 export type PropertyDefinition = {
   name: string;
   formula: string;
+  isPatternGroup?: boolean;
   visibility: PropertyVisibility;
 };
 

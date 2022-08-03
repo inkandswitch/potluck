@@ -811,6 +811,20 @@ export function evaluateSheet(
         resultRows = [{ [column.name]: result }];
       }
 
+
+      // flatten nested data of first highlight, this is necessary so
+      resultRows = resultRows.map((row) => {
+        const value = Object.values(row)[0]
+
+        const tempRow = {...row}
+
+        Object.entries(value.data || {}).forEach(([name, value]) => {
+          tempRow[name] = value
+        })
+
+        return tempRow
+      })
+
       if (evalOnlyFirstColumn) {
         break;
       }

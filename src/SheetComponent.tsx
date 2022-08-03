@@ -7,24 +7,18 @@ import { FC, useEffect, useRef, useState } from "react";
 import {
   hoverHighlightsMobx,
   isSheetExpandedMobx,
+  PropertyDefinition,
+  PropertyVisibility,
   SheetConfig,
   sheetConfigsMobx,
   SheetValueRow,
   SheetView,
   Span,
   TextDocument,
-  textEditorStateMobx,
-  PropertyDefinition,
-  PropertyVisibility,
   TextDocumentSheet,
+  textEditorStateMobx,
 } from "./primitives";
-import {
-  doSpansOverlap,
-  getTextForHighlight,
-  isHighlightComponent,
-  isNumericish,
-  isValueRowHighlight,
-} from "./utils";
+import { doSpansOverlap, getTextForHighlight, isHighlightComponent, isNumericish, isValueRowHighlight, } from "./utils";
 import { FORMULA_REFERENCE } from "./formulas";
 import { SheetCalendar } from "./SheetCalendar";
 import { HighlightHoverCard } from "./HighlightHoverCard";
@@ -32,18 +26,18 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   CalendarIcon,
-  PlusIcon,
-  TableIcon,
   CookieIcon,
-  SectionIcon,
-  QuestionMarkCircledIcon,
-  EyeOpenIcon,
+  DotsVerticalIcon,
   EyeClosedIcon,
   EyeNoneIcon,
-  TrashIcon,
+  EyeOpenIcon,
   LetterCaseCapitalizeIcon,
   MixerVerticalIcon,
-  DotsVerticalIcon,
+  PlusIcon,
+  QuestionMarkCircledIcon,
+  SectionIcon,
+  TableIcon,
+  TrashIcon,
 } from "@radix-ui/react-icons";
 import { NutritionLabel } from "./NutritionLabel";
 import * as Popover from "@radix-ui/react-popover";
@@ -51,16 +45,9 @@ import { EditorView, minimalSetup } from "codemirror";
 import { bracketMatching, LanguageSupport } from "@codemirror/language";
 import { javascriptLanguage } from "@codemirror/lang-javascript";
 import { highlightSpecialChars, keymap, tooltips } from "@codemirror/view";
-import {
-  autocompletion,
-  closeBrackets,
-  closeBracketsKeymap,
-} from "@codemirror/autocomplete";
-import {
-  IObservableArray,
-  MobXGlobals,
-  ObservableArrayAdministration,
-} from "mobx/dist/internal";
+import { autocompletion, closeBrackets, closeBracketsKeymap, } from "@codemirror/autocomplete";
+import { IObservableArray, } from "mobx/dist/internal";
+import { getPatternExprGroupNames } from "./patterns";
 
 let i = 1;
 
@@ -163,7 +150,7 @@ const SheetSettingsPopoverContent = observer(
                 }
               >
                 {textEditorStateMobx.get().selection.main.from !==
-                  textEditorStateMobx.get().selection.main.to && (
+                textEditorStateMobx.get().selection.main.to && (
                   <span>Limit range to selection</span>
                 )}
               </button>
@@ -562,9 +549,7 @@ export const SheetTable = observer(
     rows,
     rowsActiveInDoc,
   }: SheetViewProps) => {
-    const [sortBy, setSortBy] = useState<
-      { columnName: string; direction: "asc" | "desc" } | undefined
-    >(undefined);
+    const [sortBy, setSortBy] = useState<{ columnName: string; direction: "asc" | "desc" } | undefined>(undefined);
 
     const addColumn = action(() => {
       sheetConfig.properties.push({
@@ -585,12 +570,28 @@ export const SheetTable = observer(
         columnName === "date"
           ? SortMethod.Date
           : isNumericish(firstRowColumnValue)
-          ? SortMethod.Numeric
-          : SortMethod.Alphabetical;
+            ? SortMethod.Numeric
+            : SortMethod.Alphabetical;
       sortedRows = [...rows].sort((a, b) =>
         compareColumnValues(a, b, columnName, sortMethod, direction)
       );
     }
+
+    const headFormula = columns[0].formula
+
+    const groupNames = getPatternExprGroupNames(headFormula)
+
+    const groupColumnsOffset = groupNames.length
+
+    const columnsWithPatternGroups = (
+      columns.slice(0, 1)
+        .concat(groupNames.map((name) => ({
+          name,
+          isPatternGroup: true,
+          formula: "",
+          visibility: PropertyVisibility.Hidden
+        }))))
+        .concat(columns.slice(1))
 
     return (
       <>
@@ -601,103 +602,107 @@ export const SheetTable = observer(
                 className="sticky h-[31px] top-0 bg-gray-100"
                 style={{ zIndex: 1 }}
               >
-                {columns.map((column, index) => (
-                  <th
-                    key={index}
-                    className={classNames(
-                      "border-b border-r border-gray-200 text-left font-normal pl-1.5",
-                      index !== 0 ? "border-l" : undefined
-                    )}
-                  >
-                    <div className="flex gap-1 pr-1 items-center justify-between">
-                      <div
-                        className={classNames(
-                          "px-1 rounded-sm font-medium text-xs border",
-                          index === 0
-                            ? "bg-indigo-100 text-indigo-500 border-indigo-200"
-                            : "bg-orange-100 text-orange-500 border-orange-200"
-                        )}
-                      >
-                        {column.name}
+                {columnsWithPatternGroups.map((column, index) => {
+                  const isEditable = index !== 0 && !column.isPatternGroup
+
+                  return (
+                    <th
+                      key={index}
+                      className={classNames(
+                        "border-b border-r border-gray-200 text-left font-normal pl-1.5",
+                        index !== 0 ? "border-l" : undefined
+                      )}
+                    >
+                      <div className="flex gap-1 pr-1 items-center justify-between">
+                        <div
+                          className={classNames(
+                            "px-1 rounded-sm font-medium text-xs border",
+                            isEditable
+                              ? "bg-orange-100 text-orange-500 border-orange-200"
+                              : "bg-indigo-100 text-indigo-500 border-indigo-200"
+                          )}
+                        >
+                          {column.name}
+                        </div>
+                        {isEditable ? (
+                          <>
+                            <Popover.Root modal={true}>
+                              <Popover.Anchor asChild={true}>
+                                <Popover.Trigger asChild={true}>
+                                  <button className="text-gray-400 hover:text-gray-500">
+                                    <MixerVerticalIcon />
+                                  </button>
+                                </Popover.Trigger>
+                              </Popover.Anchor>
+                              <Popover.Content
+                                side="top"
+                                sideOffset={8}
+                                align="end"
+                                alignOffset={-8}
+                              >
+                                <SheetColumnSettingsPopoverContent
+                                  sheetConfig={sheetConfig}
+                                  columnIndex={index - groupColumnsOffset}
+                                  column={column}
+                                />
+                              </Popover.Content>
+                            </Popover.Root>
+                            <div className="hidden">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (
+                                    sortBy?.columnName === column.name &&
+                                    sortBy.direction === "asc"
+                                  ) {
+                                    setSortBy(undefined);
+                                  } else {
+                                    setSortBy({
+                                      columnName: column.name,
+                                      direction: "asc",
+                                    });
+                                  }
+                                }}
+                                className={classNames(
+                                  sortBy?.columnName === column.name &&
+                                  sortBy.direction === "asc"
+                                    ? "opacity-100"
+                                    : "opacity-20 hover:opacity-60"
+                                )}
+                              >
+                                <ArrowDownIcon />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (
+                                    sortBy?.columnName === column.name &&
+                                    sortBy.direction === "desc"
+                                  ) {
+                                    setSortBy(undefined);
+                                  } else {
+                                    setSortBy({
+                                      columnName: column.name,
+                                      direction: "desc",
+                                    });
+                                  }
+                                }}
+                                className={classNames(
+                                  sortBy?.columnName === column.name &&
+                                  sortBy.direction === "desc"
+                                    ? "opacity-100"
+                                    : "opacity-20 hover:opacity-60"
+                                )}
+                              >
+                                <ArrowUpIcon />
+                              </button>
+                            </div>
+                          </>
+                        ) : null}
                       </div>
-                      {index !== 0 ? (
-                        <>
-                          <Popover.Root modal={true}>
-                            <Popover.Anchor asChild={true}>
-                              <Popover.Trigger asChild={true}>
-                                <button className="text-gray-400 hover:text-gray-500">
-                                  <MixerVerticalIcon />
-                                </button>
-                              </Popover.Trigger>
-                            </Popover.Anchor>
-                            <Popover.Content
-                              side="top"
-                              sideOffset={8}
-                              align="end"
-                              alignOffset={-8}
-                            >
-                              <SheetColumnSettingsPopoverContent
-                                sheetConfig={sheetConfig}
-                                columnIndex={index}
-                                column={column}
-                              />
-                            </Popover.Content>
-                          </Popover.Root>
-                          <div className="hidden">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (
-                                  sortBy?.columnName === column.name &&
-                                  sortBy.direction === "asc"
-                                ) {
-                                  setSortBy(undefined);
-                                } else {
-                                  setSortBy({
-                                    columnName: column.name,
-                                    direction: "asc",
-                                  });
-                                }
-                              }}
-                              className={classNames(
-                                sortBy?.columnName === column.name &&
-                                  sortBy.direction === "asc"
-                                  ? "opacity-100"
-                                  : "opacity-20 hover:opacity-60"
-                              )}
-                            >
-                              <ArrowDownIcon />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                if (
-                                  sortBy?.columnName === column.name &&
-                                  sortBy.direction === "desc"
-                                ) {
-                                  setSortBy(undefined);
-                                } else {
-                                  setSortBy({
-                                    columnName: column.name,
-                                    direction: "desc",
-                                  });
-                                }
-                              }}
-                              className={classNames(
-                                sortBy?.columnName === column.name &&
-                                  sortBy.direction === "desc"
-                                  ? "opacity-100"
-                                  : "opacity-20 hover:opacity-60"
-                              )}
-                            >
-                              <ArrowUpIcon />
-                            </button>
-                          </div>
-                        </>
-                      ) : null}
-                    </div>
-                  </th>
-                ))}
+                    </th>
+                  )
+                })}
                 <th className="bg-gray-50 w-[28px]">
                   <button
                     onClick={() => addColumn()}
@@ -720,8 +725,8 @@ export const SheetTable = observer(
                       childrenHighlights.length > 0
                         ? childrenHighlights
                         : isValueRowHighlight(row)
-                        ? [row]
-                        : []
+                          ? [row]
+                          : []
                     );
                   })}
                   onMouseLeave={action(() => {
@@ -733,7 +738,7 @@ export const SheetTable = observer(
                   )}
                   key={rowIndex}
                 >
-                  {columns.map((column, colIndex) => {
+                  {columnsWithPatternGroups.map((column, colIndex) => {
                     const value: any = row.data[column.name];
 
                     return (

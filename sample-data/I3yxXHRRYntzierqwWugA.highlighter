@@ -1,1 +1,1 @@
-{"id":"I3yxXHRRYntzierqwWugA","name":"dates","properties":[{"name":"date","formula":"MatchPattern(\"{numbers}/{numbers}/{numbers}\")","visibility":"HIDDEN"}]}
+{"id":"I3yxXHRRYntzierqwWugA","name":"dates","properties":[{"name":"date","formula":"MatchPattern(\"{numbers:month}/{numbers:day}/{numbers:year}\")","visibility":"HIDDEN"}]}

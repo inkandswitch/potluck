@@ -12,6 +12,9 @@ import { getComputedDocumentValues, getComputedSheetValue } from "./compute";
 
 const patternGrammar = ohm.grammar(String.raw`
   Pattern {
+    Formula 
+      = "MatchPattern" "(" "\"" Expr "\"" ")"
+  
     Expr
       = Part*
   
@@ -37,7 +40,7 @@ const patternGrammar = ohm.grammar(String.raw`
       = textChar+
     
     textChar 
-      = ~"{" any
+      = ~("{"| "\"") any
   }
 `)
 
@@ -51,6 +54,11 @@ patternSemantics.addOperation('toAst', {
   // @ts-ignore
   _terminal () {
     return
+  },
+
+  // @ts-ignore
+  Formula (_, __, ___, expr, ____, _____) {
+    return expr.toAst()
   },
 
   // @ts-ignore
@@ -83,8 +91,30 @@ patternSemantics.addOperation('toAst', {
   }
 })
 
+export function getPatternExprGroupNames (source: string): string [] {
+  const result = patternGrammar.match(source, "Formula")
+
+  if (!result.succeeded()) {
+    return []
+  }
+
+  const pattern = patternSemantics(result).toAst() as Pattern
+
+  const names: {[name: string]: boolean} = {}
+
+
+  pattern.forEach((part) => {
+    if (part.type === 'group' && part.name) {
+      names[part.name] = true
+    }
+  })
+
+  return Object.keys(names)
+}
+
+
 export function parsePattern(source: string) : Pattern | undefined  {
-  const result = patternGrammar.match(source)
+  const result = patternGrammar.match(source, "Expr")
 
   if (!result.succeeded()) {
     return
@@ -255,10 +285,9 @@ function matchPartAfterHighlight(part: PatternPart, highlight: PartHighlight, te
     }
 
     case "group": {
-
       switch (part.expr.type) {
         case "highlightName":
-          const sheetConfig = Array.from(sheetConfigsMobx.values()).find((sheetConfig) => sheetConfig.name === part.expr.name)
+          const sheetConfig = Array.from(sheetConfigsMobx.values()).find((sheetConfig) => sheetConfig.name === (part.expr as HighlightName).name)
 
 
           if (!sheetConfig) {
@@ -266,14 +295,25 @@ function matchPartAfterHighlight(part: PatternPart, highlight: PartHighlight, te
           }
 
           const highlights = getComputedSheetValue(textDocument.id, sheetConfig.id).get() as Highlight[]
-          const nextHighlight = highlights.find(({ span }) => span[0] === highlight.span[1])
+          const matchingHighlight = highlights.find(({ span }) => span[0] === highlight.span[1])
 
-          if (!nextHighlight) {
+          if (!matchingHighlight) {
             return
           }
 
-          const partSize = nextHighlight.span[1] - nextHighlight.span[0]
-          return { ...highlight, span: [highlight.span[0], highlight.span[1] + partSize] }
+          const partSize = matchingHighlight.span[1] - matchingHighlight.span[0]
+          return {
+            ...highlight,
+            span: [highlight.span[0],
+              highlight.span[1] + partSize],
+            data: (
+              part.name
+              ? {
+                ...highlight.data, [part.name]: matchingHighlight
+              }
+              : highlight.data
+            )
+          }
 
 
         case "regExpr":

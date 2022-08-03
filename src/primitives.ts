@@ -126,29 +126,24 @@ export const selectedTextDocumentIdBox = observable.box(
 
 type SearchBoxState = {
   search: string;
-  mode: "regex" | "string";
   selectedSearchIndex: number | undefined;
 };
 
 export const searchTermBox: IObservableValue<SearchBoxState> =
   observable.box<SearchBoxState>({
     search: "",
-    mode: "regex",
     selectedSearchIndex: undefined,
   });
 
 type PendingSearch =
   | { _type: "saved"; sheetConfig: SheetConfig }
-  | { _type: "new"; search: string; mode: "regex" | "string" };
+  | { _type: "new"; search: string };
 
 /** Get all the pending searches to suggest for a given string entered into the searchbox */
-export function getPendingSearches(
-  search: string,
-  mode: "regex" | "string"
-): PendingSearch[] {
+export function getPendingSearches(search: string): PendingSearch[] {
   let newSearches: PendingSearch[];
   if (search.length > 0) {
-    newSearches = [{ _type: "new", search, mode }];
+    newSearches = [{ _type: "new", search }];
   } else {
     newSearches = [];
   }
@@ -170,8 +165,7 @@ export function getMatchingSheetConfigs(search: string): SheetConfig[] {
 
 export const pendingSearchesComputed = computed<PendingSearch[]>(() => {
   const search = searchTermBox.get().search;
-  const mode = searchTermBox.get().mode;
-  return getPendingSearches(search, mode);
+  return getPendingSearches(search);
 });
 
 export const selectedPendingSearchComputed = computed<
@@ -191,13 +185,6 @@ export const savePendingSearchToSheet = (
 ) => {
   runInAction(() => {
     if (pendingSearch._type === "new") {
-      const formula = getSearchFormula(
-        pendingSearch.mode,
-        pendingSearch.search
-      );
-      if (formula === undefined) {
-        return;
-      }
       const sheetConfigId = generateNanoid();
       const sheetConfig: SheetConfig = {
         id: sheetConfigId,
@@ -205,7 +192,7 @@ export const savePendingSearchToSheet = (
         properties: [
           {
             name: "$",
-            formula,
+            formula: pendingSearch.search,
             visibility: PropertyVisibility.Hidden,
           },
         ],
@@ -228,19 +215,6 @@ export const savePendingSearchToSheet = (
   });
 };
 
-export function getSearchFormula(
-  type: "regex" | "string",
-  search: string
-): string | undefined {
-  if (search === "") {
-    return;
-  }
-
-  return type === "regex"
-    ? `MatchRegexp("${search}", "i")`
-    : `MatchString("${search}")`;
-}
-
 export const searchResults = computed<Highlight[]>(() => {
   const pendingSearch = selectedPendingSearchComputed.get();
 
@@ -251,7 +225,7 @@ export const searchResults = computed<Highlight[]>(() => {
   let formula: string | undefined;
 
   if (pendingSearch._type === "new") {
-    formula = getSearchFormula(pendingSearch.mode, pendingSearch.search);
+    formula = pendingSearch.search;
   } else {
     formula = pendingSearch.sheetConfig.properties[0].formula;
   }
@@ -264,16 +238,13 @@ export const searchResults = computed<Highlight[]>(() => {
 
   let results: Highlight[] = [];
   try {
-    results = evaluateFormula(
-      textDocument,
-      {} as SheetConfig,
-      formula,
-      {}
-    ) as Highlight[];
+    results =
+      evaluateFormula(textDocument, {} as SheetConfig, true, formula, {}) ?? [];
   } catch (e) {
     console.error(e);
     results = [];
   }
+  console.log("pending", results);
   return results;
 });
 

@@ -451,7 +451,7 @@ const extractPatternFromHighlightPlugin = ViewPlugin.fromClass(class {}, {
             properties: [
               {
                 name: "$",
-                formula: `MatchPattern("${patternToString(pattern)}")`,
+                formula: patternToString(pattern),
                 visibility: PropertyVisibility.Hidden,
               },
             ],

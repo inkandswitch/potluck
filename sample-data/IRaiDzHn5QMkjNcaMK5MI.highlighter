@@ -1,1 +1,1 @@
-{"id":"IRaiDzHn5QMkjNcaMK5MI","name":"dough inputs","properties":[{"name":"$","formula":"MatchRegexp(\"[0-9][0-9\\.]*\")","visibility":"HIDDEN"},{"name":"value","formula":"ParseFloat($)","visibility":"HIDDEN"},{"name":"label","formula":"TextBefore($)","visibility":"HIDDEN"}]}
+{"id":"IRaiDzHn5QMkjNcaMK5MI","name":"dough inputs","properties":[{"name":"$","formula":"{/[0-9][0-9\\.]*/}","visibility":"HIDDEN"},{"name":"value","formula":"ParseFloat($)","visibility":"HIDDEN"},{"name":"label","formula":"TextBefore($)","visibility":"HIDDEN"}]}

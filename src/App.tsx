@@ -5,7 +5,6 @@ import {
   Highlight,
   isSheetExpandedMobx,
   PropertyVisibility,
-  getSearchFormula,
   searchResults,
   searchTermBox,
   selectedTextDocumentIdBox,
@@ -16,7 +15,6 @@ import {
   getMatchingSheetConfigs,
   showSearchPanelBox,
   showDocumentSidebarBox,
-  getPendingSearches,
   pendingSearchesComputed,
   savePendingSearchToSheet,
   selectedPendingSearchComputed,
@@ -38,10 +36,7 @@ import {
 } from "@radix-ui/react-icons";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { ToastViewport } from "@radix-ui/react-toast";
-import { evaluateFormula } from "./formulas";
 import { DocumentSidebar } from "./DocumentSidebar";
-
-const NEW_OPTION_ID = "new";
 
 const TextDocumentName = observer(
   ({ textDocument }: { textDocument: TextDocument }) => {
@@ -207,7 +202,7 @@ const SearchBox = observer(
             <div className="grow relative">
               <input
                 ref={searchBoxRef}
-                className="border-gray-200 border rounded w-full py-1 pl-1 pr-8"
+                className="border-gray-200 border rounded w-full py-1 px-1"
                 type="text"
                 placeholder="Search"
                 value={searchState.search}
@@ -238,20 +233,6 @@ const SearchBox = observer(
                   });
                 }}
               />
-              <button
-                className={`
-          absolute top-[5px] right-[5px] rounded pt-[2px] w-6 h-6
-          ${searchState.mode === "regex" ? "bg-blue-100" : "bg-gray-200"}
-        `}
-                onClick={() => {
-                  searchTermBox.set({
-                    ...searchState,
-                    mode: searchState.mode === "regex" ? "string" : "regex",
-                  });
-                }}
-              >
-                <div className="bg-gray-500 icon icon-asterisk" />
-              </button>
             </div>
           </div>
           {searchBoxFocused && (
@@ -300,8 +281,7 @@ const SearchBox = observer(
                       <div>
                         <span className="font-medium">
                           "{pendingSearch.search}"
-                        </span>{" "}
-                        {pendingSearch.mode === "regex" && "(as regex)"}
+                        </span>
                       </div>
                     </div>
                   )}
@@ -310,7 +290,7 @@ const SearchBox = observer(
             </div>
           )}
           {selectedPendingSearch !== undefined && (
-            <div className="absolute top-2 right-[55px] bg-white z-10 text-gray-400 text-sm">
+            <div className="absolute top-2 right-2 bg-white z-10 text-gray-400 text-sm">
               {results.length} results
             </div>
           )}

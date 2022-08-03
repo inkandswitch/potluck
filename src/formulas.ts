@@ -102,6 +102,7 @@ function evalCondition(condition: any, item: any): any {
 export function evaluateFormula(
   textDocument: TextDocument,
   sheetConfig: SheetConfig,
+  isFirstColumn: boolean,
   source: string,
   scope: Scope
 ) {
@@ -628,7 +629,13 @@ export function evaluateFormula(
       `
     with (API) {
       with (context) {
-        return ${source}
+        return ${
+          isFirstColumn
+            ? source.startsWith("=")
+              ? source.substring(1)
+              : `MatchPattern("${source.replaceAll(/"/g, '\\"')}")`
+            : source
+        }
       }
     }
   `
@@ -794,14 +801,11 @@ export function evaluateSheet(
     (sheet) => sheet.configId === sheetConfig.id
   );
 
-  for (const column of sheetConfig.properties) {
-    if (resultRows === undefined) {
-      const result = evaluateFormula(
-        textDocument,
-        sheetConfig,
-        column.formula,
-        {}
-      );
+  for (const [i, column] of sheetConfig.properties.entries()) {
+    if (i === 0) {
+      const result =
+        evaluateFormula(textDocument, sheetConfig, true, column.formula, {}) ??
+        [];
 
       if (isArray(result)) {
         resultRows = result;
@@ -835,10 +839,11 @@ export function evaluateSheet(
         break;
       }
     } else {
-      resultRows = resultRows.map((row, _index) => {
+      resultRows = resultRows!.map((row, _index) => {
         const result = evaluateFormula(
           textDocument,
           sheetConfig,
+          false,
           column.formula,
           { ...row, _index }
         );

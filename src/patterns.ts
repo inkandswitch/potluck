@@ -9,6 +9,9 @@ import {
 import { groupBy, escapeRegExp } from "lodash";
 import ohm from 'ohm-js';
 import { getComputedDocumentValues, getComputedSheetValue } from "./compute";
+import {getTextForHighlight} from "./utils";
+
+window.getTextForHighlight = getTextForHighlight
 
 const patternGrammar = ohm.grammar(String.raw`
   Pattern {
@@ -233,15 +236,15 @@ function matchGroupPart({ expr, name }: GroupPart, textDocument: TextDocument): 
       break;
   }
 
-  return highlights.map((higlight) => (
+  return highlights.map((highlight) => (
     name === undefined
-      ? higlight
-      : { ...higlight, data: { [name]: higlight } }
+      ? { span: highlight.span, documentId: textDocument.id, data: {} }
+      : { ...highlight, data: { [name]: highlight } }
   ))
 }
 
 function matchRegex(source: string, textDocument: TextDocument): PartHighlight[] {
-  const regex = new RegExp(source, "g");
+  const regex = new RegExp(source, "gi");
   const docString = textDocument.text.sliceString(0);
 
   const highlights: Highlight[] = [];
@@ -281,6 +284,7 @@ function matchPartAfterHighlight(part: PatternPart, highlight: PartHighlight, te
       }
 
       const partSize = followingText.length - followingTextTrimmed.length + part.text.length
+
       return { ...highlight, span: [highlight.span[0], highlight.span[1] + partSize] }
     }
 

@@ -99,15 +99,22 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>(
   defaultState.sheetConfigs.map((sheetConfig) => [sheetConfig.id, sheetConfig])
 );
 
-export function addSheetConfig() {
+export function addSheetConfig(config?: {
+  name?: string;
+  properties: PropertyDefinition[];
+}) {
   const id = generateNanoid();
-  const sheetConfig: SheetConfig = {
+  const defaultConfig = {
     id,
     name: `sheet${nextSheetIndex++}`,
     properties: [
       { name: "col1", formula: "", visibility: PropertyVisibility.Hidden },
     ],
   };
+
+  const sheetConfig: SheetConfig = config
+    ? { ...defaultConfig, ...config }
+    : defaultConfig;
   runInAction(() => {
     sheetConfigsMobx.set(id, sheetConfig);
   });

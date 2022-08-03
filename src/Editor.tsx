@@ -1,13 +1,15 @@
-import { Decoration, EditorView, WidgetType } from "@codemirror/view";
-import { Facet, StateEffect, StateField } from "@codemirror/state";
+import { Decoration, EditorView, ViewPlugin, WidgetType } from "@codemirror/view";
+import { EditorState, Facet, SelectionRange, StateEffect, StateField } from "@codemirror/state";
 import { minimalSetup } from "codemirror";
 import { useEffect, useRef } from "react";
 import { autorun, comparer, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
+  addSheetConfig,
   Highlight,
   highlightComponentEntriesMobx,
   hoverHighlightsMobx,
+  isSheetExpandedMobx,
   PropertyVisibility,
   searchResults,
   sheetConfigsMobx,
@@ -15,12 +17,10 @@ import {
   textDocumentsMobx,
   textEditorStateMobx,
 } from "./primitives";
-import {
-  editorSelectionHighlightsComputed,
-  getComputedSheetValue,
-} from "./compute";
+import { editorSelectionHighlightsComputed, } from "./compute";
 import {
   doSpansOverlap,
+  generateNanoid,
   getTextForHighlight,
   isHighlightComponent,
   isValueRowHighlight,
@@ -28,6 +28,8 @@ import {
 import { createRoot, Root } from "react-dom/client";
 import { NumberSliderComponent } from "./NumberSliderComponent";
 import classNames from "classnames";
+import { Pattern, patternToString } from "./patterns";
+import { sortBy } from "lodash";
 
 const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
 const MAX_SUPERSCRIPT_LENGTH = 20;
@@ -278,10 +280,10 @@ const highlightDecorations = EditorView.decorations.compute(
             isValueRowHighlight(columnValue) &&
             columnValue.documentId === documentId
               ? [
-                  Decoration.mark({
-                    class: "cm-highlight-hover",
-                  }).range(columnValue.span[0], columnValue.span[1]),
-                ]
+                Decoration.mark({
+                  class: "cm-highlight-hover",
+                }).range(columnValue.span[0], columnValue.span[1]),
+              ]
               : []
           );
         }),
@@ -373,21 +375,21 @@ const highlightDecorations = EditorView.decorations.compute(
               decorations.push(
                 spansOverlap
                   ? Decoration.widget({
-                      widget: new SuperscriptWidget(
-                        highlight.data,
-                        replaceProperties,
-                        SuperscriptWidgetMode.InlineWidgetTemporarilyMoved
-                      ),
-                      side: 1,
-                    }).range(highlight.span[0])
+                    widget: new SuperscriptWidget(
+                      highlight.data,
+                      replaceProperties,
+                      SuperscriptWidgetMode.InlineWidgetTemporarilyMoved
+                    ),
+                    side: 1,
+                  }).range(highlight.span[0])
                   : Decoration.widget({
-                      widget: new InlineWidget(
-                        highlight.data,
-                        replaceProperties,
-                        InlineWidgetMode.Replace
-                      ),
-                      side: 1,
-                    }).range(highlight.span[1])
+                    widget: new InlineWidget(
+                      highlight.data,
+                      replaceProperties,
+                      InlineWidgetMode.Replace
+                    ),
+                    side: 1,
+                  }).range(highlight.span[1])
               );
             }
           }
@@ -398,6 +400,92 @@ const highlightDecorations = EditorView.decorations.compute(
     );
   }
 );
+
+const extractPatternFromHighlightPlugin = ViewPlugin.fromClass(class {
+}, {
+  eventHandlers: {
+    keydown(event, view) {
+      if (event.key === "h" && event.metaKey) {
+
+        event.preventDefault()
+
+        const range = view.state.selection.ranges[0]
+
+        if (!range) {
+          return
+        }
+
+        const pattern = patternFromRange(range, view.state)
+        const textDocumentId = view.state.facet(textDocumentIdFacet)
+        const textDocument = textDocumentsMobx.get(textDocumentId)
+
+        if (!textDocument) {
+          return
+        }
+
+        runInAction(() => {
+          const newSheetConfig = addSheetConfig({
+            properties: [
+              {
+                name: "$",
+                formula: `MatchPattern("${patternToString(pattern)}")`,
+                visibility: PropertyVisibility.Hidden
+              }
+            ]
+          })
+
+          const sheetId = generateNanoid()
+
+          textDocument.sheets.push({
+            id: sheetId,
+            configId: newSheetConfig.id
+          })
+
+          isSheetExpandedMobx.set(sheetId, true)
+        })
+      }
+    }
+  }
+})
+
+function patternFromRange(range: SelectionRange, state: EditorState): Pattern {
+  const highlights = state.field(highlightsField)
+
+  const containedHighlights = sortBy(
+    highlights.filter(({ span }) => (
+      span[0] >= range.from && span[1] <= range.to
+    )),
+
+    ({ span }) => span[0]
+  )
+
+  let pattern: Pattern = [];
+  let prevEnd = range.from
+
+  for (const highlight of containedHighlights) {
+    if (prevEnd !== highlight.span[0]) {
+      pattern.push({ type: "text", text: state.doc.sliceString(prevEnd, highlight.span[0]) })
+    }
+
+    prevEnd = highlight.span[1]
+
+    const sheetConfig = sheetConfigsMobx.get(highlight.sheetConfigId)
+
+    pattern.push({
+      type: "group",
+      expr: {
+        type: "highlightName",
+        name: sheetConfig!.name,
+      }
+    })
+  }
+
+  if (prevEnd !== range.to) {
+    pattern.push({ type: "text", text: state.doc.sliceString(prevEnd, range.to) })
+  }
+
+  return pattern
+}
 
 export const Editor = observer(
   ({ textDocumentId }: { textDocumentId: string }) => {
@@ -426,6 +514,7 @@ export const Editor = observer(
           highlightDecorations,
           hoverHighlightsField,
           textDocumentIdFacet.of(textDocumentId),
+          extractPatternFromHighlightPlugin
         ],
         parent: editorRef.current!,
         dispatch(transaction) {

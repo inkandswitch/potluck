@@ -3,6 +3,7 @@ import { fileSave } from "browser-fs-access";
 import { comparer, reaction, runInAction } from "mobx";
 import {
   selectedTextDocumentIdBox,
+  SheetConfig,
   sheetConfigsMobx,
   Span,
   TextDocument,
@@ -89,53 +90,23 @@ export class DirectoryPersistence {
   async initSync(writePrimitives: boolean) {
     if (!writePrimitives) {
       runInAction(() => {
-        const documentSheetConfig: SerializedDocumentSheet[] = JSON.parse(
-          this.fileCache[DOCUMENT_SHEET_CONFIG_FILEPATH] ?? "[]"
+        const { textDocuments, sheetConfigs } = getStateFromFiles(
+          this.fileCache
         );
         textDocumentsMobx.replace(
           new Map(
-            Object.entries(this.fileCache)
-              .filter(([filePath]) => filePath.endsWith(TEXT_FILE_EXTENSION))
-              .map(([filePath, contents]) => {
-                const id = getTextDocumentId(filePath);
-                const lines = contents.split("\n");
-                const text = Text.of(
-                  lines.length > 1 ? contents.split("\n").slice(1) : [""]
-                );
-                return [
-                  id,
-                  {
-                    id,
-                    name: lines[0] ?? "",
-                    text,
-                    sheets: documentSheetConfig
-                      .filter((c) => c.textDocumentId === id)
-                      .map((c) => ({
-                        id: c.id,
-                        configId: c.configId,
-                        highlightSearchRange: c.highlightSearchRange,
-                      })),
-                  },
-                ];
-              })
+            textDocuments.map((textDocument) => [textDocument.id, textDocument])
           )
         );
-        const textDocumentIds = [...textDocumentsMobx.keys()];
+        sheetConfigsMobx.replace(
+          new Map(
+            sheetConfigs.map((sheetConfig) => [sheetConfig.id, sheetConfig])
+          )
+        );
+        const textDocumentIds = textDocuments.map((d) => d.id);
         if (!textDocumentIds.includes(selectedTextDocumentIdBox.get())) {
           selectedTextDocumentIdBox.set(textDocumentIds[0]);
         }
-        sheetConfigsMobx.replace(
-          new Map(
-            Object.entries(this.fileCache)
-              .filter(([filePath]) =>
-                filePath.endsWith(HIGHLIGHTER_FILE_EXTENSION)
-              )
-              .map(([filePath, contents]) => {
-                const id = getHighlighterId(filePath);
-                return [id, JSON.parse(contents)];
-              })
-          )
-        );
       });
     }
     this.unsubscribes = [
@@ -334,4 +305,45 @@ function getDocumentSheetConfig(
       highlightSearchRange: documentSheet.highlightSearchRange,
     }))
   );
+}
+
+export function getStateFromFiles(files: { [filePath: string]: string }): {
+  textDocuments: TextDocument[];
+  sheetConfigs: SheetConfig[];
+} {
+  const documentSheetConfig: SerializedDocumentSheet[] = JSON.parse(
+    files[DOCUMENT_SHEET_CONFIG_FILEPATH] ?? "[]"
+  );
+  const sheetConfigs = Object.entries(files)
+    .filter(([filePath]) => filePath.endsWith(HIGHLIGHTER_FILE_EXTENSION))
+    .map(([filePath, contents]) => {
+      const id = getHighlighterId(filePath);
+      return JSON.parse(contents);
+    });
+  const textDocuments = Object.entries(files)
+    .filter(([filePath]) => filePath.endsWith(TEXT_FILE_EXTENSION))
+    .map(([filePath, contents]) => {
+      const id = getTextDocumentId(filePath);
+      const lines = contents.split("\n");
+      const text = Text.of(
+        lines.length > 1 ? contents.split("\n").slice(1) : [""]
+      );
+      return {
+        id,
+        name: lines[0] ?? "",
+        text,
+        sheets: documentSheetConfig
+          .filter(
+            (c) =>
+              c.textDocumentId === id &&
+              sheetConfigs.some((config) => config.id === c.configId)
+          )
+          .map((c) => ({
+            id: c.id,
+            configId: c.configId,
+            highlightSearchRange: c.highlightSearchRange,
+          })),
+      };
+    });
+  return { textDocuments, sheetConfigs };
 }

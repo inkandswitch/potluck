@@ -316,19 +316,23 @@ function matchPartAfterHighlight(
             textDocument.id,
             sheetConfig.id
           ).get() as Highlight[];
+          const remainingText = textDocument.text.sliceString(
+            highlight.span[1]
+          );
+          const trimmedRemainingtext = remainingText.trimStart();
+          const trimmedLength =
+            remainingText.length - trimmedRemainingtext.length;
           const matchingHighlight = highlights.find(
-            ({ span }) => span[0] === highlight.span[1]
+            ({ span }) => span[0] === highlight.span[1] + trimmedLength
           );
 
           if (!matchingHighlight) {
             return;
           }
 
-          const partSize =
-            matchingHighlight.span[1] - matchingHighlight.span[0];
           return {
             ...highlight,
-            span: [highlight.span[0], highlight.span[1] + partSize],
+            span: [highlight.span[0], matchingHighlight.span[1]],
             data: part.name
               ? {
                   ...highlight.data,

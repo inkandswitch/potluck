@@ -4,7 +4,7 @@ import dsv from "@rollup/plugin-dsv";
 
 // The Vite Chokidar overrides don't actually work unless you write a plugin.
 // This plugin overwrites the `ignored` directories for live-reloading. We do
-// this to avoid realods on changes to `sample-data/`.
+// this to avoid reloads on changes to `sample-data/`.
 //
 // https://github.com/vitejs/vite/issues/8341
 const ignored = () => {

@@ -226,16 +226,16 @@ Salt:
 Yeast:
 Oil`;
 
-export const WORKOUT_DOCUMENT_ID = "workout";
-export const GOCHUJANG_PORK_DOCUMENT_ID = "gochujang pork";
+export const WORKOUT_DOCUMENT_ID = generateNanoid();
+export const GOCHUJANG_PORK_DOCUMENT_ID = generateNanoid();
 export const PIZZA_DOCUMENT_ID = generateNanoid();
 export const DOUGH_DOCUMENT_ID = generateNanoid();
 export const COFFEE_DOCUMENT_ID = generateNanoid();
-export const ALL_INGREDIENTS_DOCUMENT_ID = "all ingredients";
+export const ALL_INGREDIENTS_DOCUMENT_ID = generateNanoid();
 export const WORKOUT_SHEET_CONFIG_ID = generateNanoid();
 export const NUMBER_SHEET_CONFIG_ID = generateNanoid();
 export const QUANTITY_SHEET_CONFIG_ID = generateNanoid();
-export const ICE_CREAM_DOCUMENT_ID = "ice cream";
+export const ICE_CREAM_DOCUMENT_ID = generateNanoid();
 export const INGREDIENTS_SHEET_CONFIG_ID = generateNanoid();
 export const ALL_INGREDIENTS_SHEET_CONFIG_ID = generateNanoid();
 export const MARKDOWN_SHEET_CONFIG_ID = generateNanoid();

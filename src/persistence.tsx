@@ -1,9 +1,5 @@
 import { Text } from "@codemirror/state";
-import {
-  directoryOpen,
-  fileSave,
-  FileWithDirectoryAndFileHandle,
-} from "browser-fs-access";
+import { fileSave } from "browser-fs-access";
 import { comparer, reaction, runInAction } from "mobx";
 import {
   selectedTextDocumentIdBox,
@@ -43,92 +39,105 @@ function getHighlighterId(filePath: string) {
   );
 }
 
+declare global {
+  interface Window {
+    showDirectoryPicker(options: any): Promise<any>;
+  }
+}
+
 export class DirectoryPersistence {
   directoryHandle: FileSystemDirectoryHandle | undefined;
-  blobsInDirectory: FileWithDirectoryAndFileHandle[] | undefined;
   fileHandles: { [filePath: string]: FileSystemFileHandle } = {};
   fileCache: { [filePath: string]: string } = {};
   unsubscribes: (() => void)[] = [];
 
   constructor() {}
 
-  async init() {
-    this.blobsInDirectory = await directoryOpen({
-      recursive: false,
+  async init(writePrimitives: boolean) {
+    this.directoryHandle = await window.showDirectoryPicker({
       mode: "readwrite",
     });
-    this.directoryHandle = this.blobsInDirectory.find(
-      (blob) => blob.webkitRelativePath.split("/").length === 2
-    )?.directoryHandle;
-    if (this.directoryHandle === undefined) {
-      throw new Error(
-        "sorry! browser-fs-access requires at least one file in the directory"
-      );
-    }
-    for (const file of this.blobsInDirectory) {
-      const relativePath = getRelativePath(file);
-      if (
-        file.name.endsWith(`.${HIGHLIGHTER_FILE_EXTENSION}`) ||
-        file.name.endsWith(`.${TEXT_FILE_EXTENSION}`) ||
-        relativePath === DOCUMENT_SHEET_CONFIG_FILEPATH
-      ) {
-        if (file.handle !== undefined) {
-          this.fileHandles[relativePath] = file.handle;
+    // @ts-ignore
+    for await (const entry of this.directoryHandle.values()) {
+      const relativePath = `/${entry.name}`;
+      if (entry.kind === "file") {
+        const file = await entry.getFile().then((file: any) => {
+          file.directoryHandle = this.directoryHandle;
+          file.handle = entry;
+          return Object.defineProperty(file, "webkitRelativePath", {
+            configurable: true,
+            enumerable: true,
+            get: () => relativePath,
+          });
+        });
+        if (
+          file.name.endsWith(`.${HIGHLIGHTER_FILE_EXTENSION}`) ||
+          file.name.endsWith(`.${TEXT_FILE_EXTENSION}`) ||
+          relativePath === DOCUMENT_SHEET_CONFIG_FILEPATH
+        ) {
+          if (file.handle !== undefined) {
+            this.fileHandles[relativePath] = file.handle;
+          }
+          this.fileCache[relativePath] = await file.text();
         }
-        this.fileCache[relativePath] = await file.text();
       }
     }
 
-    await this.initSync();
+    await this.initSync(writePrimitives);
   }
 
-  async initSync() {
-    runInAction(() => {
-      const documentSheetConfig: SerializedDocumentSheet[] = JSON.parse(
-        this.fileCache[DOCUMENT_SHEET_CONFIG_FILEPATH] ?? "[]"
-      );
-      textDocumentsMobx.replace(
-        new Map(
-          Object.entries(this.fileCache)
-            .filter(([filePath]) => filePath.endsWith(TEXT_FILE_EXTENSION))
-            .map(([filePath, contents]) => {
-              const id = getTextDocumentId(filePath);
-              const text = Text.of(contents.split("\n").slice(1));
-              return [
-                id,
-                {
+  async initSync(writePrimitives: boolean) {
+    if (!writePrimitives) {
+      runInAction(() => {
+        const documentSheetConfig: SerializedDocumentSheet[] = JSON.parse(
+          this.fileCache[DOCUMENT_SHEET_CONFIG_FILEPATH] ?? "[]"
+        );
+        textDocumentsMobx.replace(
+          new Map(
+            Object.entries(this.fileCache)
+              .filter(([filePath]) => filePath.endsWith(TEXT_FILE_EXTENSION))
+              .map(([filePath, contents]) => {
+                const id = getTextDocumentId(filePath);
+                const lines = contents.split("\n");
+                const text = Text.of(
+                  lines.length > 1 ? contents.split("\n").slice(1) : [""]
+                );
+                return [
                   id,
-                  name: contents.split("\n")[0],
-                  text,
-                  sheets: documentSheetConfig
-                    .filter((c) => c.textDocumentId === id)
-                    .map((c) => ({
-                      id: c.id,
-                      configId: c.configId,
-                      highlightSearchRange: c.highlightSearchRange,
-                    })),
-                },
-              ];
-            })
-        )
-      );
-      const textDocumentIds = [...textDocumentsMobx.keys()];
-      if (!textDocumentIds.includes(selectedTextDocumentIdBox.get())) {
-        selectedTextDocumentIdBox.set(textDocumentIds[0]);
-      }
-      sheetConfigsMobx.replace(
-        new Map(
-          Object.entries(this.fileCache)
-            .filter(([filePath]) =>
-              filePath.endsWith(HIGHLIGHTER_FILE_EXTENSION)
-            )
-            .map(([filePath, contents]) => {
-              const id = getHighlighterId(filePath);
-              return [id, JSON.parse(contents)];
-            })
-        )
-      );
-    });
+                  {
+                    id,
+                    name: lines[0] ?? "",
+                    text,
+                    sheets: documentSheetConfig
+                      .filter((c) => c.textDocumentId === id)
+                      .map((c) => ({
+                        id: c.id,
+                        configId: c.configId,
+                        highlightSearchRange: c.highlightSearchRange,
+                      })),
+                  },
+                ];
+              })
+          )
+        );
+        const textDocumentIds = [...textDocumentsMobx.keys()];
+        if (!textDocumentIds.includes(selectedTextDocumentIdBox.get())) {
+          selectedTextDocumentIdBox.set(textDocumentIds[0]);
+        }
+        sheetConfigsMobx.replace(
+          new Map(
+            Object.entries(this.fileCache)
+              .filter(([filePath]) =>
+                filePath.endsWith(HIGHLIGHTER_FILE_EXTENSION)
+              )
+              .map(([filePath, contents]) => {
+                const id = getHighlighterId(filePath);
+                return [id, JSON.parse(contents)];
+              })
+          )
+        );
+      });
+    }
     this.unsubscribes = [
       reaction(
         () => {
@@ -144,7 +153,11 @@ export class DirectoryPersistence {
             await this.writeFile(`/${id}.${TEXT_FILE_EXTENSION}`, contents);
           }
         },
-        { equals: comparer.structural, delay: 100 }
+        {
+          equals: comparer.structural,
+          delay: 100,
+          fireImmediately: writePrimitives,
+        }
       ),
       reaction(
         () => {
@@ -158,7 +171,7 @@ export class DirectoryPersistence {
             documentSheetConfigJSON
           );
         },
-        { delay: 100 }
+        { delay: 100, fireImmediately: writePrimitives }
       ),
       reaction(
         () => {
@@ -174,7 +187,11 @@ export class DirectoryPersistence {
             );
           }
         },
-        { equals: comparer.structural, delay: 100 }
+        {
+          equals: comparer.structural,
+          delay: 100,
+          fireImmediately: writePrimitives,
+        }
       ),
     ];
   }

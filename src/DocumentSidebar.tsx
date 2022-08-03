@@ -26,14 +26,15 @@ const PersistenceButton = observer(() => {
       <Tooltip.Root>
         <Tooltip.Trigger asChild={true}>
           <button
-            onClick={() => {
+            onClick={(e) => {
               if (directoryPersistence !== undefined) {
                 directoryPersistence.destroy();
               }
 
+              const isMetaKey = e.metaKey;
               async function go() {
                 const d = new DirectoryPersistence();
-                await d.init();
+                await d.init(isMetaKey);
                 setDirectoryPersistence(d);
               }
 

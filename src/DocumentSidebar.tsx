@@ -7,6 +7,7 @@ import {
   TextDocument,
   textDocumentsMobx,
 } from "./primitives";
+import { FileTextIcon } from "@radix-ui/react-icons";
 
 const DocumentSidebarItem = observer(
   ({ textDocument }: { textDocument: TextDocument }) => {
@@ -27,8 +28,13 @@ const DocumentSidebarItem = observer(
           isSelected ? "bg-gray-100" : "hover:bg-gray-50"
         )}
       >
-        <div className="font-bold">{textDocument.name}</div>
-        <div className="whitespace-nowrap overflow-hidden overflow-ellipsis text-gray-400">
+        <div className="flex items-center">
+          <div className="mr-1">
+            <FileTextIcon className="text-gray-400" />
+          </div>
+          <div className="font-medium">{textDocument.name}</div>
+        </div>
+        <div className="whitespace-nowrap overflow-hidden overflow-ellipsis text-gray-400 text-xs">
           {firstLineText}
         </div>
       </button>

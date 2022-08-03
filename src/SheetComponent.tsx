@@ -191,14 +191,10 @@ const SheetName = observer(
     textDocument,
     textDocumentSheet,
     sheetConfig,
-    rowsCount,
-    sheetActiveInDoc,
   }: {
     textDocument: TextDocument;
     textDocumentSheet: TextDocumentSheet;
     sheetConfig: SheetConfig;
-    rowsCount: number | undefined;
-    sheetActiveInDoc: boolean;
   }) => {
     const firstColumn = sheetConfig.properties[0];
     return (
@@ -260,17 +256,6 @@ const SheetName = observer(
         >
           <TrashIcon />
         </button>
-        {rowsCount !== undefined ? (
-          <div
-            className={classNames(
-              "rounded text-sm text-gray-400 whitespace-nowrap px-1",
-              sheetActiveInDoc ? "bg-blue-100" : "bg-gray-50"
-            )}
-          >
-            <span className="font-medium text-gray-500">{rowsCount}</span>{" "}
-            results
-          </div>
-        ) : null}
       </>
     );
   }
@@ -858,7 +843,7 @@ export const SheetComponent = observer(
             onChange={action((e) => {
               sheetConfig.name = e.target.value;
             })}
-            className="text-[11px] outline-none bg-transparent text-gray-500 focus:text-gray-600"
+            className="text-xs outline-none bg-transparent text-gray-700 focus:text-gray-900 p-0.5"
           />
           {isExpanded && (canRenderAsCalendar || canRenderAsNutritionLabel) ? (
             <div className="flex gap-2 pr-1">
@@ -926,8 +911,6 @@ export const SheetComponent = observer(
               textDocument={textDocument}
               textDocumentSheet={textDocumentSheet}
               sheetConfig={sheetConfig}
-              rowsCount={rows.length}
-              sheetActiveInDoc={rowsActiveInDoc.length > 0}
             />
           </div>
 
@@ -941,6 +924,12 @@ export const SheetComponent = observer(
             />
           )}
         </div>
+
+        {rows.length !== undefined ? (
+          <div className={"text-xs text-gray-400 p-0.5"}>
+            {rows.length} result{rows.length !== 1 ? "s" : ""}
+          </div>
+        ) : null}
       </div>
     );
   }

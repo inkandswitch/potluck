@@ -820,7 +820,7 @@ export function evaluateSheet(
 
       // flatten nested data of first highlight, this is necessary so named groups are directly accessible in the table
       resultRows = resultRows.map((row) => {
-        const value = Object.values(row)[0];
+        const value = Object.values(row)[0] ?? {};
 
         const tempRow = { ...row };
 

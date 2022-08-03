@@ -50,7 +50,12 @@ export const DocumentSidebar = observer(() => {
   return (
     <div className="w-64 border-r border-gray-200">
       <div className="flex items-center justify-between px-2 h-12 border-b border-gray-200">
-        <div className="text-gray-300 font-bold">potluck</div>
+        <div className="text-sm font-medium">
+          Potluck{" "}
+          <span className="bg-blue-200 text-blue-600 rounded px-1 py-0.5 text-xs">
+            v0.5
+          </span>
+        </div>
       </div>
       {values(textDocumentsMobx).map((textDocument) => (
         <DocumentSidebarItem

@@ -15,7 +15,7 @@ import {
   PropertyDefinition,
 } from "./primitives";
 import { useMemo, useState } from "react";
-import { getTextForHighlight, isValueRowHighlight } from "./utils";
+import { getIntValue, getTextForHighlight, isValueRowHighlight } from "./utils";
 import addDays from "date-fns/addDays";
 import { action } from "mobx";
 import { HighlightHoverCard } from "./HighlightHoverCard";
@@ -24,7 +24,7 @@ import { SheetViewProps } from "./SheetComponent";
 function getDateForRow(row: SheetValueRow) {
   const { day, month, year } =
     typeof row.data.year === "number" ? row.data : row.data.date.data;
-  return new Date(2000 + year, month - 1, day);
+  return new Date(2000 + getIntValue(year), getIntValue(month) - 1, getIntValue(day));
 }
 
 type CalendarEvent = {

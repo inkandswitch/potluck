@@ -121,7 +121,7 @@ export function addSheetConfig(config?: {
 }
 
 export const selectedTextDocumentIdBox = observable.box(
-  defaultState.textDocuments[0].id
+  defaultState.textDocuments[1].id
 );
 
 type SearchBoxState = {

@@ -13,15 +13,23 @@ import {
 } from "./primitives";
 import { isValueRowHighlight } from "./utils";
 
-const getDocumentSheetKey = (textDocumentId: string, sheetConfigId: string) =>
-  `${textDocumentId}:${sheetConfigId}`;
+const getDocumentSheetKey = (
+  textDocumentId: string,
+  sheetConfigId: string,
+  firstColumnOnly: boolean = false
+) => `${textDocumentId}:${sheetConfigId}${firstColumnOnly ? ":first" : ""}`;
 const documentSheetCache: Record<string, IComputedValue<SheetValueRow[]>> = {};
 
 export function getComputedSheetValue(
   textDocumentId: string,
-  sheetConfigId: string
+  sheetConfigId: string,
+  firstColumnOnly: boolean = false
 ): IComputedValue<SheetValueRow[]> {
-  const key = getDocumentSheetKey(textDocumentId, sheetConfigId);
+  const key = getDocumentSheetKey(
+    textDocumentId,
+    sheetConfigId,
+    firstColumnOnly
+  );
   if (documentSheetCache[key] === undefined) {
     documentSheetCache[key] = computed(() => {
       const textDocument = textDocumentsMobx.get(textDocumentId);
@@ -29,7 +37,7 @@ export function getComputedSheetValue(
       if (textDocument === undefined || sheetConfig === undefined) {
         return [];
       }
-      return evaluateSheet(textDocument, sheetConfig);
+      return evaluateSheet(textDocument, sheetConfig, firstColumnOnly);
     });
   }
   return documentSheetCache[key];
@@ -89,36 +97,19 @@ export const editorSelectionHighlightsComputed = computed(
 // we cheat a little here, for the sheetConfigId we only eval the first column to avoid
 // circular dependencies, this is necessary for the formula like NextValuesUntil(activity, HasType("workouts"))
 // here we reference workouts in the workout table
-export function getHighlightsUntilSheet(
+export function getComputedHighlightsForDocumentAvoidingCircular(
   textDocument: TextDocument,
-  sheetConfigId: string
-) {
+  sheetConfigIdToGetFirstColumnOnly: string
+): IComputedValue<Highlight[]> {
   return computed(() => {
-    let highlights: Highlight[] = [];
-
-    for (const sheet of textDocument.sheets) {
-      if (sheet.configId === sheetConfigId) {
-        return highlights.concat(
-          evaluateSheet(
-            textDocument,
-            sheetConfigsMobx.get(sheet.configId)!,
-            true
-          ).filter(
-            (row: SheetValueRow) => "span" in row && row.span !== undefined
-          ) as Highlight[]
-        );
-      }
-
-      highlights = highlights.concat(
-        evaluateSheet(
-          textDocument,
-          sheetConfigsMobx.get(sheet.configId)!
-        ).filter(
-          (row: SheetValueRow) => "span" in row && row.span !== undefined
-        ) as Highlight[]
-      );
-    }
-
-    return highlights;
+    return textDocument.sheets.flatMap((sheet) =>
+      getComputedSheetValue(
+        textDocument.id,
+        sheet.configId,
+        sheet.configId === sheetConfigIdToGetFirstColumnOnly
+      )
+        .get()
+        .filter((r): r is Highlight => isValueRowHighlight(r))
+    );
   });
 }

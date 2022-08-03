@@ -27,7 +27,7 @@ import {
 import {
   getComputedDocumentValues,
   getComputedSheetValue,
-  getHighlightsUntilSheet,
+  getComputedHighlightsForDocumentAvoidingCircular,
 } from "./compute";
 import {
   doSpansOverlap,
@@ -347,7 +347,10 @@ export function evaluateFormula(
       }
 
       const sortedHighlights = sortBy(
-        getHighlightsUntilSheet(textDocument, highlight.sheetConfigId).get(),
+        getComputedHighlightsForDocumentAvoidingCircular(
+          textDocument,
+          highlight.sheetConfigId
+        ).get(),
         ({ span }) => span[0]
       );
 

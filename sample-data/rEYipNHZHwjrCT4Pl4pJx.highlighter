@@ -1,0 +1,1 @@
+{"id":"rEYipNHZHwjrCT4Pl4pJx","name":"numbers","properties":[{"name":"$","formula":"MatchRegexp(\"[0-9][0-9\\.]*\")","visibility":"HIDDEN"},{"name":"value","formula":"ParseFloat($)","visibility":"HIDDEN"}]}

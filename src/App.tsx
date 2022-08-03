@@ -499,7 +499,7 @@ const App = observer(() => {
         />
       </div>
       {showSearchPanel ? (
-        <div className="bg-gray-100 grow h-full overflow-auto pl-6 pr-4 pt-8">
+        <div className="border-l border-gray-200 bg-gray-100 grow h-full overflow-auto pl-6 pr-4 pt-8">
           <SearchBox
             textDocumentId={textDocumentId}
             focusOnMountRef={focusSearchOnMountRef}

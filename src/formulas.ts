@@ -29,7 +29,12 @@ import {
   getComputedSheetValue,
   getHighlightsUntilSheet,
 } from "./compute";
-import { doSpansOverlap, getTextForHighlight, isNumericish } from "./utils";
+import {
+  doSpansOverlap,
+  getTextForHighlight,
+  isNumericish,
+  isValueRowHighlight,
+} from "./utils";
 import { OFFICIAL_FOODS } from "./data/officialFoods";
 // @ts-ignore
 import FuzzySet from "fuzzyset";
@@ -428,6 +433,22 @@ export function evaluateFormula(
       return parseFloat(number);
     },
 
+    Uppercase: (text: string | Highlight) => {
+      if (isValueRowHighlight(text)) {
+        return getTextForHighlight(text)!.toUpperCase();
+      }
+
+      return text.toUpperCase();
+    },
+
+    Lowercase: (text: string | Highlight) => {
+      if (isValueRowHighlight(text)) {
+        return getTextForHighlight(text)!.toLowerCase();
+      }
+
+      return text.toLowerCase();
+    },
+
     Round: round,
 
     DataFromDoc: (
@@ -713,6 +734,16 @@ export const FORMULA_REFERENCE = [
   {
     name: "ParseFloat",
     args: ["number: string"],
+  },
+  {
+    name: "Uppercase",
+    args: ["text: Highlight | string"],
+    return: "string",
+  },
+  {
+    name: "Lowercase",
+    args: ["text: Highlight | string"],
+    return: "string",
   },
   {
     name: "IsNumber",

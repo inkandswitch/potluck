@@ -487,6 +487,7 @@ const SheetColumnSettingsPopoverContent = observer(
       [PropertyVisibility.Inline]: "Next to text",
       [PropertyVisibility.Superscript]: "Above text",
       [PropertyVisibility.Replace]: "Replace text",
+      [PropertyVisibility.Style]: "Apply CSS style",
     };
 
     return (

@@ -21,6 +21,7 @@ export enum PropertyVisibility {
   Inline = "INLINE",
   Superscript = "SUPERSCRIPT",
   Replace = "REPLACE",
+  Style = "STYLE",
 }
 
 export type PropertyDefinition = {
@@ -118,12 +119,13 @@ Bench 35 10x3
 Squat 30 10x3
 Bench 35 10x3, felt a bit sore`;
 
-const COFFEE_TEXT = `Grind 11 g coffee, medium-fine.
+const COFFEE_TEXT = `## Recipe
+Grind 11 g coffee, medium-fine.
 Add 200 g water, brew 2 minutes, plunge!
 
 scale by
 
-Notes:
+## Notes
 6/22/22: Pretty good, but forgot to swirl.
 6/23/22: Felt weak and under-extracted. Grind finer?`;
 
@@ -366,6 +368,10 @@ export const textDocumentsMobx = observable.map<string, TextDocument>({
       {
         id: generateNanoid(),
         configId: DATE_SHEET_CONFIG_ID,
+      },
+      {
+        id: generateNanoid(),
+        configId: MARKDOWN_SHEET_CONFIG_ID,
       },
     ],
   },
@@ -683,6 +689,21 @@ export const sheetConfigsMobx = observable.map<string, SheetConfig>({
         name: "type",
         formula: "$.data.type",
         visibility: PropertyVisibility.Hidden,
+      },
+      {
+        name: "font-weight",
+        formula: `type === "title" || type === "bold" ? "bold" : "normal"`,
+        visibility: PropertyVisibility.Style,
+      },
+      {
+        name: "font-style",
+        formula: `type === "italic" ? "italic" : "normal"`,
+        visibility: PropertyVisibility.Style,
+      },
+      {
+        name: "font-size",
+        formula: `type === "title" ? "1rem" : "normal"`,
+        visibility: PropertyVisibility.Style,
       },
     ],
   },

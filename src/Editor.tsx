@@ -329,6 +329,25 @@ const highlightDecorations = EditorView.decorations.compute(
                 }).range(highlight.span[1])
               );
             }
+            const styleProperties = sheetConfigsMobx
+              .get(highlight.sheetConfigId)!
+              .properties.filter(
+                (property) => property.visibility === PropertyVisibility.Style
+              )
+              .map((property) => property.name);
+            if (styleProperties.length > 0) {
+              decorations.push(
+                Decoration.mark({
+                  attributes: {
+                    style: styleProperties
+                      .map((property) => {
+                        return `${property}: ${highlight.data[property]}`;
+                      })
+                      .join("; "),
+                  },
+                }).range(highlight.span[0], highlight.span[1])
+              );
+            }
             const replaceProperties = sheetConfigsMobx
               .get(highlight.sheetConfigId)!
               .properties.filter(

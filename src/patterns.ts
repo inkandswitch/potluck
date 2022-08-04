@@ -301,8 +301,16 @@ function matchPartAfterHighlight(
     }
 
     case "group": {
+      let matchingHighlight : undefined | Omit<Highlight, "sheetConfigId"> = undefined;
+      const remainingText = textDocument.text.sliceString(
+        highlight.span[1]
+      );
+      const trimmedRemainingText = remainingText.trimStart();
+      const trimmedLength =
+        remainingText.length - trimmedRemainingText.length;
+
       switch (part.expr.type) {
-        case "highlightName":
+        case "highlightName": {
           const sheetConfig = Array.from(sheetConfigsMobx.values()).find(
             (sheetConfig) =>
               sheetConfig.name === (part.expr as HighlightName).name
@@ -316,33 +324,48 @@ function matchPartAfterHighlight(
             textDocument.id,
             sheetConfig.id
           ).get() as Highlight[];
-          const remainingText = textDocument.text.sliceString(
-            highlight.span[1]
-          );
-          const trimmedRemainingtext = remainingText.trimStart();
-          const trimmedLength =
-            remainingText.length - trimmedRemainingtext.length;
-          const matchingHighlight = highlights.find(
+
+          matchingHighlight = highlights.find(
             ({ span }) => span[0] === highlight.span[1] + trimmedLength
           );
+          break;
+        }
 
-          if (!matchingHighlight) {
-            return;
+        case "regExpr": {
+          const regex = new RegExp(part.expr.source, "ig")
+
+          const match = regex.exec(trimmedRemainingText)
+
+          if (match) {
+            const [matchString] = match
+
+            if (match.index !== 0) {
+              return
+            }
+
+            const from = highlight.span[1] + trimmedLength
+            const to = from + matchString.length
+
+            matchingHighlight = {
+              documentId: textDocument.id,
+              span: [from, to],
+              data: {}
+            }
           }
+        }
+      }
 
-          return {
-            ...highlight,
-            span: [highlight.span[0], matchingHighlight.span[1]],
-            data: part.name
-              ? {
-                  ...highlight.data,
-                  [part.name]: matchingHighlight,
-                }
-              : highlight.data,
-          };
-
-        case "regExpr":
-          throw new Error("not implemented");
+      if (matchingHighlight) {
+        return {
+          ...highlight,
+          span: [highlight.span[0], matchingHighlight.span[1]],
+          data: part.name
+            ? {
+              ...highlight.data,
+              [part.name]: matchingHighlight,
+            }
+            : highlight.data,
+        };
       }
     }
   }

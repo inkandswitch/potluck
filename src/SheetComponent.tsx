@@ -24,6 +24,7 @@ import {
   isHighlightComponent,
   isNumericish,
   isValueRowHighlight,
+  transformColumnFormula,
 } from "./utils";
 import { FORMULA_REFERENCE } from "./formulas";
 import { SheetCalendar } from "./SheetCalendar";
@@ -589,8 +590,7 @@ export const SheetTable = observer(
       );
     }
 
-    const headFormula = columns[0].formula;
-
+    const headFormula = transformColumnFormula(columns[0].formula, true);
     const groupNames = getPatternExprGroupNames(headFormula);
 
     const groupColumnsOffset = groupNames.length;

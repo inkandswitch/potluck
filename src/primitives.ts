@@ -244,7 +244,6 @@ export const searchResults = computed<Highlight[]>(() => {
     console.error(e);
     results = [];
   }
-  console.log("pending", results);
   return results;
 });
 

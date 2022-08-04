@@ -34,6 +34,7 @@ import {
   getTextForHighlight,
   isNumericish,
   isValueRowHighlight,
+  transformColumnFormula,
 } from "./utils";
 import { OFFICIAL_FOODS } from "./data/officialFoods";
 // @ts-ignore
@@ -629,13 +630,7 @@ export function evaluateFormula(
       `
     with (API) {
       with (context) {
-        return ${
-          isFirstColumn
-            ? source.startsWith("=")
-              ? source.substring(1)
-              : `MatchPattern("${source.replaceAll(/"/g, '\\"')}")`
-            : source
-        }
+        return ${transformColumnFormula(source, isFirstColumn)}
       }
     }
   `

@@ -27,10 +27,10 @@ export function getTextForHighlight(highlight: Highlight) {
 
 export function getIntValue(value: any) {
   if (isValueRowHighlight(value)) {
-    value = getTextForHighlight(value)
+    value = getTextForHighlight(value);
   }
 
-  return parseInt(value, 10)
+  return parseInt(value, 10);
 }
 
 export function isValueRowHighlight(valueRow: any): valueRow is Highlight {
@@ -53,3 +53,14 @@ export function isNumericish(value: any): boolean {
 }
 
 export const generateNanoid = customAlphabet(alphanumeric);
+
+export function transformColumnFormula(
+  formula: string,
+  isFirstColumn: boolean
+) {
+  return isFirstColumn
+    ? formula.startsWith("=")
+      ? formula.substring(1)
+      : `MatchPattern("${formula.replaceAll(/"/g, '\\"')}")`
+    : formula;
+}

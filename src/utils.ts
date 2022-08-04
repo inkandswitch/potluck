@@ -42,7 +42,12 @@ export function isValueRowHighlight(valueRow: any): valueRow is Highlight {
 }
 
 export function isHighlightComponent(value: any): value is HighlightComponent {
-  return typeof value === "object" && typeof value.render === "function";
+  return (
+    value !== undefined &&
+    value !== null &&
+    typeof value === "object" &&
+    typeof value.render === "function"
+  );
 }
 
 export function isNumericish(value: any): boolean {

@@ -75,6 +75,14 @@ export function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
     return <span className="text-red-500 font-mono">#Err</span>;
   }
 
+  if (value === undefined) {
+    return <span className="text-gray-400 font-mono">undefined</span>;
+  }
+
+  if (value === null) {
+    return <span className="text-gray-400 font-mono">null</span>;
+  }
+
   if (isHighlightComponent(value)) {
     return <span className="font-mono">{value.render()}</span>;
   }

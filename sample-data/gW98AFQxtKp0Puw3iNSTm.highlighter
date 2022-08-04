@@ -1,1 +1,1 @@
-{"id":"gW98AFQxtKp0Puw3iNSTm","name":"time","properties":[{"name":"$","formula":"{numbers:hours}:{numbers:minutes}","visibility":"HIDDEN"}]}
+{"id":"gW98AFQxtKp0Puw3iNSTm","name":"time","properties":[{"name":"$","formula":"{number:hours}:{number:minutes}","visibility":"HIDDEN"}]}

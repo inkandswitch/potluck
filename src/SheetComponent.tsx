@@ -335,7 +335,7 @@ function useFormulaInput(
   onChange: (value: string) => void,
   cmContentTheme: any,
   useLineWrapping = false
-) {
+): React.MutableRefObject<EditorView | undefined> {
   const viewRef = useRef<EditorView | undefined>(undefined);
   const valueRef = useRef(value);
 
@@ -405,6 +405,7 @@ function useFormulaInput(
       });
     }
   }, [value]);
+  return viewRef;
 }
 
 function SearchFormulaInput({
@@ -430,7 +431,7 @@ function FormulaInput({
   onChange: (value: string) => void;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
-  useFormulaInput(
+  const editorViewRef = useFormulaInput(
     rootRef,
     value,
     onChange,
@@ -443,6 +444,9 @@ function FormulaInput({
     },
     true
   );
+  useEffect(() => {
+    editorViewRef.current?.focus();
+  }, []);
   return (
     <div className="relative">
       <div

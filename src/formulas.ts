@@ -120,12 +120,14 @@ export function evaluateFormula(
           indexOfDelimiter !== -1
             ? index + indexOfDelimiter
             : index + line.length;
-        highlights.push({
-          documentId: textDocument.id,
-          sheetConfigId: sheetConfig.id,
-          span: [index, endOfSpan],
-          data: {},
-        });
+        if (endOfSpan > index) {
+          highlights.push({
+            documentId: textDocument.id,
+            sheetConfigId: sheetConfig.id,
+            span: [index, endOfSpan],
+            data: {},
+          });
+        }
         index += line.length + 1;
       }
 

@@ -642,7 +642,6 @@ export function evaluateFormula(
 
     return isNaN(result) ? undefined : result;
   } catch (e) {
-    console.error(e);
     return e;
   }
 }
@@ -813,7 +812,9 @@ export function evaluateSheet(
               doSpansOverlap(textDocumentSheet.highlightSearchRange!, item.span)
           );
         }
-        resultRows = sortBy(resultRows, (r) => r.span[0]);
+        if (resultRows[0].span !== undefined) {
+          resultRows = sortBy(resultRows, (r) => r.span[0]);
+        }
         resultRows = resultRows.map((item) => ({ [column.name]: item }));
       } else {
         resultRows = [{ [column.name]: result }];

@@ -79,9 +79,6 @@ export const editorSelectionHighlightsComputed = computed(
     return Object.entries(documentValueRows)
       .map(([sheetConfigId, sheetValueRows]) =>
         sheetValueRows.filter((r): r is Highlight => {
-          const textDocumentSheet = textDocument.sheets.find(
-            (sheet) => sheet.configId === sheetConfigId
-          )!;
           return isValueRowHighlight(r);
         })
       )

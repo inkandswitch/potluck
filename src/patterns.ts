@@ -18,10 +18,10 @@ const patternGrammar = ohm.grammar(String.raw`
       = "{" (RegExpr |  HighlightName) (":" Name)? "}"
   
     Name
-      = letter+
+      = alnum+
   
     HighlightName
-      = letter+
+      = alnum+
   
     RegExpr
       = "/" regExprChar+ "/"
@@ -301,13 +301,11 @@ function matchPartAfterHighlight(
     }
 
     case "group": {
-      let matchingHighlight : undefined | Omit<Highlight, "sheetConfigId"> = undefined;
-      const remainingText = textDocument.text.sliceString(
-        highlight.span[1]
-      );
+      let matchingHighlight: undefined | Omit<Highlight, "sheetConfigId"> =
+        undefined;
+      const remainingText = textDocument.text.sliceString(highlight.span[1]);
       const trimmedRemainingText = remainingText.trimStart();
-      const trimmedLength =
-        remainingText.length - trimmedRemainingText.length;
+      const trimmedLength = remainingText.length - trimmedRemainingText.length;
 
       switch (part.expr.type) {
         case "highlightName": {
@@ -332,25 +330,25 @@ function matchPartAfterHighlight(
         }
 
         case "regExpr": {
-          const regex = new RegExp(part.expr.source, "gim")
+          const regex = new RegExp(part.expr.source, "gim");
 
-          const match = regex.exec(trimmedRemainingText)
+          const match = regex.exec(trimmedRemainingText);
 
           if (match) {
-            const [matchString] = match
+            const [matchString] = match;
 
             if (match.index !== 0) {
-              return
+              return;
             }
 
-            const from = highlight.span[1] + trimmedLength
-            const to = from + matchString.length
+            const from = highlight.span[1] + trimmedLength;
+            const to = from + matchString.length;
 
             matchingHighlight = {
               documentId: textDocument.id,
               span: [from, to],
-              data: {}
-            }
+              data: {},
+            };
           }
         }
       }
@@ -361,9 +359,9 @@ function matchPartAfterHighlight(
           span: [highlight.span[0], matchingHighlight.span[1]],
           data: part.name
             ? {
-              ...highlight.data,
-              [part.name]: matchingHighlight,
-            }
+                ...highlight.data,
+                [part.name]: matchingHighlight,
+              }
             : highlight.data,
         };
       }

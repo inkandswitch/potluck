@@ -285,22 +285,23 @@ const hoverHighlightsField = StateField.define<Highlight[]>({
   },
 });
 
-
-function getHiddenSheetConfigIdsByDocumentId (documentId: string) : {[sheetId: string]: boolean } {
-  const isConfigSheetIdHidden : {[sheetId: string]: boolean } = {}
-  const textDocument = textDocumentsMobx.get(documentId)
+function getHiddenSheetConfigIdsByDocumentId(documentId: string): {
+  [sheetId: string]: boolean;
+} {
+  const isConfigSheetIdHidden: { [sheetId: string]: boolean } = {};
+  const textDocument = textDocumentsMobx.get(documentId);
 
   if (!textDocument) {
-    return isConfigSheetIdHidden
+    return isConfigSheetIdHidden;
   }
 
   textDocument.sheets.forEach((sheet) => {
     if (sheet.hideHighlightsInDocument) {
-      isConfigSheetIdHidden[sheet.configId] = true
+      isConfigSheetIdHidden[sheet.configId] = true;
     }
-  })
+  });
 
-  return isConfigSheetIdHidden
+  return isConfigSheetIdHidden;
 }
 
 const highlightDecorations = EditorView.decorations.compute(
@@ -310,7 +311,8 @@ const highlightDecorations = EditorView.decorations.compute(
     const selectionSpan: Span = [selectionRange.from, selectionRange.to];
     const highlights = state.field(highlightsField);
     const documentId = state.facet(textDocumentIdFacet);
-    const isConfigSheetIdHidden = getHiddenSheetConfigIdsByDocumentId(documentId)
+    const isConfigSheetIdHidden =
+      getHiddenSheetConfigIdsByDocumentId(documentId);
 
     const selectionHighlights = highlights.filter(
       (highlight) =>
@@ -340,7 +342,7 @@ const highlightDecorations = EditorView.decorations.compute(
         }),
         ...highlights.flatMap((highlight) => {
           if (isConfigSheetIdHidden[highlight.sheetConfigId]) {
-            return []
+            return [];
           }
 
           const decorations = [
@@ -504,16 +506,17 @@ function patternFromRange(range: SelectionRange, state: EditorState): Pattern {
     highlights.filter(
       ({ span }) => span[0] >= range.from && span[1] <= range.to
     ),
-    ['span.0', 'span.1'],
-    ['asc', 'desc']
+    ["span.0", "span.1"],
+    ["asc", "desc"]
   );
 
   let pattern: Pattern = [];
   let prevEnd = range.from;
 
+  const usedHighlightNames: string[] = [];
   for (const highlight of containedHighlights) {
     if (highlight.span[0] < prevEnd) {
-      continue
+      continue;
     }
 
     if (highlight.span[0] !== prevEnd) {
@@ -525,15 +528,21 @@ function patternFromRange(range: SelectionRange, state: EditorState): Pattern {
 
     prevEnd = highlight.span[1];
 
-    const sheetConfig = sheetConfigsMobx.get(highlight.sheetConfigId);
+    const sheetConfigName = sheetConfigsMobx.get(highlight.sheetConfigId)!.name;
 
     pattern.push({
+      name: `${sheetConfigName}${
+        usedHighlightNames.includes(sheetConfigName)
+          ? usedHighlightNames.filter((x) => x === sheetConfigName).length + 1
+          : ""
+      }`,
       type: "group",
       expr: {
         type: "highlightName",
-        name: sheetConfig!.name,
+        name: sheetConfigName,
       },
     });
+    usedHighlightNames.push(sheetConfigName);
   }
 
   if (prevEnd !== range.to) {

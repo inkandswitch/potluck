@@ -285,6 +285,24 @@ const hoverHighlightsField = StateField.define<Highlight[]>({
   },
 });
 
+
+function getHiddenSheetConfigIdsByDocumentId (documentId: string) : {[sheetId: string]: boolean } {
+  const isConfigSheetIdHidden : {[sheetId: string]: boolean } = {}
+  const textDocument = textDocumentsMobx.get(documentId)
+
+  if (!textDocument) {
+    return isConfigSheetIdHidden
+  }
+
+  textDocument.sheets.forEach((sheet) => {
+    if (sheet.hideHighlightsInDocument) {
+      isConfigSheetIdHidden[sheet.configId] = true
+    }
+  })
+
+  return isConfigSheetIdHidden
+}
+
 const highlightDecorations = EditorView.decorations.compute(
   [highlightsField, hoverHighlightsField],
   (state) => {
@@ -292,6 +310,8 @@ const highlightDecorations = EditorView.decorations.compute(
     const selectionSpan: Span = [selectionRange.from, selectionRange.to];
     const highlights = state.field(highlightsField);
     const documentId = state.facet(textDocumentIdFacet);
+    const isConfigSheetIdHidden = getHiddenSheetConfigIdsByDocumentId(documentId)
+
     const selectionHighlights = highlights.filter(
       (highlight) =>
         isValueRowHighlight(highlight) &&
@@ -303,6 +323,7 @@ const highlightDecorations = EditorView.decorations.compute(
         ...selectionHighlights.flatMap((highlight) => {
           return Object.values(highlight.data).flatMap((columnValue) =>
             isValueRowHighlight(columnValue) &&
+            !isConfigSheetIdHidden[columnValue.sheetConfigId] &&
             columnValue.documentId === documentId
               ? [
                   Decoration.mark({
@@ -318,11 +339,16 @@ const highlightDecorations = EditorView.decorations.compute(
           }).range(highlight.span[0], highlight.span[1]);
         }),
         ...highlights.flatMap((highlight) => {
+          if (isConfigSheetIdHidden[highlight.sheetConfigId]) {
+            return []
+          }
+
           const decorations = [
             Decoration.mark({
               class: "cm-highlight",
             }).range(highlight.span[0], highlight.span[1]),
           ];
+
           if (highlight.data !== undefined) {
             const superscriptProperties = sheetConfigsMobx
               .get(highlight.sheetConfigId)!

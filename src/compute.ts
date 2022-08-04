@@ -82,11 +82,7 @@ export const editorSelectionHighlightsComputed = computed(
           const textDocumentSheet = textDocument.sheets.find(
             (sheet) => sheet.configId === sheetConfigId
           )!;
-          if (textDocumentSheet.hideHighlightsInDocument) {
-            return false;
-          } else {
-            return isValueRowHighlight(r);
-          }
+          return isValueRowHighlight(r);
         })
       )
       .flat();

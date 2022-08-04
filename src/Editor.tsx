@@ -7,6 +7,7 @@ import {
 import {
   EditorState,
   Facet,
+  Range,
   SelectionRange,
   StateEffect,
   StateField,
@@ -341,15 +342,39 @@ const highlightDecorations = EditorView.decorations.compute(
           }).range(highlight.span[0], highlight.span[1]);
         }),
         ...highlights.flatMap((highlight) => {
-          if (isConfigSheetIdHidden[highlight.sheetConfigId]) {
-            return [];
+          const decorations: Array<Range<Decoration>> = [];
+
+          // We apply style properties even if the sheet config is set to not show highlights in doc,
+          // eg so that we can apply markdown styling without blue underlines everywhere.
+          const styleProperties = sheetConfigsMobx
+            .get(highlight.sheetConfigId)!
+            .properties.filter(
+              (property) => property.visibility === PropertyVisibility.Style
+            )
+            .map((property) => property.name);
+          if (styleProperties.length > 0) {
+            decorations.push(
+              Decoration.mark({
+                attributes: {
+                  style: styleProperties
+                    .map((property) => {
+                      return `${property}: ${highlight.data[property]}`;
+                    })
+                    .join("; "),
+                },
+              }).range(highlight.span[0], highlight.span[1])
+            );
           }
 
-          const decorations = [
+          if (isConfigSheetIdHidden[highlight.sheetConfigId]) {
+            return decorations;
+          }
+
+          decorations.push(
             Decoration.mark({
               class: "cm-highlight",
-            }).range(highlight.span[0], highlight.span[1]),
-          ];
+            }).range(highlight.span[0], highlight.span[1])
+          );
 
           if (highlight.data !== undefined) {
             const superscriptProperties = sheetConfigsMobx
@@ -384,25 +409,7 @@ const highlightDecorations = EditorView.decorations.compute(
                 }).range(highlight.span[1])
               );
             }
-            const styleProperties = sheetConfigsMobx
-              .get(highlight.sheetConfigId)!
-              .properties.filter(
-                (property) => property.visibility === PropertyVisibility.Style
-              )
-              .map((property) => property.name);
-            if (styleProperties.length > 0) {
-              decorations.push(
-                Decoration.mark({
-                  attributes: {
-                    style: styleProperties
-                      .map((property) => {
-                        return `${property}: ${highlight.data[property]}`;
-                      })
-                      .join("; "),
-                  },
-                }).range(highlight.span[0], highlight.span[1])
-              );
-            }
+
             const replaceProperties = sheetConfigsMobx
               .get(highlight.sheetConfigId)!
               .properties.filter(

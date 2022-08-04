@@ -226,12 +226,13 @@ const SearchBox = observer(
                 onKeyDown={
                   handleInputKeydown as unknown as KeyboardEventHandler<HTMLInputElement>
                 }
-                onChange={(e) => {
+                onChange={action((e) => {
                   searchTermBox.set({
                     ...searchState,
+                    selectedSearchIndex: 0,
                     search: e.target.value,
                   });
-                }}
+                })}
               />
             </div>
           </div>
@@ -272,15 +273,24 @@ const SearchBox = observer(
                 >
                   {pendingSearch._type === "saved" ? (
                     <div className="text-sm flex">
-                      <div className=" text-gray-400 mr-2 w-12">Saved</div>
-                      <div>{pendingSearch.sheetConfig.name}</div>
+                      <div className=" text-gray-400 mr-2 w-12 flex-shrink-0">
+                        Saved
+                      </div>
+                      <div className="flex-shrink-0">
+                        {pendingSearch.sheetConfig.name}
+                      </div>
+                      {searchState.selectedSearchIndex === index ? (
+                        <div className="font-mono text-gray-400 text-sm ml-2 overflow-ellipsis overflow-hidden whitespace-nowrap">
+                          {pendingSearch.sheetConfig.properties[0]?.formula}
+                        </div>
+                      ) : null}
                     </div>
                   ) : (
                     <div className="text-sm flex">
                       <div className=" text-gray-400 mr-2 w-12">New</div>{" "}
                       <div>
                         <span className="font-medium">
-                          "{pendingSearch.search}"
+                          {pendingSearch.search}
                         </span>
                       </div>
                     </div>

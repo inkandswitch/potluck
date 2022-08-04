@@ -149,11 +149,11 @@ export function getPendingSearches(search: string): PendingSearch[] {
   }
 
   return [
+    ...newSearches,
     ...getMatchingSheetConfigs(search).map((sheetConfig) => ({
       _type: "saved" as const,
       sheetConfig,
     })),
-    ...newSearches,
   ];
 }
 

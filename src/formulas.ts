@@ -812,7 +812,7 @@ export function evaluateSheet(
               doSpansOverlap(textDocumentSheet.highlightSearchRange!, item.span)
           );
         }
-        if (resultRows[0].span !== undefined) {
+        if (resultRows.length > 0 && resultRows[0].span !== undefined) {
           resultRows = sortBy(resultRows, (r) => r.span[0]);
         }
         resultRows = resultRows.map((item) => ({ [column.name]: item }));

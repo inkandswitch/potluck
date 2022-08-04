@@ -41,7 +41,7 @@ import { NumberSliderComponent } from "./NumberSliderComponent";
 import { TimerComponent } from "./TimerComponent";
 import classNames from "classnames";
 import { Pattern, patternToString } from "./patterns";
-import { sortBy } from "lodash";
+import { orderBy } from "lodash";
 
 const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
 const MAX_SUPERSCRIPT_LENGTH = 20;
@@ -500,18 +500,23 @@ const extractPatternFromHighlightPlugin = ViewPlugin.fromClass(class {}, {
 function patternFromRange(range: SelectionRange, state: EditorState): Pattern {
   const highlights = state.field(highlightsField);
 
-  const containedHighlights = sortBy(
+  const containedHighlights = orderBy(
     highlights.filter(
       ({ span }) => span[0] >= range.from && span[1] <= range.to
     ),
-    ({ span }) => span[0]
+    ['span.0', 'span.1'],
+    ['asc', 'desc']
   );
 
   let pattern: Pattern = [];
   let prevEnd = range.from;
 
   for (const highlight of containedHighlights) {
-    if (prevEnd !== highlight.span[0]) {
+    if (highlight.span[0] < prevEnd) {
+      continue
+    }
+
+    if (highlight.span[0] !== prevEnd) {
       pattern.push({
         type: "text",
         text: state.doc.sliceString(prevEnd, highlight.span[0]),

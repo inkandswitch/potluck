@@ -568,13 +568,18 @@ export const SheetTable = observer(
       { columnName: string; direction: "asc" | "desc" } | undefined
     >(undefined);
 
+    const [didJustAddColumn, setDidJustAddColumn] = useState(false);
     const addColumn = action(() => {
       sheetConfig.properties.push({
         name: `col${++i}`,
         formula: "",
         visibility: PropertyVisibility.Hidden,
       });
+      setDidJustAddColumn(true);
     });
+    useEffect(() => {
+      setDidJustAddColumn(false);
+    }, [didJustAddColumn]);
 
     let sortedRows = rows;
     if (sortedRows.length > 0 && sortBy !== undefined) {
@@ -644,7 +649,13 @@ export const SheetTable = observer(
                         </div>
                         {isEditable ? (
                           <>
-                            <Popover.Root modal={true}>
+                            <Popover.Root
+                              defaultOpen={
+                                didJustAddColumn &&
+                                index === columnsWithPatternGroups.length - 1
+                              }
+                              modal={true}
+                            >
                               <Popover.Anchor asChild={true}>
                                 <Popover.Trigger asChild={true}>
                                   <button className="text-gray-400 hover:text-gray-500">

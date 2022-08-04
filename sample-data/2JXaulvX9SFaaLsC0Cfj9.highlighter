@@ -1,0 +1,1 @@
+{"id":"2JXaulvX9SFaaLsC0Cfj9","name":"timeRange","properties":[{"name":"$","formula":"{time:start} - {time:end}","visibility":"HIDDEN"}]}

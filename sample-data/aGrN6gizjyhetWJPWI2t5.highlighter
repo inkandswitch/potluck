@@ -1,0 +1,1 @@
+{"id":"aGrN6gizjyhetWJPWI2t5","name":"openingHours","properties":[{"name":"$","formula":"Open: {dayRange} {timeRange}","visibility":"HIDDEN"}]}

@@ -1,0 +1,1 @@
+{"id":"u8ZtB9k2kR1dKyoH3Owv3","name":"dayRange","properties":[{"name":"$","formula":"{day:start} - {day:end}","visibility":"HIDDEN"}]}

@@ -1,0 +1,1 @@
+{"id":"pJtvVPnCsInJ1ZDcM4WIw","name":"cities","properties":[{"name":"$","formula":"{/^#/}{/[^#\\n]+/:name}","visibility":"HIDDEN"}]}

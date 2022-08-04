@@ -5,34 +5,34 @@ import { getComputedSheetValue } from "./compute";
 
 const patternGrammar = ohm.grammar(String.raw`
   Pattern {
-    Formula 
+    Formula
       = "MatchPattern" "(" "\"" Expr "\"" ")"
-  
+
     Expr
       = Part*
-  
+
     Part
       = MatchGroup | text
-  
+
     MatchGroup
       = "{" (RegExpr |  HighlightName) (":" Name)? "}"
-  
+
     Name
       = alnum+
-  
+
     HighlightName
       = alnum+
-  
+
     RegExpr
       = "/" regExprChar+ "/"
-  
-    regExprChar 
+
+    regExprChar
       = ~"/" any
-  
-    text 
+
+    text
       = textChar+
-    
-    textChar 
+
+    textChar
       = ~("{"| "\"") any
   }
 `);
@@ -277,6 +277,11 @@ function matchRegex(
   return highlights;
 }
 
+// Trim spaces/tabs from the beginning of a string, but not newlines
+const trimStartWithoutNewlines = (str: string) => {
+  return str.replace(/^[ \t]+/, "");
+};
+
 function matchPartAfterHighlight(
   part: PatternPart,
   highlight: PartHighlight,
@@ -285,7 +290,7 @@ function matchPartAfterHighlight(
   switch (part.type) {
     case "text": {
       const followingText = textDocument.text.sliceString(highlight.span[1]);
-      const followingTextTrimmed = followingText.trimStart();
+      const followingTextTrimmed = trimStartWithoutNewlines(followingText);
 
       if (!followingTextTrimmed.startsWith(part.text)) {
         return;
@@ -304,7 +309,7 @@ function matchPartAfterHighlight(
       let matchingHighlight: undefined | Omit<Highlight, "sheetConfigId"> =
         undefined;
       const remainingText = textDocument.text.sliceString(highlight.span[1]);
-      const trimmedRemainingText = remainingText.trimStart();
+      const trimmedRemainingText = trimStartWithoutNewlines(remainingText);
       const trimmedLength = remainingText.length - trimmedRemainingText.length;
 
       switch (part.expr.type) {

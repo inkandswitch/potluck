@@ -142,11 +142,7 @@ type PendingSearch =
 /** Get all the pending searches to suggest for a given string entered into the searchbox */
 export function getPendingSearches(search: string): PendingSearch[] {
   let newSearches: PendingSearch[];
-  if (search.length > 0) {
-    newSearches = [{ _type: "new", search }];
-  } else {
-    newSearches = [];
-  }
+  newSearches = [{ _type: "new", search }];
 
   return [
     ...newSearches,

@@ -204,7 +204,7 @@ const SearchBox = observer(
                 ref={searchBoxRef}
                 className="border-gray-200 border rounded w-full py-1 px-1"
                 type="text"
-                placeholder="Search"
+                placeholder="Search a new pattern, or add a saved search"
                 value={searchState.search}
                 onFocus={() => {
                   searchTermBox.set({

@@ -248,7 +248,7 @@ function matchRegex(
   source: string,
   textDocument: TextDocument
 ): PartHighlight[] {
-  const regex = new RegExp(source, "gi");
+  const regex = new RegExp(source, "gim");
   const docString = textDocument.text.sliceString(0);
 
   const highlights: Highlight[] = [];
@@ -332,7 +332,7 @@ function matchPartAfterHighlight(
         }
 
         case "regExpr": {
-          const regex = new RegExp(part.expr.source, "ig")
+          const regex = new RegExp(part.expr.source, "gim")
 
           const match = regex.exec(trimmedRemainingText)
 

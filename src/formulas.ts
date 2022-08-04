@@ -667,6 +667,11 @@ export const FORMULA_REFERENCE = [
     return: "Highlight[]",
   },
   {
+    name: "Find",
+    args: ["type: string"],
+    return: "Highlight",
+  },
+  {
     name: "FindAll",
     args: ["type: string"],
     return: "Highlight[]",

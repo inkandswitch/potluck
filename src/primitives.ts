@@ -126,13 +126,13 @@ export const selectedTextDocumentIdBox = observable.box(
 
 type SearchBoxState = {
   search: string;
-  selectedSearchIndex: number | undefined;
+  selectedSearchIndex: number;
 };
 
 export const searchTermBox: IObservableValue<SearchBoxState> =
   observable.box<SearchBoxState>({
     search: "",
-    selectedSearchIndex: undefined,
+    selectedSearchIndex: 0,
   });
 
 type PendingSearch =
@@ -167,11 +167,11 @@ export const pendingSearchesComputed = computed<PendingSearch[]>(() => {
 export const selectedPendingSearchComputed = computed<
   PendingSearch | undefined
 >(() => {
-  const pendingSearches = pendingSearchesComputed.get();
-  const selectedSearchIndex = searchTermBox.get().selectedSearchIndex;
-  if (selectedSearchIndex === undefined) {
+  if (isSearchBoxFocused.get() === false) {
     return undefined;
   }
+  const pendingSearches = pendingSearchesComputed.get();
+  const selectedSearchIndex = searchTermBox.get().selectedSearchIndex;
   return pendingSearches[selectedSearchIndex];
 });
 
@@ -249,3 +249,4 @@ export const isSheetExpandedMobx = observable.map<string, boolean>({});
 
 export const showDocumentSidebarBox = observable.box(false);
 export const showSearchPanelBox = observable.box(true);
+export const isSearchBoxFocused = observable.box(false);

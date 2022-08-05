@@ -1,4 +1,4 @@
-import { Editor } from "./Editor";
+import { Editor, patternFromSelection } from "./Editor";
 import {
   addSheetConfig,
   getSheetConfigsOfTextDocument,
@@ -18,6 +18,8 @@ import {
   pendingSearchesComputed,
   savePendingSearchToSheet,
   selectedPendingSearchComputed,
+  textEditorStateMobx,
+  isSearchBoxFocused,
 } from "./primitives";
 import { observer } from "mobx-react-lite";
 import { KeyboardEventHandler, useEffect, useRef, useState } from "react";
@@ -37,6 +39,7 @@ import {
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { ToastViewport } from "@radix-ui/react-toast";
 import { DocumentSidebar } from "./DocumentSidebar";
+import { patternToString } from "./patterns";
 
 const TextDocumentName = observer(
   ({ textDocument }: { textDocument: TextDocument }) => {
@@ -134,19 +137,34 @@ const SearchBox = observer(
   }) => {
     const textDocument = textDocumentsMobx.get(textDocumentId)!;
     const searchState = searchTermBox.get();
-    const [searchBoxFocused, setSearchBoxFocused] = useState(false);
+    const searchBoxFocused = isSearchBoxFocused.get();
     const searchBoxRef = useRef<HTMLInputElement>(null);
     const results = searchResults.get();
     const selectedPendingSearch = selectedPendingSearchComputed.get();
 
+    const focusSearchBox = () => {
+      if (searchState.search === "" || searchState.search === null) {
+        const pattern = patternFromSelection(textEditorStateMobx.get()!);
+        if (pattern !== undefined && pattern.length > 0) {
+          runInAction(() => {
+            searchTermBox.set({
+              ...searchState,
+              search: patternToString(pattern),
+            });
+          });
+        }
+      }
+      searchBoxRef.current!.focus();
+    };
+
     useEffect(() => {
       if (focusOnMountRef.current) {
         focusOnMountRef.current = false;
-        searchBoxRef.current!.focus();
+        focusSearchBox();
       }
       function onKeyDown(e: KeyboardEvent) {
         if (e.metaKey && e.shiftKey && e.key === "f") {
-          searchBoxRef.current!.focus();
+          focusSearchBox();
         }
       }
       document.addEventListener("keydown", onKeyDown);
@@ -207,20 +225,14 @@ const SearchBox = observer(
                 placeholder="Search a new pattern, or add a saved search"
                 value={searchState.search}
                 onFocus={() => {
-                  searchTermBox.set({
-                    ...searchState,
-                    selectedSearchIndex: 0,
+                  runInAction(() => {
+                    isSearchBoxFocused.set(true);
                   });
-                  setSearchBoxFocused(true);
                 }}
                 onBlur={() => {
                   runInAction(() => {
-                    searchTermBox.set({
-                      ...searchState,
-                      selectedSearchIndex: undefined,
-                    });
+                    isSearchBoxFocused.set(false);
                   });
-                  setSearchBoxFocused(false);
                 }}
                 // Add a new sheet reflecting the search term
                 onKeyDown={
@@ -254,14 +266,6 @@ const SearchBox = observer(
                       searchTermBox.set({
                         ...searchState,
                         selectedSearchIndex: index,
-                      });
-                    });
-                  }}
-                  onMouseOut={() => {
-                    runInAction(() => {
-                      searchTermBox.set({
-                        ...searchState,
-                        selectedSearchIndex: undefined,
                       });
                     });
                   }}

@@ -467,13 +467,10 @@ const extractPatternFromHighlightPlugin = ViewPlugin.fromClass(class {}, {
       if (event.key === "h" && event.metaKey) {
         event.preventDefault();
 
-        const range = view.state.selection.ranges[0];
-
-        if (!range) {
+        const pattern = patternFromSelection(view.state);
+        if (pattern === undefined) {
           return;
         }
-
-        const pattern = patternFromRange(range, view.state);
         const textDocumentId = view.state.facet(textDocumentIdFacet);
         const textDocument = textDocumentsMobx.get(textDocumentId);
 
@@ -506,7 +503,11 @@ const extractPatternFromHighlightPlugin = ViewPlugin.fromClass(class {}, {
   },
 });
 
-function patternFromRange(range: SelectionRange, state: EditorState): Pattern {
+export function patternFromSelection(state: EditorState): Pattern | undefined {
+  const range = state.selection.ranges[0];
+  if (!range) {
+    return undefined;
+  }
   const highlights = state.field(highlightsField);
 
   const containedHighlights = orderBy(

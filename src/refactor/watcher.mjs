@@ -1,11 +1,14 @@
 import path from 'node:path'
+import fs from "node:fs"
 import Watcher from 'watcher'
 import { readDocumentSheets, readHighlighter, writeDocumentSheets, writeHighlighter } from './utils.mjs'
+import outdent from 'outdent'
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const watchPath = process.argv[2]
 const fullPath = path.resolve(process.cwd(), watchPath)
-
-console.log('watching ', fullPath)
 
 const watcher = new Watcher(fullPath, { renameDetection: true })
 
@@ -16,6 +19,8 @@ watcher.on('rename', (filePath, filePathNext) => {
     onRenameHighlighter(filePath, filePathNext)
   }
 })
+
+generateDefaultStateFile()
 
 function onRenameHighlighter (oldName, newName) {
   const oldConfigId = path.basename(oldName, '.highlighter')
@@ -43,6 +48,7 @@ function onRenameHighlighter (oldName, newName) {
 
   writeHighlighter(fullPath, newConfigId, refactoredHighlighter)
   writeDocumentSheets(fullPath, refactoredDocumentsSheet)
+  generateDefaultStateFile()
 }
 
 function onRenameDocument (oldName, newName) {
@@ -68,8 +74,35 @@ function onRenameDocument (oldName, newName) {
   console.log(`changed ${changeCount} sheets`)
 
   writeDocumentSheets(fullPath, refactoredDocumentsSheet)
+  generateDefaultStateFile()
 }
 
+function generateDefaultStateFile () {
+  console.log('generate DefaultState.ts')
 
+  const imports = ['import documentSheets from "../sample-data/_documentsheets?raw"']
+  const exportEntries = ['  "/_documentsheets" : documentSheets']
 
+  fs.readdirSync(fullPath).forEach((file, index )=> {
+    if (file === '_documentsheets') {
+      return
+    }
 
+    const importName = `file_${index}`
+
+    imports.push(`import ${importName} from "../sample-data/${file}?raw"`)
+    exportEntries.push(`  "/${file}" : ${importName}`)
+
+  })
+
+  const content = outdent`
+    // auto generated, do not edit
+    ${imports.join("\n")}
+    
+    export const DefaultFiles = {
+    ${exportEntries.join(',\n')}
+    }
+  `
+
+  fs.writeFileSync(path.join(__dirname, "../DefaultState.ts"), content)
+}

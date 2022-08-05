@@ -13,6 +13,11 @@ import React, { useState } from "react";
 import { generateNanoid } from "./utils";
 import * as Toast from "@radix-ui/react-toast";
 
+
+function prettyStringify (value: any) : string {
+  return JSON.stringify(value, null, 2)
+}
+
 // we'll always start file paths with / so "/foo.txt" is a foo.txt in the root
 // directory.
 
@@ -132,7 +137,7 @@ export class DirectoryPersistence {
       ),
       reaction(
         () => {
-          return JSON.stringify(
+          return prettyStringify(
             getDocumentSheetConfig([...textDocumentsMobx.values()])
           );
         },
@@ -147,7 +152,7 @@ export class DirectoryPersistence {
       reaction(
         () => {
           return [...sheetConfigsMobx.values()].map((sheetConfig) => {
-            return [sheetConfig.id, JSON.stringify(sheetConfig)];
+            return [sheetConfig.id, prettyStringify(sheetConfig)];
           });
         },
         async (serializedSheetConfigs) => {

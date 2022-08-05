@@ -1,0 +1,16 @@
+{
+  "id": "all-ingredients.names",
+  "name": "allIngredients",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "=SplitLines(\",\")",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "officialName",
+      "formula": "First(Filter(MatchRegexp(\"USDA name: (.*),?\"), SameLine($)))",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

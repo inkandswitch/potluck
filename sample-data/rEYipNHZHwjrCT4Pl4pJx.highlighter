@@ -1,1 +1,0 @@
-{"id":"rEYipNHZHwjrCT4Pl4pJx","name":"number","properties":[{"name":"$","formula":"{/[0-9][0-9\\.]*/}","visibility":"HIDDEN"},{"name":"value","formula":"ParseFloat($)","visibility":"HIDDEN"}]}

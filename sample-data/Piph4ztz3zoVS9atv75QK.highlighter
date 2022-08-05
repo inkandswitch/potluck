@@ -1,1 +1,0 @@
-{"id":"Piph4ztz3zoVS9atv75QK","name":"scale","properties":[{"name":"$","formula":"scale by","visibility":"HIDDEN"},{"name":"slider","formula":"Slider($)","visibility":"SUPERSCRIPT"},{"name":"sliderValue","formula":"slider.data.value","visibility":"INLINE"}]}

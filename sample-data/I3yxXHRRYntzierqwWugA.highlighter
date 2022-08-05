@@ -1,1 +1,0 @@
-{"id":"I3yxXHRRYntzierqwWugA","name":"dates","properties":[{"name":"date","formula":"{number:month}/{number:day}/{number:year}","visibility":"HIDDEN"}]}

@@ -1,0 +1,11 @@
+{
+  "id": "common.date",
+  "name": "dates",
+  "properties": [
+    {
+      "name": "date",
+      "formula": "{number:month}/{number:day}/{number:year}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

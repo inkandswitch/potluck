@@ -1,0 +1,21 @@
+{
+  "id": "food.quantity",
+  "name": "quantity",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{number:amount} {/(cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|gram|g|milliliter|ml)s?/:unit}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "scaleFactor",
+      "formula": "Find(\"scale\")?.data.sliderValue",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "scaledAmount",
+      "formula": "(scaleFactor && scaleFactor !== 1 && amount) ? `${scaleFactor * amount.data.value} ${unit}${amount.data.value === 1 ? 's' : ''}` : undefined",
+      "visibility": "REPLACE"
+    }
+  ]
+}

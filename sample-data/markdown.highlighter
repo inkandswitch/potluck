@@ -1,0 +1,31 @@
+{
+  "id": "markdown",
+  "name": "markdown",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "=Markdown()",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "type",
+      "formula": "$.data.type",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "font-weight",
+      "formula": "type === \"title\" || type === \"bold\" ? \"bold\" : \"normal\"",
+      "visibility": "STYLE"
+    },
+    {
+      "name": "font-style",
+      "formula": "type === \"italic\" ? \"italic\" : \"normal\"",
+      "visibility": "STYLE"
+    },
+    {
+      "name": "font-size",
+      "formula": "type === \"title\" ? \"1rem\" : \"normal\"",
+      "visibility": "STYLE"
+    }
+  ]
+}

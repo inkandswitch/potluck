@@ -992,6 +992,11 @@
     react-refresh "^0.13.0"
     resolve "^1.22.0"
 
+aborter@^1.0.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/aborter/-/aborter-1.1.0.tgz#e907bcbf406a58934b0b1baaf6d8cba88e0a1993"
+  integrity sha512-9rHWMcWTEYsMB4l+ttgPujR7OiXH9NQbP0ej+SSVaK1e2yU/tePbYm8g/g9cQhJkgczp6lpEB2fdJYLKT/T0mg==
+
 acorn-node@^1.8.2:
   version "1.8.2"
   resolved "https://registry.npmjs.org/acorn-node/-/acorn-node-1.8.2.tgz"
@@ -1026,6 +1031,13 @@ anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
+are-shallow-equal@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/are-shallow-equal/-/are-shallow-equal-1.1.1.tgz#e86f5807e7355547bda90e1b4d1967f61c76d559"
+  integrity sha512-Y0MC/7IP+WZSo0NgYDwww7euKssEodUJxjby3fmNurEDcbq8htqSgyI7a7HELJzkzNv26dOH5vKQFlzCt1H9Ag==
+  dependencies:
+    is-primitive "^3.0.1"
+
 arg@^5.0.2:
   version "5.0.2"
   resolved "https://registry.npmjs.org/arg/-/arg-5.0.2.tgz"
@@ -1037,6 +1049,11 @@ aria-hidden@^1.1.1:
   integrity sha512-RhVWFtKH5BiGMycI72q2RAFMLQi8JP9bLuQXgR5a8Znp7P5KOIADSJeyfI8PCVxLEp067B2HbP5JIiI/PXIZeA==
   dependencies:
     tslib "^1.0.0"
+
+atomically@^1.7.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/atomically/-/atomically-1.7.0.tgz#c07a0458432ea6dbc9a3506fffa424b48bccaafe"
+  integrity sha512-Xcz9l0z7y9yQ9rdDaxlmaI4uJHf/T8g9hOEzJcsEqX2SjCj4J20uK7+ldkDHMbpJDK76wF7xEIgxc/vSlsfw5w==
 
 autoprefixer@^10.4.7:
   version "10.4.7"
@@ -1098,7 +1115,7 @@ chalk@^2.0.0:
 
 chokidar@^3.5.3:
   version "3.5.3"
-  resolved "https://registry.npmjs.org/chokidar/-/chokidar-3.5.3.tgz"
+  resolved "https://registry.yarnpkg.com/chokidar/-/chokidar-3.5.3.tgz#1cf37c8707b932bd1af1ae22c0432e2acd1903bd"
   integrity sha512-Dr3sfKRP6oTcjf2JmUmFJfeVMvXBdegxB0iVQ5eb2V10uFJUCAS8OByZdVAyVb8xXNz3GjjTgj9kLWsZTqE6kw==
   dependencies:
     anymatch "~3.1.2"
@@ -1196,6 +1213,11 @@ date-fns@^2.28.0:
   version "2.28.0"
   resolved "https://registry.yarnpkg.com/date-fns/-/date-fns-2.28.0.tgz#9570d656f5fc13143e50c975a3b6bbeb46cd08b2"
   integrity sha512-8d35hViGYx/QH0icHYCeLmsLmMUheMmTyV9Fcm6gvNwdw31yXXH+O85sOBJ+OLnLQMKZowvpKb6FgMIQjcpvQw==
+
+debounce@^1.2.0:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/debounce/-/debounce-1.2.1.tgz#38881d8f4166a5c5848020c11827b834bcb3e0a5"
+  integrity sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug==
 
 debug@^4.1.0:
   version "4.3.4"
@@ -1538,6 +1560,11 @@ is-number@^7.0.0:
   resolved "https://registry.npmjs.org/is-number/-/is-number-7.0.0.tgz"
   integrity sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng==
 
+is-primitive@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/is-primitive/-/is-primitive-3.0.1.tgz#98c4db1abff185485a657fc2905052b940524d05"
+  integrity sha512-GljRxhWvlCNRfZyORiH77FwdFwGcMO620o37EOYC0ORWdq+WYNVqW0w2Juzew4M+L81l6/QS3t5gkkihyRqv9w==
+
 "js-tokens@^3.0.0 || ^4.0.0", js-tokens@^4.0.0:
   version "4.0.0"
   resolved "https://registry.npmjs.org/js-tokens/-/js-tokens-4.0.0.tgz"
@@ -1758,6 +1785,11 @@ prismjs@^1.28.0:
   resolved "https://registry.yarnpkg.com/prismjs/-/prismjs-1.28.0.tgz#0d8f561fa0f7cf6ebca901747828b149147044b6"
   integrity sha512-8aaXdYvl1F7iC7Xm1spqSaY/OJBpYW3v+KJ+F17iYxvdc8sfjW194COK5wVhMZX45tGteiBQgdvD/nhxcRwylw==
 
+promise-concurrency-limiter@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/promise-concurrency-limiter/-/promise-concurrency-limiter-1.0.0.tgz#7f24c336fa21fe0c36a1ed1b17ad6f67dca45f2a"
+  integrity sha512-OI96yL5DUck9KCLee5H6DnRfVsHIstQspXk8xsYrWr9ur9IlFuzKvoU70HwQb99MqHg2mpdkuGa92NuoXue3cw==
+
 prop-types@^15.7.2, prop-types@^15.8.1:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"
@@ -1903,6 +1935,13 @@ reusify@^1.0.4:
   resolved "https://registry.npmjs.org/reusify/-/reusify-1.0.4.tgz"
   integrity sha512-U9nH88a3fc/ekCF1l0/UP1IosiuIjyTh7hBvXVMHYgVcfGvt897Xguj2UOLDeI5BG2m7/uwyaLVT6fbtCwTyzw==
 
+ripstat@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/ripstat/-/ripstat-1.1.1.tgz#2f76915bcba33f6d253619e9408435b7df6a11e8"
+  integrity sha512-O+KrJUwY3Q8cArNraH136svsDlNmRh6mnJ9TogkpcGWBvd2Kks5d5HGsZRnWt9h3kh8D4uq62kdlYihONjgj5w==
+  dependencies:
+    atomically "^1.7.0"
+
 rollup@^2.59.0:
   version "2.76.0"
   resolved "https://registry.npmjs.org/rollup/-/rollup-2.76.0.tgz"
@@ -1949,6 +1988,11 @@ source-map-js@^1.0.2:
   resolved "https://registry.npmjs.org/source-map-js/-/source-map-js-1.0.2.tgz"
   integrity sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==
 
+string-indexes@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/string-indexes/-/string-indexes-1.0.0.tgz#87637530c4bbf46a6fa2e6df6247e1b7fbb9a654"
+  integrity sha512-RUlx+2YydZJNlRAvoh1siPYWj/Xfk6t1sQLkA5n1tMGRCKkRLzkRtJhHk4qRmKergEBh8R3pWhsUsDqia/bolw==
+
 style-mod@^4.0.0:
   version "4.0.0"
   resolved "https://registry.npmjs.org/style-mod/-/style-mod-4.0.0.tgz"
@@ -1993,6 +2037,13 @@ tailwindcss@^3.1.6:
     postcss-value-parser "^4.2.0"
     quick-lru "^5.1.1"
     resolve "^1.22.1"
+
+tiny-readdir@^1.5.0:
+  version "1.5.0"
+  resolved "https://registry.yarnpkg.com/tiny-readdir/-/tiny-readdir-1.5.0.tgz#35ee72f989e466aad52a5d73e7ad16a802753c74"
+  integrity sha512-Nep9qu34bOZApNkEnJu4V1WcgxW1kCGlYN8SYwMzZfqpv6f2E1n5vPHLczJqy2vOQ1rQG/m9fI3DQbIFXAQNGw==
+  dependencies:
+    promise-concurrency-limiter "^1.0.0"
 
 to-fast-properties@^2.0.0:
   version "2.0.0"
@@ -2092,6 +2143,18 @@ warning@^4.0.3:
   integrity sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==
   dependencies:
     loose-envify "^1.0.0"
+
+watcher@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/watcher/-/watcher-1.2.0.tgz#cc15a520b864c206f8c3b65d373cba42b248a49a"
+  integrity sha512-f2KFU8ZRSDfTXdI2Y6Ge7DXVnCx9QnlGScwUHPh+YPkbFWZS983KfgHddj+KBWZGrCCuRanYvDz91p65d9/h4w==
+  dependencies:
+    aborter "^1.0.0"
+    are-shallow-equal "^1.1.1"
+    debounce "^1.2.0"
+    ripstat "^1.1.1"
+    string-indexes "^1.0.0"
+    tiny-readdir "^1.5.0"
 
 xtend@^4.0.2:
   version "4.0.2"

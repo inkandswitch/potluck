@@ -1,1 +1,0 @@
-{"id":"4BUduyc6tOpxnkG4uLQqJ","name":"durations","properties":[{"name":"$","formula":"{/((\\\\d+\\\\s+(hours?|minutes?|seconds?))\\\\s*)*(\\\\d+\\\\s+(hours?|minutes?|seconds?))/}","visibility":"HIDDEN"},{"name":"timer","formula":"Timer($)","visibility":"INLINE"}]}

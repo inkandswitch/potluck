@@ -1,0 +1,36 @@
+{
+  "id": "food.ingredient",
+  "name": "ingredients",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "=MatchHighlight(DataFromDoc(\"all ingredients\", \"allIngredients\", \"$\"))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "matched",
+      "formula": "$.data.matchedHighlight",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "USDA Name",
+      "formula": "USDAFoodName($)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "quantity",
+      "formula": "PrevOfType($, [\"quantity\", \"number\"], 20)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "scaleFactor",
+      "formula": "Find(\"scale\")?.data.sliderValue",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "scaledQuantity",
+      "formula": "(scaleFactor && scaleFactor !== 1 && IsNumber(quantity.valueOf())) ? `${quantity * Round(scaleFactor, 2)} ${$}` : undefined",
+      "visibility": "REPLACE"
+    }
+  ]
+}

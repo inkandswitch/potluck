@@ -52,6 +52,17 @@ enum SuperscriptWidgetMode {
   InlineWidgetTemporarilyMoved, // We show inline widgets above the text while the user edits inside
 }
 
+function hasReactComponentWidget(
+  highlightData: { [key: string]: any },
+  visibleProperties: string[]
+) {
+  return visibleProperties.some(
+    (property) =>
+      highlightData[property] instanceof TimerComponent ||
+      highlightData[property] instanceof NumberSliderComponent
+  );
+}
+
 class SuperscriptWidget extends WidgetType {
   reactRoots: Root[] = [];
 
@@ -70,12 +81,8 @@ class SuperscriptWidget extends WidgetType {
     // reuse the previous widget to keep the same DOM.
     if (
       other instanceof SuperscriptWidget &&
-      Object.values(this.highlightData).some(
-        (value) => value instanceof NumberSliderComponent
-      ) &&
-      Object.values(other.highlightData).some(
-        (value) => value instanceof NumberSliderComponent
-      )
+      hasReactComponentWidget(this.highlightData, this.visibleProperties) &&
+      hasReactComponentWidget(other.highlightData, other.visibleProperties)
     ) {
       return true;
     }
@@ -165,14 +172,11 @@ class InlineWidget extends WidgetType {
   eq(other: WidgetType): boolean {
     // BIG HACK
     // For timer, we don't want to keep swapping out the DOM to avoid flickers.
+    console.log(this.visibleProperties, this.highlightData);
     if (
       other instanceof InlineWidget &&
-      Object.values(this.highlightData).some(
-        (value) => value instanceof TimerComponent
-      ) &&
-      Object.values(other.highlightData).some(
-        (value) => value instanceof TimerComponent
-      )
+      hasReactComponentWidget(this.highlightData, this.visibleProperties) &&
+      hasReactComponentWidget(other.highlightData, other.visibleProperties)
     ) {
       return true;
     }
@@ -184,6 +188,7 @@ class InlineWidget extends WidgetType {
   }
 
   toDOM() {
+    console.log("toDOM");
     const wrap = document.createElement("span");
     wrap.className = classNames("rounded-r", {
       "ml-1": this.mode === InlineWidgetMode.Inline,
@@ -225,10 +230,6 @@ class InlineWidget extends WidgetType {
     for (const reactRoot of this.reactRoots) {
       reactRoot.unmount();
     }
-  }
-
-  ignoreEvent(event: Event): boolean {
-    return false;
   }
 }
 

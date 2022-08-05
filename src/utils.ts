@@ -57,7 +57,9 @@ export function isNumericish(value: any): boolean {
   );
 }
 
-export const generateNanoid = customAlphabet(alphanumeric);
+const _generateNanoid = customAlphabet(alphanumeric)
+
+export const generateNanoid = () => `_${_generateNanoid()}`;
 
 export function transformColumnFormula(
   formula: string,

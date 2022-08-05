@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "refactor-watcher": "node src/refactor/watcher.mjs sample-data"
+    "refactor-watcher": "node src/refactor/watcher.mjs sample-data",
+    "refactor-cleanup": "node src/refactor/cleanup-highlighters.mjs sample-data"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.1.0",

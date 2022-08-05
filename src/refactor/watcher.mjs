@@ -1,10 +1,9 @@
 import path from 'node:path'
-import fs from 'node:fs'
 import Watcher from 'watcher'
+import { readDocumentSheets, readHighlighter, writeDocumentSheets, writeHighlighter } from './utils.mjs'
 
 const watchPath = process.argv[2]
 const fullPath = path.resolve(process.cwd(), watchPath)
-const documentsSheetsPath = path.join(fullPath, '_documentsheets')
 
 console.log('watching ', fullPath)
 
@@ -24,8 +23,8 @@ function onRenameHighlighter (oldName, newName) {
 
   console.log(`rename highlighter ${oldConfigId} => ${newConfigId}`)
 
-  const documentsSheets = readDocumentsSheets()
-  const highlighter = readHighlighter(newConfigId)
+  const documentsSheets = readDocumentSheets(fullPath)
+  const highlighter = readHighlighter(fullPath, newConfigId)
 
   let changeCount = 0
 
@@ -42,8 +41,8 @@ function onRenameHighlighter (oldName, newName) {
 
   console.log(`changed ${changeCount} sheets`)
 
-  writeHighlighter(newConfigId, refactoredHighlighter)
-  writeDocumentsSheets(refactoredDocumentsSheet)
+  writeHighlighter(fullPath, newConfigId, refactoredHighlighter)
+  writeDocumentSheets(fullPath, refactoredDocumentsSheet)
 }
 
 function onRenameDocument (oldName, newName) {
@@ -52,7 +51,7 @@ function onRenameDocument (oldName, newName) {
 
   console.log(`rename document ${oldTextDocumentId} => ${newTextDocumentId}`)
 
-  const documentsSheets = readDocumentsSheets()
+  const documentsSheets = readDocumentSheets(fullPath)
 
   let changeCount = 0
 
@@ -68,25 +67,8 @@ function onRenameDocument (oldName, newName) {
 
   console.log(`changed ${changeCount} sheets`)
 
-  writeDocumentsSheets(refactoredDocumentsSheet)
+  writeDocumentSheets(fullPath, refactoredDocumentsSheet)
 }
-
-function readDocumentsSheets () {
-  return JSON.parse(fs.readFileSync(documentsSheetsPath, { encoding: 'utf8', flag: 'r' }))
-}
-
-function writeDocumentsSheets (documentsSheets) {
-  fs.writeFileSync(documentsSheetsPath, JSON.stringify(documentsSheets, null, 2))
-}
-
-function readHighlighter (id) {
-  return JSON.parse(fs.readFileSync(path.join(watchPath, `${id}.highlighter`)))
-}
-
-function writeHighlighter (id, highlighter) {
-  fs.writeFileSync(path.join(watchPath, `${id}.highlighter`), JSON.stringify(highlighter, null, 2))
-}
-
 
 
 

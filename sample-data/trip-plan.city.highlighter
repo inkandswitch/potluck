@@ -1,0 +1,11 @@
+{
+  "id": "trip-plan.city",
+  "name": "city",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{markdown.h1}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

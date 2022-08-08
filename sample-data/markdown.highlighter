@@ -14,7 +14,7 @@
     },
     {
       "name": "font-weight",
-      "formula": "type === \"title\" || type === \"bold\" ? \"bold\" : \"normal\"",
+      "formula": "type.startsWith(\"h\") || type === \"bold\" ? \"bold\" : \"normal\"",
       "visibility": "STYLE"
     },
     {
@@ -24,7 +24,7 @@
     },
     {
       "name": "font-size",
-      "formula": "type === \"title\" ? \"1rem\" : \"normal\"",
+      "formula": "({\"h1\": \"1.3rem\",\n  \"h2\": \"1rem\"}[type]) || \"normal\"",
       "visibility": "STYLE"
     }
   ]

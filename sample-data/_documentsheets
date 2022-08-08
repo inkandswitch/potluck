@@ -1,6 +1,16 @@
 [
   {
     "textDocumentId": "trip-plan",
+    "id": "_InLcuS3AkMLP7bsKI5v6N",
+    "configId": "trip-plan.activity"
+  },
+  {
+    "textDocumentId": "trip-plan",
+    "id": "_QgP1hr72eFZyXOKb6GBwM",
+    "configId": "trip-plan.city"
+  },
+  {
+    "textDocumentId": "trip-plan",
     "id": "_rHwaFAMcGPKOYFHMzGvaJ",
     "configId": "common.number"
   },

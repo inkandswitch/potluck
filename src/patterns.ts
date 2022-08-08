@@ -21,7 +21,10 @@ const patternGrammar = ohm.grammar(String.raw`
       = alnum+
 
     HighlightName
-      = alnum+
+      = highlightNamePart+
+
+    highlightNamePart
+      = (alnum "."?)
 
     RegExpr
       = "/" regExprChar+ "/"
@@ -217,18 +220,26 @@ function matchGroupPart(
 
   switch (expr.type) {
     case "highlightName": {
+      const [name, ...types ] = expr.name.split(".")
+      const subtype = types.join(".")
+
       const sheetConfig = Array.from(sheetConfigsMobx.values()).find(
-        (sheetConfig) => sheetConfig.name === expr.name
+        (sheetConfig) => sheetConfig.name === name
       );
 
       if (!sheetConfig) {
         return [];
       }
 
-      highlights = getComputedSheetValue(
+      highlights = (getComputedSheetValue(
         textDocument.id,
         sheetConfig.id
-      ).get() as Highlight[];
+      ).get() as Highlight[])
+        .filter(h => (
+          subtype === "" || (
+            h.data.type && h.data.type.valueOf().startsWith(subtype)
+          )
+        ));
       break;
     }
 
@@ -314,9 +325,12 @@ function matchPartAfterHighlight(
 
       switch (part.expr.type) {
         case "highlightName": {
+          const [name, ...types ] = part.expr.name.split(".")
+          const subtype = types.join(".")
+
           const sheetConfig = Array.from(sheetConfigsMobx.values()).find(
             (sheetConfig) =>
-              sheetConfig.name === (part.expr as HighlightName).name
+              sheetConfig.name === name
           );
 
           if (!sheetConfig) {
@@ -329,7 +343,11 @@ function matchPartAfterHighlight(
           ).get() as Highlight[];
 
           matchingHighlight = highlights.find(
-            ({ span }) => span[0] === highlight.span[1] + trimmedLength
+            ({ span, data }) =>
+              (span[0] === highlight.span[1] + trimmedLength) &&
+              (subtype === "" || (
+                data.type && data.type.valueOf().startsWith(subtype)
+              ))
           );
           break;
         }

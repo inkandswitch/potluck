@@ -548,7 +548,7 @@ export function patternFromSelection(state: EditorState): Pattern | undefined {
       type: "group",
       expr: {
         type: "highlightName",
-        name: sheetConfigName,
+        name: highlight.data.type ? `${sheetConfigName}.${highlight.data.type.valueOf()}` : sheetConfigName,
       },
     });
     usedHighlightNames.push(sheetConfigName);

@@ -1,0 +1,26 @@
+{
+  "id": "trip-plan.activity",
+  "name": "activity",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{markdown.h2}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "city",
+      "formula": "PrevOfType($, \"city\")",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "openingHours",
+      "formula": "NextOfType($, \"openingHours\")",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "isOpen",
+      "formula": "openingHours.data.isOpen",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

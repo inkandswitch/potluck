@@ -94,6 +94,14 @@ Prism.languages.markdown = Prism.languages.extend("markup", {}), Prism.languages
 
 export type Scope = { [name: string]: any };
 
+function getTokenType (token: any) {
+  if (token.type === 'title') {
+    return `h${token.content[0].content.length}`
+  }
+
+  return token.type
+}
+
 function evalCondition(condition: any, item: any): any {
   if (isFunction(condition)) {
     return condition(item);
@@ -555,7 +563,7 @@ export function evaluateFormula(
             documentId: textDocument.id,
             sheetConfigId: sheetConfig.id,
             span: [start, end],
-            data: { type: token.type },
+            data: { type: getTokenType(token) },
           });
         }
 
@@ -648,6 +656,8 @@ export function evaluateFormula(
 
     return isNaN(result) ? undefined : result;
   } catch (e) {
+    console.log(e);
+
     return e;
   }
 }

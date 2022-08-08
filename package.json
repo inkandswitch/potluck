@@ -30,6 +30,7 @@
     "eventemitter3": "^4.0.7",
     "fuzzyset": "^1.0.7",
     "lodash": "^4.17.21",
+    "luxon": "^3.0.1",
     "mobx": "^6.6.1",
     "mobx-react-lite": "^3.4.0",
     "nanoid": "^4.0.0",
@@ -42,6 +43,7 @@
   },
   "devDependencies": {
     "@types/lodash": "^4.14.182",
+    "@types/luxon": "^3.0.0",
     "@types/prismjs": "^1.26.0",
     "@types/react": "^18.0.0",
     "@types/react-big-calendar": "^0.38.1",

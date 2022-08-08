@@ -17,9 +17,15 @@ import file_14 from "../sample-data/pizza-dough.number-of-balls.highlighter?raw"
 import file_15 from "../sample-data/pizza-dough.txt?raw"
 import file_16 from "../sample-data/pizza-dough.water.highlighter?raw"
 import file_17 from "../sample-data/pizza.txt?raw"
-import file_18 from "../sample-data/trip-plan.txt?raw"
-import file_19 from "../sample-data/workout.txt?raw"
-import file_20 from "../sample-data/workout.workouts.highlighter?raw"
+import file_18 from "../sample-data/trip-plan.day.highlighter?raw"
+import file_19 from "../sample-data/trip-plan.openingHours.highlighter?raw"
+import file_20 from "../sample-data/trip-plan.openingRange.highlighter?raw"
+import file_21 from "../sample-data/trip-plan.time.highlighter?raw"
+import file_22 from "../sample-data/trip-plan.timeSpan.highlighter?raw"
+import file_23 from "../sample-data/trip-plan.txt?raw"
+import file_24 from "../sample-data/workout.txt?raw"
+import file_25 from "../sample-data/workout.workout.highlighter?raw"
+import file_26 from "../sample-data/workout.workouts.highlighter?raw"
 
 export const DefaultFiles = {
   "/_documentsheets" : documentSheets,
@@ -40,7 +46,13 @@ export const DefaultFiles = {
   "/pizza-dough.txt" : file_15,
   "/pizza-dough.water.highlighter" : file_16,
   "/pizza.txt" : file_17,
-  "/trip-plan.txt" : file_18,
-  "/workout.txt" : file_19,
-  "/workout.workouts.highlighter" : file_20
+  "/trip-plan.day.highlighter" : file_18,
+  "/trip-plan.openingHours.highlighter" : file_19,
+  "/trip-plan.openingRange.highlighter" : file_20,
+  "/trip-plan.time.highlighter" : file_21,
+  "/trip-plan.timeSpan.highlighter" : file_22,
+  "/trip-plan.txt" : file_23,
+  "/workout.txt" : file_24,
+  "/workout.workout.highlighter" : file_25,
+  "/workout.workouts.highlighter" : file_26
 }

@@ -1,0 +1,26 @@
+{
+  "id": "trip-plan.openingHours",
+  "name": "openingHours",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "Open:",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "openingRange",
+      "formula": "Filter(NextUntil($, HasType(\"markdown\")), HasType(\"openingRange\"))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "isOpen",
+      "formula": "openingRange.some(r => r.data.isActive)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "color",
+      "formula": "isOpen ? \"green\" : \"red\"",
+      "visibility": "STYLE"
+    }
+  ]
+}

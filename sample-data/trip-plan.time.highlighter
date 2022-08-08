@@ -1,0 +1,16 @@
+{
+  "id": "trip-plan.time",
+  "name": "time",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{number:hours}:{number:minutes}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "time",
+      "formula": "DateTime.fromObject({hours, minutes})",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

@@ -1,5 +1,40 @@
 [
   {
+    "textDocumentId": "trip-plan",
+    "id": "_rHwaFAMcGPKOYFHMzGvaJ",
+    "configId": "common.number"
+  },
+  {
+    "textDocumentId": "trip-plan",
+    "id": "_nAjrSj3fnSHKYYvocIVGd",
+    "configId": "markdown"
+  },
+  {
+    "textDocumentId": "trip-plan",
+    "id": "_VDr76rWqTSaAMmFNLpru5",
+    "configId": "trip-plan.day"
+  },
+  {
+    "textDocumentId": "trip-plan",
+    "id": "_NKhtuqG94fi030KZVPz1J",
+    "configId": "trip-plan.openingRange"
+  },
+  {
+    "textDocumentId": "trip-plan",
+    "id": "_Y179IOu73uTbYWrdxv9bt",
+    "configId": "trip-plan.time"
+  },
+  {
+    "textDocumentId": "trip-plan",
+    "id": "_yqGX28lejuaacUHpNFDBh",
+    "configId": "trip-plan.timeSpan"
+  },
+  {
+    "textDocumentId": "trip-plan",
+    "id": "_WqCbdCTLROphJfThUc0r9",
+    "configId": "trip-plan.openingHours"
+  },
+  {
     "textDocumentId": "pizza",
     "id": "NEUs942EyHg11EAbM0NAy",
     "configId": "food.ingredient"
@@ -68,11 +103,6 @@
     "textDocumentId": "workout",
     "id": "HACBcetciF14iiDndby8U",
     "configId": "common.date"
-  },
-  {
-    "textDocumentId": "workout",
-    "id": "z1AJj5lZM1poNICrsgpdA",
-    "configId": "workout.workouts"
   },
   {
     "textDocumentId": "ice-cream",

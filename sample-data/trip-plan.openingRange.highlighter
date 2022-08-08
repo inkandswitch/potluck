@@ -1,0 +1,26 @@
+{
+  "id": "trip-plan.openingRange",
+  "name": "openingRange",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{day:start} - {day:end}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "days",
+      "formula": "const days = [\"Mon\", \"Tue\", \"Wed\", \"Thu\", \"Fri\", \"Sat\", \"Sun\"]\n\nreturn days.slice(\n  days.indexOf(start.valueOf()),\n  days.indexOf(end.valueOf()) + 1\n)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "timeRanges",
+      "formula": "Filter(FindAll(\"timeSpan\"), SameLine($))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "isActive",
+      "formula": "days.includes(DateTime.now().weekdayShort) &&\ntimeRanges.some(r => r.data.isActive)",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

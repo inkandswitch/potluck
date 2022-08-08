@@ -44,6 +44,7 @@ import { createTimerComponent } from "./TimerComponent";
 import { runInAction } from "mobx";
 import { createNumberSliderComponent } from "./NumberSliderComponent";
 import { matchPatternInDocument } from "./patterns";
+import {DateTime} from 'luxon'
 
 const foodNameMatchSet = new FuzzySet(
   OFFICIAL_FOODS.map((food: any) => food.description),
@@ -108,6 +109,8 @@ export function evaluateFormula(
   scope: Scope
 ) {
   const API = {
+    DateTime,
+
     SplitLines: (until?: string): Highlight[] => {
       // todo: there's probably a more elegant way to get lines out of CM
       const lines = textDocument.text.sliceString(0).split("\n");
@@ -622,8 +625,11 @@ export function evaluateFormula(
         highlightComponentEntriesMobx.push(componentEntry);
       });
       return componentEntry.component;
-    },
+    }
   };
+
+
+  const formulaSource = transformColumnFormula(source, isFirstColumn)
 
   try {
     let fn = new Function(
@@ -632,7 +638,7 @@ export function evaluateFormula(
       `
     with (API) {
       with (context) {
-        return ${transformColumnFormula(source, isFirstColumn)}
+        ${formulaSource.includes('return') ? formulaSource : `return (${formulaSource})`}
       }
     }
   `

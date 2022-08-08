@@ -1,0 +1,16 @@
+{
+  "id": "trip-plan.timeSpan",
+  "name": "timeSpan",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{time:start} - {time:end}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "isActive",
+      "formula": "start.data.time <= DateTime.now() &&\nend.data.time >= DateTime.now()",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

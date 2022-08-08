@@ -1,0 +1,11 @@
+{
+  "id": "trip-plan.day",
+  "name": "day",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/Mon|Tue|Wed|Thu|Fri|Sat|Sun/}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

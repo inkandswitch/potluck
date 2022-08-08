@@ -4,7 +4,7 @@ trip plan
 ## Grande Mercato 
 Local food market, great vegetables and fresh fish
 
-Open: Mon - Sun 7:00 - 13:00
+Open: Mon - Sun 12:00 - 20:00
 
 # Genua
 
@@ -16,4 +16,6 @@ Open: Mon - Sun 9:00 - 20:00
 
 ## Lugano Cathedral
 
-Open: Mon - Fri 8:00 - 12:00, 15:00 - 19:00
+Open: 
+   Wed - Fri 8:00 - 12:00, 15:00 - 19:00
+   Mon - Tue  8:00 - 13:00

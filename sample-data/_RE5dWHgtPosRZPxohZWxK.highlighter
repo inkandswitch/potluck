@@ -1,0 +1,21 @@
+{
+  "id": "_RE5dWHgtPosRZPxohZWxK",
+  "name": "todo",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "[ ]",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "task",
+      "formula": "TextAfter($)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "duedate",
+      "formula": "Filter(FindAll(\"dates\"), a => SameLine($, a))",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

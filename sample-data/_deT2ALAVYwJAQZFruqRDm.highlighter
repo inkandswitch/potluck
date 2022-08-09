@@ -1,0 +1,11 @@
+{
+  "id": "_deT2ALAVYwJAQZFruqRDm",
+  "name": "tmdb",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "tmdb{/\\\\d+/:id}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

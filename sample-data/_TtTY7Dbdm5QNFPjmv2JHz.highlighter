@@ -1,0 +1,11 @@
+{
+  "id": "_TtTY7Dbdm5QNFPjmv2JHz",
+  "name": "person",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/\\\\n\\\\n/}{/.*/:name}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

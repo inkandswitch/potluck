@@ -1,0 +1,11 @@
+{
+  "id": "_iDuKWcKC5q4oghojWEZMY",
+  "name": "- {/.*/} {dates} {tmdb} {stars}",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{dates} {tmdb} {rating} {/.*/}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

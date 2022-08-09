@@ -1,0 +1,16 @@
+{
+  "id": "_FpoqTscl6rgB6XqG5qI1G",
+  "name": "portfolio value",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "portfolio value",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col8",
+      "formula": "FindAll(\"holdings\").map(h => h.data.currentPrice * TextOfHighlight(h.data.shares)).reduce((a, b) => a + b, 0)",
+      "visibility": "INLINE"
+    }
+  ]
+}

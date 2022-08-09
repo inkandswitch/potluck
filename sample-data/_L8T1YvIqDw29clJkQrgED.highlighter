@@ -1,0 +1,11 @@
+{
+  "id": "_L8T1YvIqDw29clJkQrgED",
+  "name": "money",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "${number:amount}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

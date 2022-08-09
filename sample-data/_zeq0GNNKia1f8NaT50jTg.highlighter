@@ -1,0 +1,21 @@
+{
+  "id": "_zeq0GNNKia1f8NaT50jTg",
+  "name": "output",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "total [{name:name}]",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col9",
+      "formula": "FindAll(\"userMoney\").filter(h => TextOfHighlight(h.data.name) === TextOfHighlight(name))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col10",
+      "formula": "`$${col9.reduce((a, b) => a + b.data.money.data.amount.data.value, 0)}`",
+      "visibility": "INLINE"
+    }
+  ]
+}

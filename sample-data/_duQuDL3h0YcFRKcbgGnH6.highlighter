@@ -1,0 +1,16 @@
+{
+  "id": "_duQuDL3h0YcFRKcbgGnH6",
+  "name": "tag",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "#{/\\\\S+/}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "title",
+      "formula": "TextBefore($)",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

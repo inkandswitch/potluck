@@ -1,0 +1,16 @@
+{
+  "id": "_NJaMlWA3cj0ElGcnZBlcZ",
+  "name": "phone",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "({number}) {number}-{number}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col2",
+      "formula": "PrevOfType($, \"person\")",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "_LSD4f498CGDVS9RG7nvQb",
+  "name": "rating",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/⭐+/}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col2",
+      "formula": "TextOfHighlight($).length",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

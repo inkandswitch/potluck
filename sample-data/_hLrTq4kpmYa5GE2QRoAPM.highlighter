@@ -1,0 +1,11 @@
+{
+  "id": "_hLrTq4kpmYa5GE2QRoAPM",
+  "name": "distance",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{number}miles",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

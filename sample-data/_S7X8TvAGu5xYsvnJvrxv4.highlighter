@@ -1,0 +1,16 @@
+{
+  "id": "_S7X8TvAGu5xYsvnJvrxv4",
+  "name": "hike",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "🌲",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col3",
+      "formula": "TextAfter($)",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

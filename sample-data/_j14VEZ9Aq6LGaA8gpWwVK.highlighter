@@ -1,0 +1,16 @@
+{
+  "id": "_j14VEZ9Aq6LGaA8gpWwVK",
+  "name": "userMoney",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{name:name} {money:money}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col2",
+      "formula": "money.data.amount",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

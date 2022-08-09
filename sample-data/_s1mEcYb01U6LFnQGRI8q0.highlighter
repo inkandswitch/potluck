@@ -1,0 +1,11 @@
+{
+  "id": "_s1mEcYb01U6LFnQGRI8q0",
+  "name": "interval",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "[{/\\\\d+/:number}]",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

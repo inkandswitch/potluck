@@ -1,0 +1,21 @@
+{
+  "id": "_euC36hBrMcbfjHAGH7oYY",
+  "name": "holdings",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "${/\\\\w+/:ticker} {number:shares}@${/[\\\\d\\.]+/:cost}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "currentPrice",
+      "formula": "TextOfHighlight(ticker) === \"GME\" ? 40 : 20",
+      "visibility": "SUPERSCRIPT"
+    },
+    {
+      "name": "col7",
+      "formula": "`$${currentPrice * ParseInt(shares)}`",
+      "visibility": "INLINE"
+    }
+  ]
+}

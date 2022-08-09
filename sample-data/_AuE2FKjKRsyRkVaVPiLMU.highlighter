@@ -1,0 +1,16 @@
+{
+  "id": "_AuE2FKjKRsyRkVaVPiLMU",
+  "name": "#read-{number:rating}",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "#read-{number:rating}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "title",
+      "formula": "TextBefore($)",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

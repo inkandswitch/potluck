@@ -118,10 +118,25 @@ const DocumentSidebarItem = observer(
   }
 );
 
+const SORT_FIRST_PREFIX = "Example: ";
 export const DocumentSidebar = observer(() => {
   if (!showDocumentSidebarBox.get()) {
     return null;
   }
+
+  const sortedDocuments = [...textDocumentsMobx.values()];
+  sortedDocuments.sort((a, b) => {
+    if (a.name.startsWith(SORT_FIRST_PREFIX)) {
+      if (b.name.startsWith(SORT_FIRST_PREFIX)) {
+        return a.name.localeCompare(b.name);
+      }
+      return -1;
+    }
+    if (b.name.startsWith(SORT_FIRST_PREFIX)) {
+      return 1;
+    }
+    return a.name.localeCompare(b.name);
+  });
 
   return (
     <div className="w-64 border-r border-gray-200">
@@ -135,7 +150,7 @@ export const DocumentSidebar = observer(() => {
 
         <PersistenceButton />
       </div>
-      {values(textDocumentsMobx).map((textDocument) => (
+      {sortedDocuments.map((textDocument) => (
         <DocumentSidebarItem
           textDocument={textDocument}
           key={textDocument.id}

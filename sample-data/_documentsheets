@@ -134,6 +134,36 @@
     "configId": "food.quantity"
   },
   {
+    "textDocumentId": "bar",
+    "id": "_2TRyK9cYdyhE5k2QGQNrX",
+    "configId": "markdown"
+  },
+  {
+    "textDocumentId": "bar",
+    "id": "_csZJCgJ3S78PObHxaQCt6",
+    "configId": "common.emoji"
+  },
+  {
+    "textDocumentId": "bar",
+    "id": "_M4kQAPANPacHMzSlMrxGj",
+    "configId": "common.number"
+  },
+  {
+    "textDocumentId": "bar",
+    "id": "_XnudOhOYOAwZ0O41RC71M",
+    "configId": "bar.price"
+  },
+  {
+    "textDocumentId": "bar",
+    "id": "_FByk6n1gPfsxtVnlmbw9g",
+    "configId": "bar.sales"
+  },
+  {
+    "textDocumentId": "bar",
+    "id": "_76ua3Ul5NMlnigIHzspSm",
+    "configId": "bar.total"
+  },
+  {
     "textDocumentId": "gochujang-pork",
     "id": "zUe6BSpguigbb8wqVJ8Jo",
     "configId": "food.ingredient",

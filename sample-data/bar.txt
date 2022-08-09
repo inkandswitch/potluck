@@ -1,0 +1,29 @@
+Bar
+# Prices
+
+beer 🍺 = 3 Euros
+apple juice spritzer 🍎 = 2 Euros
+coke🥤 = 2 Euros
+coffee ☕ = 2 Euros
+cappucino 🥛 = 3 Euros
+
+# Sales
+enter emojis for each order on a new line
+
+🍺🍺
+🍎
+
+We have to charge more for beer 🍺 = 4 Euros
+
+🍺🍺
+☕️
+🥛
+🍺🥤🍎
+
+Total: 
+
+
+
+
+
+

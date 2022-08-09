@@ -1,0 +1,31 @@
+{
+  "id": "bar.sales",
+  "name": "sales",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/^(\\u00a9|\\u00ae|[\\u2000-\\u3300]|\\ud83c[\\ud000-\\udfff]|\\ud83d[\\ud000-\\udfff]|\\ud83e[\\ud000-\\udfff])/}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "orders",
+      "formula": "Filter(FindAll(\"emoji\"), SameLine($))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "prices",
+      "formula": "orders.map((o) => \n First(Filter(FindAll(\"price\"), (p) => (\n   TextOfHighlight(p.data.emoji)\n   ===\n   TextOfHighlight(o)\n ))).data.price\n)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "sum",
+      "formula": "prices\n  .map((v) => parseInt(TextOfHighlight(v)))\n  .reduce((s, v) => s+v)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "sumText",
+      "formula": "`= ${sum} Euro`",
+      "visibility": "SUPERSCRIPT"
+    }
+  ]
+}

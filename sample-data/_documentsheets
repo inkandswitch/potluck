@@ -1,5 +1,30 @@
 [
   {
+    "textDocumentId": "time-tracking",
+    "id": "_Wsf3s8IyOld9knDg1rdnC",
+    "configId": "common.number"
+  },
+  {
+    "textDocumentId": "time-tracking",
+    "id": "_1Co3scDP2mNoUzFoYltQ5",
+    "configId": "markdown"
+  },
+  {
+    "textDocumentId": "time-tracking",
+    "id": "_H7EWwGZc6qecFzGl0UTWc",
+    "configId": "time-tracking.project"
+  },
+  {
+    "textDocumentId": "time-tracking",
+    "id": "_mMM1kgsMOjd4Jtwadj75F",
+    "configId": "time-tracking.time"
+  },
+  {
+    "textDocumentId": "time-tracking",
+    "id": "_2gPgKJTGW7qDrcqP7ofMb",
+    "configId": "time-tracking.open-time"
+  },
+  {
     "textDocumentId": "trip-plan",
     "id": "_InLcuS3AkMLP7bsKI5v6N",
     "configId": "trip-plan.activity"
@@ -58,6 +83,36 @@
     "textDocumentId": "pizza",
     "id": "RmXyk98yDMNoLFZeDwTt2",
     "configId": "food.quantity"
+  },
+  {
+    "textDocumentId": "bar",
+    "id": "_2TRyK9cYdyhE5k2QGQNrX",
+    "configId": "markdown"
+  },
+  {
+    "textDocumentId": "bar",
+    "id": "_csZJCgJ3S78PObHxaQCt6",
+    "configId": "common.emoji"
+  },
+  {
+    "textDocumentId": "bar",
+    "id": "_M4kQAPANPacHMzSlMrxGj",
+    "configId": "common.number"
+  },
+  {
+    "textDocumentId": "bar",
+    "id": "_XnudOhOYOAwZ0O41RC71M",
+    "configId": "bar.price"
+  },
+  {
+    "textDocumentId": "bar",
+    "id": "_FByk6n1gPfsxtVnlmbw9g",
+    "configId": "bar.sales"
+  },
+  {
+    "textDocumentId": "bar",
+    "id": "_76ua3Ul5NMlnigIHzspSm",
+    "configId": "bar.total"
   },
   {
     "textDocumentId": "aeropress",
@@ -132,36 +187,6 @@
     "textDocumentId": "ice-cream",
     "id": "dGc1oJZ2MSClD14RZNPe4",
     "configId": "food.quantity"
-  },
-  {
-    "textDocumentId": "bar",
-    "id": "_2TRyK9cYdyhE5k2QGQNrX",
-    "configId": "markdown"
-  },
-  {
-    "textDocumentId": "bar",
-    "id": "_csZJCgJ3S78PObHxaQCt6",
-    "configId": "common.emoji"
-  },
-  {
-    "textDocumentId": "bar",
-    "id": "_M4kQAPANPacHMzSlMrxGj",
-    "configId": "common.number"
-  },
-  {
-    "textDocumentId": "bar",
-    "id": "_XnudOhOYOAwZ0O41RC71M",
-    "configId": "bar.price"
-  },
-  {
-    "textDocumentId": "bar",
-    "id": "_FByk6n1gPfsxtVnlmbw9g",
-    "configId": "bar.sales"
-  },
-  {
-    "textDocumentId": "bar",
-    "id": "_76ua3Ul5NMlnigIHzspSm",
-    "configId": "bar.total"
   },
   {
     "textDocumentId": "gochujang-pork",

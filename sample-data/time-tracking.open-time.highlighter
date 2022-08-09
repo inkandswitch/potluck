@@ -1,0 +1,21 @@
+{
+  "id": "time-tracking.open-time",
+  "name": "openTime",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{time:time}{/-$/}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "end",
+      "formula": "DateTime.now().toLocaleString(DateTime.TIME_SIMPLE)",
+      "visibility": "INLINE"
+    },
+    {
+      "name": "col12",
+      "formula": "TemplateButton($, \"stop\", ` ${end}`)",
+      "visibility": "INLINE"
+    }
+  ]
+}

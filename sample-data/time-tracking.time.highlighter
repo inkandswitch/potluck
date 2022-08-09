@@ -1,0 +1,11 @@
+{
+  "id": "time-tracking.time",
+  "name": "time",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{number:hours}:{number:minutes}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

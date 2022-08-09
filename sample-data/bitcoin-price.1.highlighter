@@ -9,7 +9,7 @@
     },
     {
       "name": "price",
-      "formula": "FetchJSON(`https://api.coindesk.com/v1/bpi/currentprice/${TextOfHighlight(currency)}.json`, 5).bpi[TextOfHighlight(currency)].rate_float",
+      "formula": "FetchJSON(`https://api.coindesk.com/v1/bpi/currentprice/${TextOfHighlight(currency)}.json`, 5)?.bpi[TextOfHighlight(currency)].rate_float",
       "visibility": "INLINE"
     }
   ]

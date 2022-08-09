@@ -13,7 +13,7 @@ import {
   StateField,
 } from "@codemirror/state";
 import { minimalSetup } from "codemirror";
-import { useEffect, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { autorun, comparer, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
@@ -27,7 +27,7 @@ import {
   sheetConfigsMobx,
   Span,
   textDocumentsMobx,
-  textEditorStateMobx,
+  textEditorStateMobx, textEditorViewMobx,
 } from "./primitives";
 import { editorSelectionHighlightsComputed } from "./compute";
 import {
@@ -205,9 +205,20 @@ class InlineWidget extends WidgetType {
       if (isHighlightComponent(value)) {
         const token = document.createElement("span");
         token.className = "mx-1";
+        token.innerText = "dummy"
         const reactRoot = createRoot(token);
         this.reactRoots.push(reactRoot);
         reactRoot.render(value.render());
+        wrap.appendChild(token);
+        continue;
+      }
+      if (React.isValidElement(value)) {
+        const token = document.createElement("span");
+        token.className = "mx-1";
+        token.innerText = "dummy"
+        const reactRoot = createRoot(token);
+        this.reactRoots.push(reactRoot);
+        reactRoot.render(value);
         wrap.appendChild(token);
         continue;
       }
@@ -622,6 +633,8 @@ export const Editor = observer(
         },
       });
 
+      textEditorViewMobx.set(view)
+
       runInAction(() => {
         textEditorStateMobx.set(view.state);
       });
@@ -629,9 +642,10 @@ export const Editor = observer(
       const unsubscribes: (() => void)[] = [
         autorun(() => {
           const highlights = editorSelectionHighlightsComputed.get();
-          view.dispatch({
+
+         view.dispatch({
             effects: setHighlightsEffect.of(highlights),
-          });
+          })
         }),
         autorun(() => {
           const highlights = hoverHighlightsMobx
@@ -650,6 +664,7 @@ export const Editor = observer(
       return () => {
         unsubscribes.forEach((unsubscribe) => unsubscribe());
         view.destroy();
+        textEditorViewMobx.set(undefined)
       };
     }, [textDocument]);
 

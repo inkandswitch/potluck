@@ -3,7 +3,7 @@ import classNames from "classnames";
 import { isArray } from "lodash";
 import { action, comparer, computed, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import { FC, useEffect, useRef, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import {
   hoverHighlightsMobx,
   isSheetExpandedMobx,
@@ -71,6 +71,10 @@ export type SheetViewProps = {
 };
 
 export function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
+  if (React.isValidElement(value)) {
+    return value
+  }
+
   if (value instanceof Error) {
     return <span className="text-red-500 font-mono">#Err</span>;
   }

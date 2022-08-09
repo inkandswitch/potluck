@@ -8,7 +8,7 @@ import {
   SheetValueRow,
   HighlightComponent,
   highlightComponentEntriesMobx,
-  HighlightComponentEntry, textEditorStateMobx,
+  HighlightComponentEntry, textEditorStateMobx, textEditorViewMobx,
 } from "./primitives";
 import {
   curry,
@@ -642,9 +642,34 @@ export function evaluateFormula(
         highlightComponentEntriesMobx.push(componentEntry);
       });
       return componentEntry.component;
+    },
+
+    TemplateButton: (
+      highlight: Highlight,
+      label: string,
+      text: string
+    ) =>  {
+      if (highlight === undefined) {
+        return undefined;
+      }
+
+      const onClick = () => {
+        const view = textEditorViewMobx.get()
+
+        if (!view) {
+          return
+        }
+
+        view.dispatch({
+          changes: { from:  highlight.span[1], insert: text }
+        })
+      }
+
+      return (
+        <button onClick={onClick} className="px-1 bg-blue-100 rounded">{label.toString()}</button>
+      )
     }
   };
-
 
   const formulaSource = transformColumnFormula(source, isFirstColumn)
 

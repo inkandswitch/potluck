@@ -4,6 +4,7 @@ import { generateNanoid } from "./utils";
 import { evaluateFormula } from "./formulas";
 import { getStateFromFiles } from "./persistence";
 import { DefaultFiles } from "./DefaultState";
+import { EditorView } from "@codemirror/view";
 
 export type Span = [from: number, to: number];
 
@@ -85,6 +86,8 @@ export function getSheetConfigsOfTextDocument(textDocument: TextDocument) {
 export const textEditorStateMobx = observable.box(
   EditorState.create({ doc: "" })
 );
+
+export const textEditorViewMobx = observable.box<EditorView>()
 
 const defaultState = getStateFromFiles(DefaultFiles);
 export const textDocumentsMobx = observable.map<string, TextDocument>(

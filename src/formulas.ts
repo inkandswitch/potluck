@@ -8,7 +8,7 @@ import {
   SheetValueRow,
   HighlightComponent,
   highlightComponentEntriesMobx,
-  HighlightComponentEntry,
+  HighlightComponentEntry, textEditorStateMobx,
 } from "./primitives";
 import {
   curry,
@@ -44,7 +44,7 @@ import { createTimerComponent } from "./TimerComponent";
 import { runInAction } from "mobx";
 import { createNumberSliderComponent } from "./NumberSliderComponent";
 import { matchPatternInDocument } from "./patterns";
-import {DateTime} from 'luxon'
+import { DateTime } from 'luxon'
 
 const foodNameMatchSet = new FuzzySet(
   OFFICIAL_FOODS.map((food: any) => food.description),
@@ -94,7 +94,7 @@ Prism.languages.markdown = Prism.languages.extend("markup", {}), Prism.languages
 
 export type Scope = { [name: string]: any };
 
-function getTokenType (token: any) {
+function getTokenType(token: any) {
   if (token.type === 'title') {
     return `h${token.content[0].content.length}`
   }
@@ -282,6 +282,15 @@ export function evaluateFormula(
           (distanceLimit === undefined ||
             r.span[0] - highlight.span[1] < distanceLimit)
       );
+    },
+
+    HasCursorFocus: (highlight: Highlight) => {
+      const selectedRange = textEditorStateMobx.get().selection.asSingle().main
+
+      return (
+        selectedRange.from >= highlight.span[0] &&
+        selectedRange.to <= highlight.span[1]
+      )
     },
 
     PrevOfType: (
@@ -513,7 +522,7 @@ export function evaluateFormula(
         ).get();
         const rowForHighlight = computedData[
           matchedHighlight.sheetConfigId
-        ].find((row) => row.data.name === matchedHighlight);
+          ].find((row) => row.data.name === matchedHighlight);
         if (
           rowForHighlight &&
           rowForHighlight.data.officialName !== undefined
@@ -804,6 +813,11 @@ export const FORMULA_REFERENCE = [
     args: [],
     return: "Highlight[]",
   },
+  {
+    name: "HasCursorFocus",
+    args: [],
+    return: "boolean"
+  }
 ];
 
 export function evaluateSheet(

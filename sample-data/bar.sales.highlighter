@@ -26,6 +26,16 @@
       "name": "sumText",
       "formula": "`= ${sum} Euro`",
       "visibility": "SUPERSCRIPT"
+    },
+    {
+      "name": "change",
+      "formula": "let result = \"\"\n\nif (sum < 5) {\n  result += ` 5 → ${5 - sum}`\n}\n\nif (sum < 10) {\n  result += ` 10 → ${10 - sum}`\n}\n\nreturn result",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col5",
+      "formula": "HasCursorFocus($) ? change : undefined",
+      "visibility": "INLINE"
     }
   ]
 }

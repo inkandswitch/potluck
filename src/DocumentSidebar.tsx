@@ -139,7 +139,7 @@ export const DocumentSidebar = observer(() => {
   });
 
   return (
-    <div className="w-64 border-r border-gray-200 flex flex-col overflow-hidden">
+    <div className="w-64 border-r border-gray-200 flex flex-col overflow-hidden flex-shrink-0">
       <div className="flex-shrink-0 flex items-center justify-between px-2 h-12 border-b border-gray-200">
         <div className="text-sm font-medium">
           Potluck{" "}

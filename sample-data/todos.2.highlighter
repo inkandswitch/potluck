@@ -1,0 +1,21 @@
+{
+  "id": "_mbY1JnLfyU4tS1CJzqlek",
+  "name": "[ ]",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "[ ]",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "task",
+      "formula": "TextAfter($)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "duedate",
+      "formula": "Filter(FindAll(\"dates\"), a => SameLine($, a))",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

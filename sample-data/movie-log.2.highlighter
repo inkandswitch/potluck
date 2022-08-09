@@ -1,0 +1,11 @@
+{
+  "id": "_NMdRa1DegnFgufcstGydw",
+  "name": "rating",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/⭐+/}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "_M6wGTrrCojFmklvFgBUeR",
+  "name": "phone",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "({number}) {number}-{number}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

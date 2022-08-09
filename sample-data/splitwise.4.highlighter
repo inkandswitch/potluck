@@ -1,0 +1,11 @@
+{
+  "id": "_jVZvRC3PmCba70dBrzJrt",
+  "name": "name",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/scarlett|yiwen|paul|sean/}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

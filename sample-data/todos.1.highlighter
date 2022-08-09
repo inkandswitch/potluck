@@ -1,0 +1,21 @@
+{
+  "id": "_PmJujr4bFGMISSl8XeztF",
+  "name": "[x]",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "[x]",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "task",
+      "formula": "TextAfter($)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "text-decoration",
+      "formula": "\"line-through\"",
+      "visibility": "STYLE"
+    }
+  ]
+}

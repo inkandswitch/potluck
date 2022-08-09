@@ -1,0 +1,11 @@
+{
+  "id": "_Hd339jU0lbUpjBVNhVnuZ",
+  "name": "tags",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "#{/\\\\S+/}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "sheets": [
+    {
+      "id": "_twysdJf5L2oWng1VP75uJ",
+      "configId": "movie-log.1"
+    },
+    {
+      "id": "_jbTqffI9b2LRuqpgmsP9e",
+      "configId": "movie-log.2"
+    },
+    {
+      "id": "_YrPYq5mwS7x7Xg6Wtjy0Z",
+      "configId": "movie-log.3"
+    },
+    {
+      "id": "_xsbsEirMvVNcOGJc8bdfY",
+      "configId": "common.date"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "id": "_iAHgDTzslsewNq7ONUkkX",
+  "name": "checker",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{interval:interval} {dates:dates}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "intervalNum",
+      "formula": "ParseInt(TextOfHighlight(interval.data.number))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "daysSince",
+      "formula": "Round((Date.now() - Date.parse(dates)) / (24 * 60 * 60 * 1000), 1)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "color",
+      "formula": "daysSince > intervalNum ? \"red\" : \"green\"",
+      "visibility": "STYLE"
+    }
+  ]
+}

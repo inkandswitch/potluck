@@ -1,0 +1,21 @@
+{
+  "id": "_GmLUpgG81za9r26OCUDMv",
+  "name": "output",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "total [{name:name}]",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "userItems",
+      "formula": "FindAll(\"userMoney\").filter(h => TextOfHighlight(h.data.name) === TextOfHighlight(name))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col7",
+      "formula": "`$${userItems.reduce((a, b) => a + b.data.money.data.amount.data.value, 0)}`",
+      "visibility": "INLINE"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "_bmejcFV1AkL41r4rsqO1Y",
+  "name": "#inbox",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "#inbox",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "_oDfxPVaNnaqxMxlXsJi3K",
+  "name": "{dates} {tmdb} {rating} {/.*/}",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{dates} {tmdb} {rating} {/.*/}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

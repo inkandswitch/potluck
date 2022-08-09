@@ -8,7 +8,9 @@ import {
   SheetValueRow,
   HighlightComponent,
   highlightComponentEntriesMobx,
-  HighlightComponentEntry, textEditorStateMobx, textEditorViewMobx,
+  HighlightComponentEntry,
+  textEditorStateMobx,
+  textEditorViewMobx,
 } from "./primitives";
 import {
   curry,
@@ -41,10 +43,10 @@ import { OFFICIAL_FOODS } from "./data/officialFoods";
 import FuzzySet from "fuzzyset";
 import Prism, { highlight } from "prismjs";
 import { createTimerComponent } from "./TimerComponent";
-import { runInAction } from "mobx";
+import { createAtom, makeObservable, runInAction } from "mobx";
 import { createNumberSliderComponent } from "./NumberSliderComponent";
 import { matchPatternInDocument } from "./patterns";
-import { DateTime } from 'luxon'
+import { DateTime } from "luxon";
 
 const foodNameMatchSet = new FuzzySet(
   OFFICIAL_FOODS.map((food: any) => food.description),
@@ -92,14 +94,52 @@ Prism.languages.markdown = Prism.languages.extend("markup", {}), Prism.languages
 //@ts-ignore
 }), Prism.languages.markdown.bold.inside.url = Prism.util.clone(Prism.languages.markdown.url), Prism.languages.markdown.italic.inside.url = Prism.util.clone(Prism.languages.markdown.url), Prism.languages.markdown.bold.inside.italic = Prism.util.clone(Prism.languages.markdown.italic), Prism.languages.markdown.italic.inside.bold = Prism.util.clone(Prism.languages.markdown.bold); // prettier-ignore
 
+class Clock {
+  atom;
+  intervalHandler: number | undefined = undefined;
+  currentDateTime = new Date();
+
+  constructor() {
+    this.atom = createAtom(
+      "Clock",
+      () => this.startTicking(),
+      () => this.stopTicking()
+    );
+  }
+
+  getTime() {
+    if (this.atom.reportObserved()) {
+      return this.currentDateTime;
+    } else {
+      return new Date();
+    }
+  }
+
+  tick() {
+    this.currentDateTime = new Date();
+    this.atom.reportChanged();
+  }
+
+  startTicking() {
+    this.tick();
+    this.intervalHandler = setInterval(() => this.tick(), 5000);
+  }
+
+  stopTicking() {
+    clearInterval(this.intervalHandler);
+    this.intervalHandler = undefined;
+  }
+}
+const clock = new Clock();
+
 export type Scope = { [name: string]: any };
 
 function getTokenType(token: any) {
-  if (token.type === 'title') {
-    return `h${token.content[0].content.length}`
+  if (token.type === "title") {
+    return `h${token.content[0].content.length}`;
   }
 
-  return token.type
+  return token.type;
 }
 
 function evalCondition(condition: any, item: any): any {
@@ -285,12 +325,12 @@ export function evaluateFormula(
     },
 
     HasCursorFocus: (highlight: Highlight) => {
-      const selectedRange = textEditorStateMobx.get().selection.asSingle().main
+      const selectedRange = textEditorStateMobx.get().selection.asSingle().main;
 
       return (
         selectedRange.from >= highlight.span[0] &&
         selectedRange.to <= highlight.span[1]
-      )
+      );
     },
 
     PrevOfType: (
@@ -511,6 +551,10 @@ export function evaluateFormula(
       return result;
     },
 
+    NowDate: () => {
+      return clock.getTime();
+    },
+
     USDAFoodName: (foodName: Highlight): string | undefined => {
       let text = getTextForHighlight(foodName);
       const matchedHighlight = foodName.data.matchedHighlight as
@@ -522,7 +566,7 @@ export function evaluateFormula(
         ).get();
         const rowForHighlight = computedData[
           matchedHighlight.sheetConfigId
-          ].find((row) => row.data.name === matchedHighlight);
+        ].find((row) => row.data.name === matchedHighlight);
         if (
           rowForHighlight &&
           rowForHighlight.data.officialName !== undefined
@@ -644,34 +688,32 @@ export function evaluateFormula(
       return componentEntry.component;
     },
 
-    TemplateButton: (
-      highlight: Highlight,
-      label: string,
-      text: string
-    ) =>  {
+    TemplateButton: (highlight: Highlight, label: string, text: string) => {
       if (highlight === undefined) {
         return undefined;
       }
 
       const onClick = () => {
-        const view = textEditorViewMobx.get()
+        const view = textEditorViewMobx.get();
 
         if (!view) {
-          return
+          return;
         }
 
         view.dispatch({
-          changes: { from:  highlight.span[1], insert: text }
-        })
-      }
+          changes: { from: highlight.span[1], insert: text },
+        });
+      };
 
       return (
-        <button onClick={onClick} className="px-1 bg-blue-100 rounded">{label.toString()}</button>
-      )
-    }
+        <button onClick={onClick} className="px-1 bg-blue-100 rounded">
+          {label.toString()}
+        </button>
+      );
+    },
   };
 
-  const formulaSource = transformColumnFormula(source, isFirstColumn)
+  const formulaSource = transformColumnFormula(source, isFirstColumn);
 
   try {
     let fn = new Function(
@@ -680,7 +722,11 @@ export function evaluateFormula(
       `
     with (API) {
       with (context) {
-        ${formulaSource.includes('return') ? formulaSource : `return (${formulaSource})`}
+        ${
+          formulaSource.includes("return")
+            ? formulaSource
+            : `return (${formulaSource})`
+        }
       }
     }
   `
@@ -829,6 +875,11 @@ export const FORMULA_REFERENCE = [
     return: "Highlight[]",
   },
   {
+    name: "NowDate",
+    args: [],
+    return: "Date",
+  },
+  {
     name: "USDAFoodName",
     args: ["foodName: Highlight"],
     return: "string?",
@@ -841,8 +892,8 @@ export const FORMULA_REFERENCE = [
   {
     name: "HasCursorFocus",
     args: [],
-    return: "boolean"
-  }
+    return: "boolean",
+  },
 ];
 
 export function evaluateSheet(

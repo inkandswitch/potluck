@@ -27,7 +27,8 @@ import {
   sheetConfigsMobx,
   Span,
   textDocumentsMobx,
-  textEditorStateMobx, textEditorViewMobx,
+  textEditorStateMobx,
+  textEditorViewMobx,
 } from "./primitives";
 import { editorSelectionHighlightsComputed } from "./compute";
 import {
@@ -205,7 +206,7 @@ class InlineWidget extends WidgetType {
       if (isHighlightComponent(value)) {
         const token = document.createElement("span");
         token.className = "mx-1";
-        token.innerText = "dummy"
+        token.innerHTML = `<span class="invisible">dummy</span>`;
         const reactRoot = createRoot(token);
         this.reactRoots.push(reactRoot);
         reactRoot.render(value.render());
@@ -215,7 +216,7 @@ class InlineWidget extends WidgetType {
       if (React.isValidElement(value)) {
         const token = document.createElement("span");
         token.className = "mx-1";
-        token.innerText = "dummy"
+        token.innerHTML = `<span class="invisible">dummy</span>`;
         const reactRoot = createRoot(token);
         this.reactRoots.push(reactRoot);
         reactRoot.render(value);
@@ -559,7 +560,9 @@ export function patternFromSelection(state: EditorState): Pattern | undefined {
       type: "group",
       expr: {
         type: "highlightName",
-        name: highlight.data.type ? `${sheetConfigName}.${highlight.data.type.valueOf()}` : sheetConfigName,
+        name: highlight.data.type
+          ? `${sheetConfigName}.${highlight.data.type.valueOf()}`
+          : sheetConfigName,
       },
     });
     usedHighlightNames.push(sheetConfigName);
@@ -633,7 +636,7 @@ export const Editor = observer(
         },
       });
 
-      textEditorViewMobx.set(view)
+      textEditorViewMobx.set(view);
 
       runInAction(() => {
         textEditorStateMobx.set(view.state);
@@ -643,9 +646,9 @@ export const Editor = observer(
         autorun(() => {
           const highlights = editorSelectionHighlightsComputed.get();
 
-         view.dispatch({
+          view.dispatch({
             effects: setHighlightsEffect.of(highlights),
-          })
+          });
         }),
         autorun(() => {
           const highlights = hoverHighlightsMobx
@@ -664,7 +667,7 @@ export const Editor = observer(
       return () => {
         unsubscribes.forEach((unsubscribe) => unsubscribe());
         view.destroy();
-        textEditorViewMobx.set(undefined)
+        textEditorViewMobx.set(undefined);
       };
     }, [textDocument]);
 

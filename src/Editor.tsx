@@ -173,7 +173,6 @@ class InlineWidget extends WidgetType {
   eq(other: WidgetType): boolean {
     // BIG HACK
     // For timer, we don't want to keep swapping out the DOM to avoid flickers.
-    console.log(this.visibleProperties, this.highlightData);
     if (
       other instanceof InlineWidget &&
       hasReactComponentWidget(this.highlightData, this.visibleProperties) &&

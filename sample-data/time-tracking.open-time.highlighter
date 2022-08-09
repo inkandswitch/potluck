@@ -9,7 +9,7 @@
     },
     {
       "name": "end",
-      "formula": "DateTime.now().toLocaleString(DateTime.TIME_SIMPLE)",
+      "formula": "DateTime.fromJSDate(NowDate()).toLocaleString(DateTime.TIME_24_SIMPLE)",
       "visibility": "INLINE"
     },
     {

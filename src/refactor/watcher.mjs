@@ -80,14 +80,10 @@ function onRenameDocument (oldName, newName) {
 function generateDefaultStateFile () {
   console.log('generate DefaultState.ts')
 
-  const imports = ['import documentSheets from "../sample-data/_documentsheets?raw"']
-  const exportEntries = ['  "/_documentsheets" : documentSheets']
+  const imports = []
+  const exportEntries = []
 
   fs.readdirSync(fullPath).forEach((file, index )=> {
-    if (file === '_documentsheets') {
-      return
-    }
-
     const importName = `file_${index}`
 
     imports.push(`import ${importName} from "../sample-data/${file}?raw"`)

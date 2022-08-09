@@ -1,0 +1,24 @@
+{
+  "sheets": [
+    {
+      "id": "_Wsf3s8IyOld9knDg1rdnC",
+      "configId": "common.number"
+    },
+    {
+      "id": "_1Co3scDP2mNoUzFoYltQ5",
+      "configId": "markdown"
+    },
+    {
+      "id": "_H7EWwGZc6qecFzGl0UTWc",
+      "configId": "time-tracking.project"
+    },
+    {
+      "id": "_mMM1kgsMOjd4Jtwadj75F",
+      "configId": "time-tracking.time"
+    },
+    {
+      "id": "_2gPgKJTGW7qDrcqP7ofMb",
+      "configId": "time-tracking.open-time"
+    }
+  ]
+}

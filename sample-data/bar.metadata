@@ -1,0 +1,28 @@
+{
+  "sheets": [
+    {
+      "id": "_2TRyK9cYdyhE5k2QGQNrX",
+      "configId": "markdown"
+    },
+    {
+      "id": "_csZJCgJ3S78PObHxaQCt6",
+      "configId": "common.emoji"
+    },
+    {
+      "id": "_M4kQAPANPacHMzSlMrxGj",
+      "configId": "common.number"
+    },
+    {
+      "id": "_XnudOhOYOAwZ0O41RC71M",
+      "configId": "bar.price"
+    },
+    {
+      "id": "_FByk6n1gPfsxtVnlmbw9g",
+      "configId": "bar.sales"
+    },
+    {
+      "id": "_76ua3Ul5NMlnigIHzspSm",
+      "configId": "bar.total"
+    }
+  ]
+}

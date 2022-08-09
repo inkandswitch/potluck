@@ -1,0 +1,40 @@
+{
+  "sheets": [
+    {
+      "id": "_InLcuS3AkMLP7bsKI5v6N",
+      "configId": "trip-plan.activity"
+    },
+    {
+      "id": "_QgP1hr72eFZyXOKb6GBwM",
+      "configId": "trip-plan.city"
+    },
+    {
+      "id": "_rHwaFAMcGPKOYFHMzGvaJ",
+      "configId": "common.number"
+    },
+    {
+      "id": "_nAjrSj3fnSHKYYvocIVGd",
+      "configId": "markdown"
+    },
+    {
+      "id": "_VDr76rWqTSaAMmFNLpru5",
+      "configId": "trip-plan.day"
+    },
+    {
+      "id": "_NKhtuqG94fi030KZVPz1J",
+      "configId": "trip-plan.openingRange"
+    },
+    {
+      "id": "_Y179IOu73uTbYWrdxv9bt",
+      "configId": "trip-plan.time"
+    },
+    {
+      "id": "_yqGX28lejuaacUHpNFDBh",
+      "configId": "trip-plan.timeSpan"
+    },
+    {
+      "id": "_WqCbdCTLROphJfThUc0r9",
+      "configId": "trip-plan.openingHours"
+    }
+  ]
+}

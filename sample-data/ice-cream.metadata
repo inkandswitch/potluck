@@ -1,0 +1,20 @@
+{
+  "sheets": [
+    {
+      "id": "oOb1B0Bhe4d9xo7FITnNV",
+      "configId": "food.ingredient",
+      "highlightSearchRange": [
+        12,
+        117
+      ]
+    },
+    {
+      "id": "OJfD4K5OMu5qEHvZiRONd",
+      "configId": "common.number"
+    },
+    {
+      "id": "dGc1oJZ2MSClD14RZNPe4",
+      "configId": "food.quantity"
+    }
+  ]
+}

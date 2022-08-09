@@ -7,23 +7,23 @@ import {
   sheetConfigsMobx,
   Span,
   TextDocument,
+  TextDocumentSheet,
   textDocumentsMobx,
 } from "./primitives";
 import React, { useState } from "react";
 import { generateNanoid } from "./utils";
 import * as Toast from "@radix-ui/react-toast";
 
-
-function prettyStringify (value: any) : string {
-  return JSON.stringify(value, null, 2)
+function prettyStringify(value: any): string {
+  return JSON.stringify(value, null, 2);
 }
 
 // we'll always start file paths with / so "/foo.txt" is a foo.txt in the root
 // directory.
 
 export const TEXT_FILE_EXTENSION = "txt";
+export const DOCUMENT_METADATA_EXTENSION = "metadata";
 export const HIGHLIGHTER_FILE_EXTENSION = "highlighter";
-export const DOCUMENT_SHEET_CONFIG_FILEPATH = "/_documentsheets";
 
 function getRelativePath(fileHandle: File) {
   return fileHandle.webkitRelativePath.substring(
@@ -35,6 +35,13 @@ function getTextDocumentId(filePath: string) {
   return filePath.substring(
     1,
     filePath.length - TEXT_FILE_EXTENSION.length - 1
+  );
+}
+
+function getTextDocumentIdFromMetadata(filePath: string) {
+  return filePath.substring(
+    1,
+    filePath.length - DOCUMENT_METADATA_EXTENSION.length - 1
   );
 }
 
@@ -79,7 +86,7 @@ export class DirectoryPersistence {
         if (
           file.name.endsWith(`.${HIGHLIGHTER_FILE_EXTENSION}`) ||
           file.name.endsWith(`.${TEXT_FILE_EXTENSION}`) ||
-          relativePath === DOCUMENT_SHEET_CONFIG_FILEPATH
+          file.name.endsWith(`.${DOCUMENT_METADATA_EXTENSION}`)
         ) {
           if (file.handle !== undefined) {
             this.fileHandles[relativePath] = file.handle;
@@ -136,18 +143,24 @@ export class DirectoryPersistence {
         }
       ),
       reaction(
-        () => {
-          return prettyStringify(
-            getDocumentSheetConfig([...textDocumentsMobx.values()])
-          );
+        () =>
+          [...textDocumentsMobx.values()].map((textDocument) => [
+            textDocument.id,
+            prettyStringify({ sheets: getDocumentSheetConfig(textDocument) }),
+          ]),
+        async (documentSheetConfig) => {
+          for (const [id, contents] of documentSheetConfig) {
+            await this.writeFile(
+              `/${id}.${DOCUMENT_METADATA_EXTENSION}`,
+              contents
+            );
+          }
         },
-        async (documentSheetConfigJSON) => {
-          await this.writeFile(
-            DOCUMENT_SHEET_CONFIG_FILEPATH,
-            documentSheetConfigJSON
-          );
-        },
-        { delay: 100, fireImmediately: writePrimitives }
+        {
+          equals: comparer.structural,
+          delay: 100,
+          fireImmediately: writePrimitives,
+        }
       ),
       reaction(
         () => {
@@ -179,7 +192,7 @@ export class DirectoryPersistence {
     if (
       !filePath.endsWith(`.${HIGHLIGHTER_FILE_EXTENSION}`) &&
       !filePath.endsWith(`.${TEXT_FILE_EXTENSION}`) &&
-      filePath !== DOCUMENT_SHEET_CONFIG_FILEPATH
+      !filePath.endsWith(`.${DOCUMENT_METADATA_EXTENSION}`)
     ) {
       throw new Error();
     }
@@ -294,37 +307,40 @@ export function FileDropWrapper({
 }
 
 type SerializedDocumentSheet = {
-  textDocumentId: string;
   id: string;
   configId: string;
   highlightSearchRange: Span | undefined;
 };
 function getDocumentSheetConfig(
-  textDocuments: TextDocument[]
+  textDocument: TextDocument
 ): SerializedDocumentSheet[] {
-  return textDocuments.flatMap((textDocument) =>
-    textDocument.sheets.map((documentSheet) => ({
-      textDocumentId: textDocument.id,
-      id: documentSheet.id,
-      configId: documentSheet.configId,
-      highlightSearchRange: documentSheet.highlightSearchRange,
-    }))
-  );
+  return textDocument.sheets.map((documentSheet) => ({
+    id: documentSheet.id,
+    configId: documentSheet.configId,
+    highlightSearchRange: documentSheet.highlightSearchRange,
+  }));
 }
 
 export function getStateFromFiles(files: { [filePath: string]: string }): {
   textDocuments: TextDocument[];
   sheetConfigs: SheetConfig[];
 } {
-  const documentSheetConfig: SerializedDocumentSheet[] = JSON.parse(
-    files[DOCUMENT_SHEET_CONFIG_FILEPATH] ?? "[]"
-  );
   const sheetConfigs = Object.entries(files)
     .filter(([filePath]) => filePath.endsWith(HIGHLIGHTER_FILE_EXTENSION))
     .map(([filePath, contents]) => {
       const id = getHighlighterId(filePath);
       return JSON.parse(contents);
     });
+  const documentSheets: {
+    [textDocumentId: string]: { sheets: TextDocumentSheet[] };
+  } = Object.fromEntries(
+    Object.entries(files)
+      .filter(([filePath]) => filePath.endsWith(DOCUMENT_METADATA_EXTENSION))
+      .map(([filePath, contents]) => {
+        const id = getTextDocumentIdFromMetadata(filePath);
+        return [id, JSON.parse(contents)];
+      })
+  );
   const textDocuments = Object.entries(files)
     .filter(([filePath]) => filePath.endsWith(TEXT_FILE_EXTENSION))
     .map(([filePath, contents]) => {
@@ -337,11 +353,9 @@ export function getStateFromFiles(files: { [filePath: string]: string }): {
         id,
         name: lines[0] ?? "",
         text,
-        sheets: documentSheetConfig
-          .filter(
-            (c) =>
-              c.textDocumentId === id &&
-              sheetConfigs.some((config) => config.id === c.configId)
+        sheets: (documentSheets[id]?.sheets ?? [])
+          .filter((c) =>
+            sheetConfigs.some((config) => config.id === c.configId)
           )
           .map((c) => ({
             id: c.id,

@@ -1,0 +1,28 @@
+{
+  "sheets": [
+    {
+      "id": "eiIXzGv8Zq1zybgMZdd1z",
+      "configId": "common.number"
+    },
+    {
+      "id": "X8bBiHSTseJNK4lyNkl2D",
+      "configId": "food.quantity"
+    },
+    {
+      "id": "JdoUlaXUw0gg15KLpYHp6",
+      "configId": "common.duration"
+    },
+    {
+      "id": "fUpyOI1wmdDbCnuq6dNfU",
+      "configId": "food.scale"
+    },
+    {
+      "id": "PL4sKTsqJcM18ppBJIviZ",
+      "configId": "common.date"
+    },
+    {
+      "id": "Htzihyo06gMLB1lCrEl24",
+      "configId": "markdown"
+    }
+  ]
+}

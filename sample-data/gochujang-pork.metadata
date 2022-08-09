@@ -1,0 +1,28 @@
+{
+  "sheets": [
+    {
+      "id": "zUe6BSpguigbb8wqVJ8Jo",
+      "configId": "food.ingredient",
+      "highlightSearchRange": [
+        662,
+        1430
+      ]
+    },
+    {
+      "id": "69ETypGNV9MGLGuYDJVMT",
+      "configId": "common.number"
+    },
+    {
+      "id": "rtmeGoGDzu10C1mxqo8rG",
+      "configId": "food.quantity"
+    },
+    {
+      "id": "RAknoIAG0p2vDdGvW6Dvi",
+      "configId": "food.scale"
+    },
+    {
+      "id": "DNQtQEvwr9jkN8cHFWgeE",
+      "configId": "common.duration"
+    }
+  ]
+}

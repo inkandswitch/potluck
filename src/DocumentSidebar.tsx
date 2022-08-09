@@ -139,8 +139,8 @@ export const DocumentSidebar = observer(() => {
   });
 
   return (
-    <div className="w-64 border-r border-gray-200">
-      <div className="flex items-center justify-between px-2 h-12 border-b border-gray-200">
+    <div className="w-64 border-r border-gray-200 flex flex-col overflow-hidden">
+      <div className="flex-shrink-0 flex items-center justify-between px-2 h-12 border-b border-gray-200">
         <div className="text-sm font-medium">
           Potluck{" "}
           <span className="bg-blue-200 text-blue-600 rounded px-1 py-0.5 text-xs">
@@ -150,12 +150,14 @@ export const DocumentSidebar = observer(() => {
 
         <PersistenceButton />
       </div>
-      {sortedDocuments.map((textDocument) => (
-        <DocumentSidebarItem
-          textDocument={textDocument}
-          key={textDocument.id}
-        />
-      ))}
+      <div className="grow overflow-auto">
+        {sortedDocuments.map((textDocument) => (
+          <DocumentSidebarItem
+            textDocument={textDocument}
+            key={textDocument.id}
+          />
+        ))}
+      </div>
     </div>
   );
 });

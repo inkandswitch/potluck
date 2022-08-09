@@ -47,6 +47,7 @@ import { createAtom, makeObservable, runInAction } from "mobx";
 import { createNumberSliderComponent } from "./NumberSliderComponent";
 import { matchPatternInDocument } from "./patterns";
 import { DateTime } from "luxon";
+import memoize from "memoizee";
 
 const foodNameMatchSet = new FuzzySet(
   OFFICIAL_FOODS.map((food: any) => food.description),
@@ -131,6 +132,68 @@ class Clock {
   }
 }
 const clock = new Clock();
+
+class FetchAtom {
+  atom;
+  callIndex = 0;
+  intervalHandler: number | undefined = undefined;
+  currentJSON: any | undefined;
+
+  constructor(
+    readonly url: string,
+    readonly refetchInterval: number | undefined
+  ) {
+    this.atom = createAtom(
+      "Clock",
+      () => this.start(),
+      () => this.stop()
+    );
+  }
+
+  getJSON() {
+    if (this.atom.reportObserved()) {
+      return this.currentJSON;
+    } else {
+      throw new Error("tried accessing FetchAtom outside mobx reactivity");
+    }
+  }
+
+  tick() {
+    this.callIndex++;
+    const currentCallIndex = this.callIndex;
+    fetch(this.url)
+      .then((response) => response.json())
+      .then((json) => {
+        if (this.callIndex === currentCallIndex) {
+          this.currentJSON = json;
+          this.atom.reportChanged();
+        }
+      });
+  }
+
+  start() {
+    this.tick();
+    if (this.refetchInterval !== undefined && this.refetchInterval !== 0) {
+      this.intervalHandler = setInterval(
+        () => this.tick(),
+        this.refetchInterval * 1000
+      );
+    }
+  }
+
+  stop() {
+    if (this.intervalHandler !== undefined) {
+      clearInterval(this.intervalHandler);
+      this.intervalHandler = undefined;
+    }
+  }
+}
+const getFetchAtom = memoize(
+  (url, refetchIntervalSeconds) => {
+    return new FetchAtom(url, refetchIntervalSeconds);
+  },
+  { length: 2 }
+);
 
 export type Scope = { [name: string]: any };
 
@@ -553,6 +616,15 @@ export function evaluateFormula(
 
     NowDate: () => {
       return clock.getTime();
+    },
+
+    FetchJSON: (url: string, refetchInterval: number) => {
+      // force user to pass refetchInterval so we don't fetch every URL while
+      // they're typing it since we're live.
+      if (refetchInterval !== undefined) {
+        return getFetchAtom(url, refetchInterval).getJSON();
+      }
+      return undefined;
     },
 
     USDAFoodName: (foodName: Highlight): string | undefined => {

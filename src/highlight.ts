@@ -1,5 +1,8 @@
-import { Span } from "./primitives";
+import { sheetConfigsMobx, Span } from "./primitives";
 import { getTextForHighlight } from "./utils";
+import { highlight } from "prismjs";
+import { isString, orderBy } from "lodash";
+import { getComputedSheetValue } from "./compute";
 
 export class Highlight {
   constructor(
@@ -10,15 +13,65 @@ export class Highlight {
   ) {
   }
 
-  get (attr: string) {
-    return this.data[attr]
+  ValuesBeforeOfType(type: string | string[]) {
+    const typeSheetConfigs = Array.from(sheetConfigsMobx.values()).filter(
+      (sheetConfig) =>
+        isString(type)
+          ? sheetConfig.name === type
+          : type.includes(sheetConfig.name)
+    );
+
+    const highlights = orderBy(
+      typeSheetConfigs
+        .flatMap((typeSheetConfig) =>
+          getComputedSheetValue(this.documentId, typeSheetConfig.id).get()
+        )
+        .filter((row) => (
+          "span" in row &&
+          row.span[1] < this.span[0]
+        )) as Highlight[],
+
+      [({ span }) => span[0]],
+      ['desc']
+    );
+
+    return new HighlightCollection(highlights)
   }
 
-  text () {
+  ValuesAfterOfType(type: string | string[]) {
+    const typeSheetConfigs = Array.from(sheetConfigsMobx.values()).filter(
+      (sheetConfig) =>
+        isString(type)
+          ? sheetConfig.name === type
+          : type.includes(sheetConfig.name)
+    );
+
+    const highlights = orderBy(
+      typeSheetConfigs
+        .flatMap((typeSheetConfig) =>
+          getComputedSheetValue(this.documentId, typeSheetConfig.id).get()
+        )
+        .filter((row) => (
+          "span" in row &&
+          row.span[0] > this.span[1]
+        )) as Highlight[],
+
+      [({ span }) => span[0]],
+      ['asc']
+    );
+
+    return new HighlightCollection(highlights)
+  }
+
+  valueOf() {
+
+  }
+
+  Text() {
     return getTextForHighlight(this)
   }
 
-  static from (highlight: {
+  static from(highlight: {
     documentId: string,
     sheetConfigId: string,
     span: Span,
@@ -27,3 +80,25 @@ export class Highlight {
     return new Highlight(highlight.documentId, highlight.sheetConfigId, highlight.span, highlight.data)
   }
 };
+
+
+class ChainableCollection<T> {
+  constructor(items: T[]) {
+  }
+}
+
+export class HighlightCollection extends ChainableCollection<Highlight>{
+  constructor(readonly items: Highlight[]) {
+    super(items)
+  }
+
+  Text() {
+    return new ChainableCollection(this.items.map(h => h.Text()))
+  }
+}
+
+
+
+export function isChainableCollection(value: any) {
+ return value instanceof ChainableCollection
+}

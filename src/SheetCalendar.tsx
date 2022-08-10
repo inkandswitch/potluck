@@ -7,7 +7,6 @@ import enUS from "date-fns/locale/en-US";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { observer } from "mobx-react-lite";
 import {
-  Highlight,
   hoverHighlightsMobx,
   SheetConfig,
   SheetValueRow,
@@ -20,6 +19,7 @@ import addDays from "date-fns/addDays";
 import { action } from "mobx";
 import { HighlightHoverCard } from "./HighlightHoverCard";
 import { SheetViewProps } from "./SheetComponent";
+import { Highlight } from "./highlight";
 
 function getDateForRow(row: SheetValueRow) {
   const { day, month, year } =

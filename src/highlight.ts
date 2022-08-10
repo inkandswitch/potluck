@@ -1,5 +1,5 @@
 import { sheetConfigsMobx, Span } from "./primitives";
-import { getTextForHighlight } from "./utils";
+import { getTextForHighlight, isNumericish } from "./utils";
 import { highlight } from "prismjs";
 import { isString, orderBy } from "lodash";
 import { getComputedSheetValue } from "./compute";
@@ -64,7 +64,21 @@ export class Highlight {
   }
 
   valueOf() {
+    const spanText = this.Text()
 
+    if (!spanText) {
+      return
+    }
+
+    if (isNumericish(spanText)) {
+      return parseFloat(spanText)
+    }
+
+    return spanText
+  }
+
+  toString () {
+    return this.Text()
   }
 
   Text() {

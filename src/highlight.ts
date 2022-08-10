@@ -1,7 +1,7 @@
 import { sheetConfigsMobx, SheetValueRow, Span, textDocumentsMobx } from "./primitives";
-import { getTextForHighlight, isNumericish, isValueRowHighlight } from "./utils";
+import { coerceValueToNumber, getTextForHighlight, isNumericish, isValueRowHighlight } from "./utils";
 import { highlight } from "prismjs";
-import { isNaN, isString, orderBy } from "lodash";
+import { isNaN, isString, orderBy, get, pick } from "lodash";
 import { getComputedSheetValue } from "./compute";
 import { evaluateFormula } from "./formulas";
 
@@ -134,7 +134,32 @@ class ChainableCollection<T> {
       ))
     ))
 
-    return new ChainableCollection(this.row, filteredItems, this.itemName)
+    // @ts-ignore
+    return new this.constructor(this.row, filteredItems, this.itemName)
+  }
+
+  SumOf(path?: string) {
+    let sum = 0;
+
+    this.items.forEach((item) => {
+      const number = coerceValueToNumber(path ? get(item, path) : item)
+
+      console.log(item, number, path)
+
+      if (!isNaN(number)) {
+        sum += number
+      }
+    })
+
+    return sum
+  }
+
+  Pick(path: string) {
+
+    const pickedAttributes = this.items.map((item) => get(item, path))
+
+    // @ts-ignore
+    return new this.constructor(this.row, pickedAttributes, this.itemName)
   }
 }
 

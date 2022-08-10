@@ -57,6 +57,22 @@ export function isNumericish(value: any): boolean {
   );
 }
 
+export function coerceValueToNumber (value: any) : number | typeof NaN {
+  if (isValueRowHighlight(value)) {
+    return coerceValueToNumber(getTextForHighlight(value))
+  }
+
+  if (typeof value === "number") {
+    return value
+  }
+
+  if (isNumericish(value)) {
+    return parseFloat(value)
+  }
+
+  return NaN
+}
+
 const _generateNanoid = customAlphabet(alphanumeric)
 
 export const generateNanoid = () => `_${_generateNanoid()}`;

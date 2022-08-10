@@ -766,10 +766,10 @@ export function evaluateFormula(
   try {
     let fn = new Function(
       "API",
-      "context",
+      "scope",
       `
     with (API) {
-      with (context) {
+      with (scope) {
         ${
         formulaSource.includes("return")
           ? formulaSource
@@ -1002,7 +1002,7 @@ export function evaluateSheet(
           sheetConfig,
           false,
           column.formula,
-          row,
+          {_index, ...row}
         );
 
         return { ...row, [column.name]: result };

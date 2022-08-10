@@ -2,7 +2,6 @@ import { Editor, patternFromSelection } from "./Editor";
 import {
   addSheetConfig,
   getSheetConfigsOfTextDocument,
-  Highlight,
   isSheetExpandedMobx,
   PropertyVisibility,
   searchResults,

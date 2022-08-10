@@ -1,8 +1,9 @@
-import { sheetConfigsMobx, Span } from "./primitives";
-import { getTextForHighlight, isNumericish } from "./utils";
+import { sheetConfigsMobx, SheetValueRow, Span, textDocumentsMobx } from "./primitives";
+import { getTextForHighlight, isNumericish, isValueRowHighlight } from "./utils";
 import { highlight } from "prismjs";
-import { isString, orderBy } from "lodash";
+import { isNaN, isString, orderBy } from "lodash";
 import { getComputedSheetValue } from "./compute";
+import { evaluateFormula } from "./formulas";
 
 export class Highlight {
   constructor(
@@ -13,7 +14,7 @@ export class Highlight {
   ) {
   }
 
-  ValuesBeforeOfType(type: string | string[]) {
+  Prev(type: string | string[]) {
     const typeSheetConfigs = Array.from(sheetConfigsMobx.values()).filter(
       (sheetConfig) =>
         isString(type)
@@ -35,10 +36,10 @@ export class Highlight {
       ['desc']
     );
 
-    return new HighlightCollection(highlights)
+    return new HighlightCollection(this, highlights, isString(type) ? type : undefined)
   }
 
-  ValuesAfterOfType(type: string | string[]) {
+  Next(type: string | string[]) {
     const typeSheetConfigs = Array.from(sheetConfigsMobx.values()).filter(
       (sheetConfig) =>
         isString(type)
@@ -60,7 +61,7 @@ export class Highlight {
       ['asc']
     );
 
-    return new HighlightCollection(highlights)
+    return new HighlightCollection(this, highlights, isString(type) ? type : undefined)
   }
 
   valueOf() {
@@ -77,12 +78,20 @@ export class Highlight {
     return spanText
   }
 
-  toString () {
+  toString() {
     return this.Text()
   }
 
   Text() {
     return getTextForHighlight(this)
+  }
+
+  isEqualTo(value: any) {
+    if (isValueRowHighlight(value)) {
+      return this.Text() === value.Text()
+    }
+
+    return this.Text() === value
   }
 
   static from(highlight: {
@@ -93,26 +102,53 @@ export class Highlight {
   }) {
     return new Highlight(highlight.documentId, highlight.sheetConfigId, highlight.span, highlight.data)
   }
-};
+}
 
 
 class ChainableCollection<T> {
-  constructor(items: T[]) {
+  constructor(readonly row: SheetValueRow, readonly items: T[], readonly itemName?: string) {
+  }
+
+  As(itemName: string) {
+    if (this.itemName) {
+      throw new Error('item name is already set')
+    }
+
+    // @ts-ignore
+    return new this.constructor(this.items, itemName)
+  }
+
+  Where(conditionSource: string) {
+    const textDocument = textDocumentsMobx.get(this.row.documentId)
+    const sheetConfig = sheetConfigsMobx.get(this.row.sheetConfigId)
+
+    if (!textDocument || !sheetConfig) {
+      return new Error("invalid row")
+    }
+
+    const filteredItems = this.items.filter((item) => (
+      evaluateFormula(textDocument, sheetConfig, false, conditionSource, (
+        this.itemName
+          ? { ...this.row.data, [this.itemName]: item }
+          : this.row
+      ))
+    ))
+
+    return new ChainableCollection(this.row, filteredItems, this.itemName)
   }
 }
 
-export class HighlightCollection extends ChainableCollection<Highlight>{
-  constructor(readonly items: Highlight[]) {
-    super(items)
+export class HighlightCollection extends ChainableCollection<Highlight> {
+  constructor(readonly row: SheetValueRow, readonly items: Highlight[], readonly itemName?: string) {
+    super(row, items, itemName)
   }
 
   Text() {
-    return new ChainableCollection(this.items.map(h => h.Text()))
+    return new ChainableCollection(this.row, this.items.map(h => h.Text()))
   }
 }
 
 
-
 export function isChainableCollection(value: any) {
- return value instanceof ChainableCollection
+  return value instanceof ChainableCollection
 }

@@ -5,17 +5,15 @@ import { evaluateFormula } from "./formulas";
 import { getStateFromFiles } from "./persistence";
 import { DefaultFiles } from "./DefaultState";
 import { EditorView } from "@codemirror/view";
+import { Highlight } from "./highlight";
 
 export type Span = [from: number, to: number];
 
-// this is a row in a document sheet
-export type Highlight = {
-  documentId: string;
-  sheetConfigId: string;
-  span: Span;
-  data: { [columnName: string]: any };
+export type SheetValueRowWithoutSpan = {
+  documentId: string,
+  sheetConfigId: string,
+  data: { [columnName: string]: any },
 };
-export type SheetValueRowWithoutSpan = Omit<Highlight, "span">;
 export type SheetValueRow = Highlight | SheetValueRowWithoutSpan;
 
 export enum PropertyVisibility {

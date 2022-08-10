@@ -2,15 +2,14 @@ import { comparer, computed, IComputedValue } from "mobx";
 import { evaluateSheet } from "./formulas";
 import {
   getSheetConfigsOfTextDocument,
-  Highlight,
   selectedTextDocumentIdBox,
   SheetConfig,
-  sheetConfigsMobx,
-  SheetValueRow,
+  sheetConfigsMobx, SheetValueRow,
   TextDocument,
   TextDocumentSheet,
   textDocumentsMobx,
 } from "./primitives";
+import {Highlight} from "./highlight";
 import { isValueRowHighlight } from "./utils";
 
 const getDocumentSheetKey = (

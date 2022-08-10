@@ -18,7 +18,6 @@ import { autorun, comparer, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   addSheetConfig,
-  Highlight,
   highlightComponentEntriesMobx,
   hoverHighlightsMobx,
   isSheetExpandedMobx,
@@ -30,6 +29,7 @@ import {
   textEditorStateMobx,
   textEditorViewMobx,
 } from "./primitives";
+import {Highlight} from "./highlight";
 import { editorSelectionHighlightsComputed } from "./compute";
 import {
   doSpansOverlap,
@@ -261,13 +261,13 @@ const highlightsField = StateField.define<Highlight[]>({
     }
     return highlights
       .map(
-        (highlight): Highlight => ({
+        (highlight): Highlight => (Highlight.from({
           ...highlight,
           span: [
             tr.changes.mapPos(highlight.span[0]),
             tr.changes.mapPos(highlight.span[1]),
           ],
-        })
+        }))
       )
       .filter((highlight) => highlight.span[0] !== highlight.span[1]);
   },
@@ -286,13 +286,13 @@ const hoverHighlightsField = StateField.define<Highlight[]>({
     }
     return highlights
       .map(
-        (highlight): Highlight => ({
+        (highlight): Highlight => (Highlight.from({
           ...highlight,
           span: [
             tr.changes.mapPos(highlight.span[0]),
             tr.changes.mapPos(highlight.span[1]),
           ],
-        })
+        }))
       )
       .filter((highlight) => highlight.span[0] !== highlight.span[1]);
   },

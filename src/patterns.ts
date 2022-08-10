@@ -1,4 +1,5 @@
-import { Highlight, sheetConfigsMobx, TextDocument } from "./primitives";
+import { sheetConfigsMobx, TextDocument } from "./primitives";
+import { Highlight } from "./highlight";
 import { escapeRegExp } from "lodash";
 import ohm from "ohm-js";
 import { getComputedSheetValue } from "./compute";
@@ -144,8 +145,6 @@ export type PatternPart = TextPart | GroupPart;
 
 export type Pattern = PatternPart[];
 
-export type PartHighlight = Omit<Highlight, "sheetConfigId">;
-
 export function patternToString(pattern: Pattern) {
   let string = "";
 
@@ -179,7 +178,7 @@ export function matchPatternInDocument(
     throw new Error("invalid pattern");
   }
 
-  let highlights: PartHighlight[] = [];
+  let highlights: Highlight[] = [];
 
   pattern.forEach((part, index) => {
     if (index === 0) {
@@ -193,13 +192,13 @@ export function matchPatternInDocument(
     }
   });
 
-  return highlights.map((highlight) => ({ ...highlight, sheetConfigId }));
+  return highlights.map((highlight) => Highlight.from({ ...highlight, sheetConfigId }));
 }
 
 function matchPart(
   part: PatternPart,
   textDocument: TextDocument
-): PartHighlight[] {
+): Highlight[] {
   switch (part.type) {
     case "text":
       return matchRegex(escapeRegExp(part.text), textDocument);
@@ -215,12 +214,12 @@ function matchPart(
 function matchGroupPart(
   { expr, name }: GroupPart,
   textDocument: TextDocument
-): PartHighlight[] {
-  let highlights: PartHighlight[] = [];
+): Highlight[] {
+  let highlights: Highlight[] = [];
 
   switch (expr.type) {
     case "highlightName": {
-      const [name, ...types ] = expr.name.split(".")
+      const [name, ...types] = expr.name.split(".")
       const subtype = types.join(".")
 
       const sheetConfig = Array.from(sheetConfigsMobx.values()).find(
@@ -250,15 +249,15 @@ function matchGroupPart(
 
   return highlights.map((highlight) =>
     name === undefined
-      ? { span: highlight.span, documentId: textDocument.id, data: {} }
-      : { ...highlight, data: { [name]: highlight } }
+      ? Highlight.from({ sheetConfigId: "", span: highlight.span, documentId: textDocument.id, data: {} })
+      : Highlight.from({ ...highlight, data: { [name]: highlight } })
   );
 }
 
 function matchRegex(
   source: string,
   textDocument: TextDocument
-): PartHighlight[] {
+): Highlight [] {
   const regex = new RegExp(source, "gim");
   const docString = textDocument.text.sliceString(0);
 
@@ -277,12 +276,7 @@ function matchRegex(
 
     prevIndex = from;
 
-    highlights.push({
-      documentId: textDocument.id,
-      sheetConfigId: "",
-      span: [from, to],
-      data: {},
-    });
+    highlights.push(new Highlight(textDocument.id, "", [from, to], {}));
   }
 
   return highlights;
@@ -295,9 +289,9 @@ const trimStartWithoutNewlines = (str: string) => {
 
 function matchPartAfterHighlight(
   part: PatternPart,
-  highlight: PartHighlight,
+  highlight: Highlight,
   textDocument: TextDocument
-): PartHighlight | undefined {
+): Highlight | undefined {
   switch (part.type) {
     case "text": {
       const followingText = textDocument.text.sliceString(highlight.span[1]);
@@ -310,10 +304,10 @@ function matchPartAfterHighlight(
       const partSize =
         followingText.length - followingTextTrimmed.length + part.text.length;
 
-      return {
+      return Highlight.from({
         ...highlight,
         span: [highlight.span[0], highlight.span[1] + partSize],
-      };
+      });
     }
 
     case "group": {
@@ -325,7 +319,7 @@ function matchPartAfterHighlight(
 
       switch (part.expr.type) {
         case "highlightName": {
-          const [name, ...types ] = part.expr.name.split(".")
+          const [name, ...types] = part.expr.name.split(".")
           const subtype = types.join(".")
 
           const sheetConfig = Array.from(sheetConfigsMobx.values()).find(
@@ -367,26 +361,22 @@ function matchPartAfterHighlight(
             const from = highlight.span[1] + trimmedLength;
             const to = from + matchString.length;
 
-            matchingHighlight = {
-              documentId: textDocument.id,
-              span: [from, to],
-              data: {},
-            };
+            matchingHighlight = new Highlight(textDocument.id, "", [from, to], {});
           }
         }
       }
 
       if (matchingHighlight) {
-        return {
+        return Highlight.from({
           ...highlight,
           span: [highlight.span[0], matchingHighlight.span[1]],
           data: part.name
             ? {
-                ...highlight.data,
-                [part.name]: matchingHighlight,
-              }
+              ...highlight.data,
+              [part.name]: matchingHighlight,
+            }
             : highlight.data,
-        };
+        });
       }
     }
   }

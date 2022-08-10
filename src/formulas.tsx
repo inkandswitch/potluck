@@ -1,17 +1,16 @@
 import {
   SheetConfig,
-  Highlight,
   sheetConfigsMobx,
   textDocumentsMobx,
   getSheetConfigsOfTextDocument,
   TextDocument,
-  SheetValueRow,
   HighlightComponent,
   highlightComponentEntriesMobx,
   HighlightComponentEntry,
   textEditorStateMobx,
-  textEditorViewMobx,
+  textEditorViewMobx, SheetValueRow,
 } from "./primitives";
+import { Highlight } from "./highlight";
 import {
   curry,
   isFunction,
@@ -131,6 +130,7 @@ class Clock {
     this.intervalHandler = undefined;
   }
 }
+
 const clock = new Clock();
 
 class FetchAtom {
@@ -188,6 +188,7 @@ class FetchAtom {
     }
   }
 }
+
 const getFetchAtom = memoize(
   (url, refetchIntervalSeconds) => {
     return new FetchAtom(url, refetchIntervalSeconds);
@@ -217,7 +218,7 @@ export function evaluateFormula(
   sheetConfig: SheetConfig,
   isFirstColumn: boolean,
   source: string,
-  scope: Scope
+  scope: Scope,
 ) {
   const API = {
     DateTime,
@@ -235,12 +236,7 @@ export function evaluateFormula(
             ? index + indexOfDelimiter
             : index + line.length;
         if (endOfSpan > index) {
-          highlights.push({
-            documentId: textDocument.id,
-            sheetConfigId: sheetConfig.id,
-            span: [index, endOfSpan],
-            data: {},
-          });
+          highlights.push(new Highlight(textDocument.id, sheetConfig.id, [index, endOfSpan], {}))
         }
         index += line.length + 1;
       }
@@ -268,12 +264,7 @@ export function evaluateFormula(
 
         prevIndex = from;
 
-        highlights.push({
-          documentId: textDocument.id,
-          sheetConfigId: sheetConfig.id,
-          span: [from, to],
-          data: { groups: match.slice(1) },
-        });
+        highlights.push(new Highlight(textDocument.id, sheetConfig.id, [from, to], { groups: match.slice(1) }));
       }
 
       return highlights;
@@ -330,10 +321,10 @@ export function evaluateFormula(
                 doSpansOverlap(newHighlight.span, old.span)
               )
           )
-          .map((newHighlight) => ({
+          .map((newHighlight) => (Highlight.from({
             ...newHighlight,
             data: { ...newHighlight.data, matchedHighlight: value },
-          }));
+          })));
 
         highlights = highlights.concat(newHighlights);
       }
@@ -436,12 +427,7 @@ export function evaluateFormula(
       if (endIndex === -1) {
         endIndex = textDocument.text.sliceString(0).length;
       }
-      return {
-        documentId: textDocument.id,
-        sheetConfigId: sheetConfig.id,
-        span: [highlight.span[1], endIndex],
-        data: {},
-      };
+      return new Highlight(textDocument.id, sheetConfig.id, [highlight.span[1], endIndex], {})
     },
 
     TextBefore: (highlight: Highlight, until: string = "\n"): Highlight => {
@@ -458,12 +444,7 @@ export function evaluateFormula(
         startIndex = indicesWhereUntilOccurs.slice(-1)[0]!;
       }
 
-      return {
-        documentId: textDocument.id,
-        sheetConfigId: sheetConfig.id,
-        span: [startIndex, highlight.span[0]],
-        data: {},
-      };
+      return new Highlight(textDocument.id, sheetConfig.id, [startIndex, highlight.span[0]], {})
     },
 
     NextUntil: (highlight: Highlight, stopCondition: any): Highlight[] => {
@@ -638,7 +619,7 @@ export function evaluateFormula(
         ).get();
         const rowForHighlight = computedData[
           matchedHighlight.sheetConfigId
-        ].find((row) => row.data.name === matchedHighlight);
+          ].find((row) => row.data.name === matchedHighlight);
         if (
           rowForHighlight &&
           rowForHighlight.data.officialName !== undefined
@@ -684,12 +665,7 @@ export function evaluateFormula(
         const end = start + length;
 
         if (typeof token !== "string") {
-          highlights.push({
-            documentId: textDocument.id,
-            sheetConfigId: sheetConfig.id,
-            span: [start, end],
-            data: { type: getTokenType(token) },
-          });
+          highlights.push(new Highlight(textDocument.id, sheetConfig.id, [start, end], { type: getTokenType(token) }));
         }
 
         start = end;
@@ -795,16 +771,16 @@ export function evaluateFormula(
     with (API) {
       with (context) {
         ${
-          formulaSource.includes("return")
-            ? formulaSource
-            : `return (${formulaSource})`
-        }
+        formulaSource.includes("return")
+          ? formulaSource
+          : `return (${formulaSource})`
+      }
       }
     }
   `
     );
 
-    const result = fn(API, scopeProxy(scope));
+    const result = fn(API, scope);
 
     return isNaN(result) ? undefined : result;
   } catch (e) {
@@ -1026,7 +1002,7 @@ export function evaluateSheet(
           sheetConfig,
           false,
           column.formula,
-          { ...row, _index }
+          row,
         );
 
         return { ...row, [column.name]: result };
@@ -1036,7 +1012,7 @@ export function evaluateSheet(
 
   // Stretch the bounds of this Highlight so it contains all the highlights in its row.
   // Need to be careful to only consider child Highlights which are in this doc, not other docs
-  return (resultRows ?? []).map((rowData) => {
+  const result =  (resultRows ?? []).map((rowData) => {
     let from, to;
 
     for (const value of Object.values(rowData)) {
@@ -1058,13 +1034,18 @@ export function evaluateSheet(
       }
     }
 
+    if (from !== undefined && to !== undefined ) {
+      return new Highlight(textDocument.id, sheetConfig.id, [from, to], rowData)
+    }
+
     return {
       documentId: textDocument.id,
       sheetConfigId: sheetConfig.id,
-      span: from !== undefined && to !== undefined ? [from, to] : undefined,
       data: rowData,
     };
   });
+
+  return result;
 }
 
 function wrapValueInProxy(value: any) {

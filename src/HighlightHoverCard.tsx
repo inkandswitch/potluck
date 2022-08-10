@@ -1,8 +1,9 @@
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
-import { Highlight, textDocumentsMobx } from "./primitives";
+import { textDocumentsMobx } from "./primitives";
 import { getTextForHighlight } from "./utils";
 import * as HoverCardPrimitive from "@radix-ui/react-hover-card";
+import { Highlight } from "./highlight";
 
 export const HighlightHoverCardContent = observer(
   ({ highlight }: { highlight: Highlight }) => {
@@ -24,13 +25,14 @@ export const HighlightHoverCardContent = observer(
       ).to
     );
 
-    const startLine = textDocument.text.lineAt(highlight.span[0]).number
-    const endLine = textDocument.text.lineAt(highlight.span[1]).number
+    const startLine = textDocument.text.lineAt(highlight.span[0]).number;
+    const endLine = textDocument.text.lineAt(highlight.span[1]).number;
 
     return (
       <>
         <div className="text-xs uppercase font-mono text-gray-400 mb-1">
-          {textDocument.name} (Line  {startLine === endLine ? startLine : `${startLine} - ${endLine}`})
+          {textDocument.name} (Line{" "}
+          {startLine === endLine ? startLine : `${startLine} - ${endLine}`})
         </div>
         <div className="whitespace-pre-wrap">
           {highlight.span[0] > startPosOfHighlightLine ? (

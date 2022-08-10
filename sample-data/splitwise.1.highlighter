@@ -9,12 +9,17 @@
     },
     {
       "name": "userItems",
-      "formula": "FindAll(\"userMoney\").filter(h => TextOfHighlight(h.data.name) === TextOfHighlight(name))",
+      "formula": "$.Prev(\"userMoney\")\n.Where(\n \"userMoney.data.name.isEqualTo(name)\"\n)",
       "visibility": "HIDDEN"
     },
     {
-      "name": "col7",
-      "formula": "`$${userItems.reduce((a, b) => a + b.data.money.data.amount.data.value, 0)}`",
+      "name": "sum",
+      "formula": "userItems\n.SumOf(\"data.money.data.amount\")",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "sumText",
+      "formula": "`$${sum}`",
       "visibility": "INLINE"
     }
   ]

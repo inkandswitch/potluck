@@ -16,9 +16,11 @@ enter emojis for each order on a new line
 We have to charge more for beer 🍺 = 4 Euros
 
 🍺🍺
-☕️
+☕
 🥛
 🍺🥤🍎
+
+🍺🍺
 
 Total: 
 

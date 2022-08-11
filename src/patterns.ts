@@ -34,10 +34,13 @@ const patternGrammar = ohm.grammar(String.raw`
       = ~"/" any
 
     text
-      = textChar+
+      = (textChar|endTextChar)+
 
     textChar
-      = ~("{"| "\"") any
+      = ~("{"| "\"") any ~end
+    
+    endTextChar
+      = ~("{"| "\"" | "$") any end  
   }
 `);
 
@@ -188,7 +191,11 @@ export function matchPatternInDocument(
   textDocument: TextDocument,
   sheetConfigId: string
 ): Highlight[] {
+
+
+
   const pattern = parsePattern(source);
+
 
   if (!pattern) {
     throw new Error("invalid pattern");
@@ -198,13 +205,33 @@ export function matchPatternInDocument(
 
   pattern.parts.forEach((part, index) => {
     if (index === 0) {
-      highlights = matchPart(part, pattern.matchAtStartOfLine, textDocument);
+      highlights = matchPart(
+        part,
+        pattern.matchAtStartOfLine,
+        pattern.matchAtEndOfLine,
+        textDocument
+      );
     } else {
       highlights = highlights
         .map((highlight) =>
           matchPartAfterHighlight(part, highlight, textDocument)
         )
-        .filter((highlight) => highlight !== undefined) as Highlight[];
+        .filter((highlight) => {
+          if (highlight === undefined) {
+            return false
+          }
+
+
+          if (!pattern.matchAtEndOfLine) {
+            return true
+          }
+
+          const fromLine = textDocument.text.lineAt(highlight.span[0])
+          const toLine = textDocument.text.lineAt(highlight.span[1])
+
+          return fromLine.number === toLine.number && highlight.span[1] === toLine.to
+
+        }) as Highlight[];
     }
   });
 
@@ -214,6 +241,7 @@ export function matchPatternInDocument(
 function matchPart(
   part: PatternPart,
   matchAtStartOfLine: boolean,
+  matchAtEndOfLine: boolean,
   textDocument: TextDocument
 ): Highlight[] {
   switch (part.type) {
@@ -226,7 +254,7 @@ function matchPart(
 
 
     case "group":
-      return matchGroupPart(part, matchAtStartOfLine, textDocument);
+      return matchGroupPart(part, matchAtStartOfLine, matchAtEndOfLine, textDocument);
 
     default:
       return [];
@@ -236,6 +264,7 @@ function matchPart(
 function matchGroupPart(
   { expr, name, matchMultiple }: GroupPart,
   matchAtStartOfLine: boolean,
+  matchAtEndOfLine: boolean,
   textDocument: TextDocument
 ): Highlight[] {
   let highlights: Highlight[] = [];
@@ -261,6 +290,20 @@ function matchGroupPart(
       ).get() as Highlight[])
         .forEach(highlight => {
 
+          // reject if it should be on same line but isn't
+          if (matchAtEndOfLine) {
+            const fromLineNumber = textDocument.text.lineAt(highlight.span[0]).number
+            const toLineNumber = textDocument.text.lineAt(highlight.span[1]).number
+
+            if (fromLineNumber !== toLineNumber) {
+              if (highlightGroup) {
+                highlights.push(highlightGroup)
+                highlightGroup = undefined
+              }
+              return
+            }
+          }
+
           // reject, if subtype doesn't match
           if((subtype !== "" && (
             !highlight.data.type ||
@@ -278,7 +321,10 @@ function matchGroupPart(
           if (highlightGroup) {
             const textBetween = textDocument.text.sliceString(highlightGroup.span[1], highlight.span[0])
 
-            if (textBetween.trim() === '') {
+            const highlightGroupLine = textDocument.text.lineAt(highlightGroup.span[1]).number
+            const highlightLine = textDocument.text.lineAt(highlight.span[0]).number
+
+            if (textBetween.trim() === '' && (!matchAtEndOfLine || highlightLine === highlightGroupLine)) {
               highlightGroup = Highlight.from({
                 ...highlightGroup,
                 span: [highlightGroup.span[0], highlight.span[1]],
@@ -292,6 +338,7 @@ function matchGroupPart(
             highlights.push(highlightGroup)
             highlightGroup = undefined
           }
+
 
           // reject if it should match the start of line but doesn't
           if (matchAtStartOfLine) {

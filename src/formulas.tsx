@@ -767,7 +767,8 @@ export function evaluateFormula(
     TemplateButton: (
       highlight: Highlight,
       buttonLabel: string,
-      insertText: string
+      updateText: string,
+      operation: "append" | "prepend" | "replace" = "append"
     ) => {
       if (highlight === undefined) {
         return undefined;
@@ -781,7 +782,16 @@ export function evaluateFormula(
         }
 
         view.dispatch({
-          changes: { from: highlight.span[1], insert: insertText },
+          changes:
+            operation === "replace"
+              ? {
+                  from: highlight.span[0],
+                  to: highlight.span[1],
+                  insert: updateText,
+                }
+              : operation === "prepend"
+              ? { from: highlight.span[0], insert: updateText }
+              : { from: highlight.span[1], insert: updateText },
         });
       };
 
@@ -961,7 +971,12 @@ export const FORMULA_REFERENCE = [
   },
   {
     name: "TemplateButton",
-    args: ["highlight: Highlight", "buttonLabel: string", "insertText: string"],
+    args: [
+      "highlight: Highlight",
+      "buttonLabel: string",
+      "updateText: string",
+      `operation?: "append" | "prepend" | "replace"`,
+    ],
     return: "Component",
   },
   {

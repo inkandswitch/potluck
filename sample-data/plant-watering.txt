@@ -1,7 +1,7 @@
 plant watering tracker
 using current date in formula. "interesting" formula of calculating days since date
 
-monstera [6] 8/3/22
+monstera [6] 8/11/2022
 fig plant [3] 8/5/22
 backyard tree [10] 8/1/22
 bonsai tree [3] 8/4/22

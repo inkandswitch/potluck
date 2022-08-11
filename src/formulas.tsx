@@ -123,7 +123,7 @@ class Clock {
 
   startTicking() {
     this.tick();
-    this.intervalHandler = setInterval(() => this.tick(), 5000);
+    this.intervalHandler = setInterval(() => this.tick(), 1000);
   }
 
   stopTicking() {
@@ -767,7 +767,7 @@ export function evaluateFormula(
     TemplateButton: (
       highlight: Highlight,
       buttonLabel: string,
-      updateText: string,
+      updateText: string | (() => string),
       operation: "append" | "prepend" | "replace" = "append"
     ) => {
       if (highlight === undefined) {
@@ -781,17 +781,19 @@ export function evaluateFormula(
           return;
         }
 
+        const insert =
+          typeof updateText === "function" ? updateText() : updateText;
         view.dispatch({
           changes:
             operation === "replace"
               ? {
                   from: highlight.span[0],
                   to: highlight.span[1],
-                  insert: updateText,
+                  insert,
                 }
               : operation === "prepend"
-              ? { from: highlight.span[0], insert: updateText }
-              : { from: highlight.span[1], insert: updateText },
+              ? { from: highlight.span[0], insert }
+              : { from: highlight.span[1], insert },
         });
       };
 

@@ -144,7 +144,7 @@ const SearchBox = observer(
     const focusSearchBox = () => {
       if (searchState.search === "" || searchState.search === null) {
         const pattern = patternFromSelection(textEditorStateMobx.get()!);
-        if (pattern !== undefined && pattern.length > 0) {
+        if (pattern !== undefined && pattern.parts.length > 0) {
           runInAction(() => {
             searchTermBox.set({
               ...searchState,

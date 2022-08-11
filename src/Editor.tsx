@@ -29,7 +29,7 @@ import {
   textEditorStateMobx,
   textEditorViewMobx,
 } from "./primitives";
-import {Highlight} from "./highlight";
+import { Highlight } from "./highlight";
 import { editorSelectionHighlightsComputed } from "./compute";
 import {
   doSpansOverlap,
@@ -42,7 +42,7 @@ import { createRoot, Root } from "react-dom/client";
 import { NumberSliderComponent } from "./NumberSliderComponent";
 import { TimerComponent } from "./TimerComponent";
 import classNames from "classnames";
-import { Pattern, patternToString } from "./patterns";
+import { Pattern, PatternPart, patternToString } from "./patterns";
 import { orderBy } from "lodash";
 
 const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
@@ -261,13 +261,14 @@ const highlightsField = StateField.define<Highlight[]>({
     }
     return highlights
       .map(
-        (highlight): Highlight => (Highlight.from({
-          ...highlight,
-          span: [
-            tr.changes.mapPos(highlight.span[0]),
-            tr.changes.mapPos(highlight.span[1]),
-          ],
-        }))
+        (highlight): Highlight =>
+          Highlight.from({
+            ...highlight,
+            span: [
+              tr.changes.mapPos(highlight.span[0]),
+              tr.changes.mapPos(highlight.span[1]),
+            ],
+          })
       )
       .filter((highlight) => highlight.span[0] !== highlight.span[1]);
   },
@@ -286,13 +287,14 @@ const hoverHighlightsField = StateField.define<Highlight[]>({
     }
     return highlights
       .map(
-        (highlight): Highlight => (Highlight.from({
-          ...highlight,
-          span: [
-            tr.changes.mapPos(highlight.span[0]),
-            tr.changes.mapPos(highlight.span[1]),
-          ],
-        }))
+        (highlight): Highlight =>
+          Highlight.from({
+            ...highlight,
+            span: [
+              tr.changes.mapPos(highlight.span[0]),
+              tr.changes.mapPos(highlight.span[1]),
+            ],
+          })
       )
       .filter((highlight) => highlight.span[0] !== highlight.span[1]);
   },
@@ -530,7 +532,7 @@ export function patternFromSelection(state: EditorState): Pattern | undefined {
     ["asc", "desc"]
   );
 
-  let pattern: Pattern = [];
+  let patternParts: PatternPart[] = [];
   let prevEnd = range.from;
 
   const usedHighlightNames: string[] = [];
@@ -540,7 +542,7 @@ export function patternFromSelection(state: EditorState): Pattern | undefined {
     }
 
     if (highlight.span[0] !== prevEnd) {
-      pattern.push({
+      patternParts.push({
         type: "text",
         text: state.doc.sliceString(prevEnd, highlight.span[0]),
       });
@@ -550,7 +552,7 @@ export function patternFromSelection(state: EditorState): Pattern | undefined {
 
     const sheetConfigName = sheetConfigsMobx.get(highlight.sheetConfigId)!.name;
 
-    pattern.push({
+    patternParts.push({
       name: `${sheetConfigName}${
         usedHighlightNames.includes(sheetConfigName)
           ? usedHighlightNames.filter((x) => x === sheetConfigName).length + 1
@@ -563,18 +565,23 @@ export function patternFromSelection(state: EditorState): Pattern | undefined {
           ? `${sheetConfigName}.${highlight.data.type.valueOf()}`
           : sheetConfigName,
       },
+      matchMultiple: false,
     });
     usedHighlightNames.push(sheetConfigName);
   }
 
   if (prevEnd !== range.to) {
-    pattern.push({
+    patternParts.push({
       type: "text",
       text: state.doc.sliceString(prevEnd, range.to),
     });
   }
 
-  return pattern;
+  return {
+    parts: patternParts,
+    matchAtStartOfLine: false,
+    matchAtEndOfLine: false,
+  };
 }
 
 export const Editor = observer(

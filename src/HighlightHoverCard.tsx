@@ -74,9 +74,7 @@ export function HighlightHoverCard({
 }) {
   return (
     <HoverCardPrimitive.Root openDelay={500}>
-      <HoverCardPrimitive.Trigger asChild={true}>
-        {children}
-      </HoverCardPrimitive.Trigger>
+      <HoverCardPrimitive.Trigger>{children}</HoverCardPrimitive.Trigger>
       <HoverCardPrimitive.Content
         side="top"
         sideOffset={2}

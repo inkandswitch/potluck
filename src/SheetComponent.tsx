@@ -3,12 +3,13 @@ import classNames from "classnames";
 import { isArray } from "lodash";
 import { action, comparer, computed, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
-import React, { FC, useEffect, useRef, useState } from "react";
+import React, { FC, forwardRef, useEffect, useRef, useState } from "react";
 import {
   hoverHighlightsMobx,
   isSheetExpandedMobx,
   PropertyDefinition,
   PropertyVisibility,
+  selectedTextDocumentIdBox,
   SheetConfig,
   sheetConfigsMobx,
   SheetValueRow,
@@ -17,6 +18,7 @@ import {
   TextDocument,
   TextDocumentSheet,
   textEditorStateMobx,
+  textEditorViewMobx,
 } from "./primitives";
 import {
   doSpansOverlap,
@@ -59,7 +61,7 @@ import {
 } from "@codemirror/autocomplete";
 import { IObservableArray } from "mobx/dist/internal";
 import { getPatternExprGroupNames } from "./patterns";
-import { isChainableCollection } from "./highlight";
+import { Highlight, isChainableCollection } from "./highlight";
 
 let i = 1;
 
@@ -71,9 +73,101 @@ export type SheetViewProps = {
   rowsActiveInDoc: SheetValueRow[];
 };
 
+function EditableHighlightInput({
+  initialText,
+  onUpdate,
+  onCancel,
+}: {
+  initialText: string;
+  onUpdate: (newValue: string) => void;
+  onCancel: () => void;
+}) {
+  const [value, setValue] = useState(initialText);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  return (
+    <span className="relative">
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => {
+          setValue(e.target.value);
+        }}
+        onBlur={() => {
+          onUpdate(value);
+        }}
+        onKeyDown={(e) => {
+          switch (e.key) {
+            case "Enter": {
+              onUpdate(value);
+              break;
+            }
+            case "Escape": {
+              onCancel();
+              break;
+            }
+          }
+        }}
+        className="absolute px-2 top-px bottom-0 left-0 right-0 bg-transparent border-0 outline-none z-1"
+        autoFocus={true}
+        ref={inputRef}
+      />
+      <span className="px-2 invisible">{value}</span>
+    </span>
+  );
+}
+
+const EditableHighlight = forwardRef<HTMLSpanElement, { highlight: Highlight }>(
+  ({ highlight }, forwardedRef) => {
+    const [isEditing, setIsEditing] = useState(false);
+    const text = getTextForHighlight(highlight);
+
+    return (
+      <span
+        className={classNames(
+          "bg-white py-0.5 border font-sans cursor-default rounded-md",
+          isEditing
+            ? "border-dashed border-gray-300"
+            : "cm-highlight border-gray-200 hover:bg-yellow-200"
+        )}
+        ref={forwardedRef}
+      >
+        {isEditing ? (
+          <EditableHighlightInput
+            initialText={text ?? ""}
+            onUpdate={(newValue) => {
+              textEditorViewMobx.get()?.dispatch({
+                changes: {
+                  from: highlight.span[0],
+                  to: highlight.span[1],
+                  insert: newValue,
+                },
+              });
+              setIsEditing(false);
+            }}
+            onCancel={() => {
+              setIsEditing(false);
+            }}
+          />
+        ) : (
+          <span
+            onClick={() => {
+              if (selectedTextDocumentIdBox.get() === highlight.documentId) {
+                setIsEditing(true);
+              }
+            }}
+            className="px-2"
+          >
+            {text}
+          </span>
+        )}
+      </span>
+    );
+  }
+);
+
 export function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
   if (React.isValidElement(value)) {
-    return value
+    return value;
   }
 
   if (value instanceof Error) {
@@ -93,19 +187,15 @@ export function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
   }
 
   if (isValueRowHighlight(value)) {
-    const text = getTextForHighlight(value);
-
     return (
       <HighlightHoverCard highlight={value}>
-        <span className="cm-highlight bg-white py-0.5 px-2 border border-gray-200 hover:bg-yellow-200 font-sans cursor-default rounded-md">
-          {text}
-        </span>
+        <EditableHighlight highlight={value} />
       </HighlightHoverCard>
     );
   }
 
   if (isArray(value) || isChainableCollection(value)) {
-    const items = isArray(value) ? value : value.items
+    const items = isArray(value) ? value : value.items;
 
     const lastIndex = items.length - 1;
 

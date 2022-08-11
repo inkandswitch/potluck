@@ -10,7 +10,7 @@ const patternGrammar = ohm.grammar(String.raw`
       = "MatchPattern" "(" "\"" Expr "\"" ")"
 
     Expr
-      = Part*
+      = "^"? Part* "$"?
 
     Part
       = MatchGroup | text
@@ -51,6 +51,15 @@ patternSemantics.addOperation("toAst", {
   // @ts-ignore
   _terminal() {
     return;
+  },
+
+  // @ts-ignore
+  Expr(startOfLineFlag, parts, endOfLineFlag) {
+    return {
+      parts: parts.toAst(),
+      matchAtStartOfLine: startOfLineFlag.sourceString === "^",
+      matchAtEndOfLine: endOfLineFlag.sourceString === "$"
+    };
   },
 
   // @ts-ignore
@@ -99,7 +108,7 @@ export function getPatternExprGroupNames(source: string): string[] {
 
   const names: { [name: string]: boolean } = {};
 
-  pattern.forEach((part) => {
+  pattern.parts.forEach((part) => {
     if (part.type === "group" && part.name) {
       names[part.name] = true;
     }
@@ -117,6 +126,7 @@ export function parsePattern(source: string): Pattern | undefined {
 
   return patternSemantics(result).toAst() as Pattern;
 }
+
 
 export type TextPart = {
   type: "text";
@@ -143,12 +153,16 @@ export type RegExpr = {
 
 export type PatternPart = TextPart | GroupPart;
 
-export type Pattern = PatternPart[];
+export type Pattern = {
+  parts: PatternPart[],
+  matchAtStartOfLine: boolean,
+  matchAtEndOfLine: boolean
+}
 
 export function patternToString(pattern: Pattern) {
   let string = "";
 
-  for (const part of pattern) {
+  for (const part of pattern.parts) {
     switch (part.type) {
       case "text":
         string += part.text;
@@ -180,9 +194,9 @@ export function matchPatternInDocument(
 
   let highlights: Highlight[] = [];
 
-  pattern.forEach((part, index) => {
+  pattern.parts.forEach((part, index) => {
     if (index === 0) {
-      highlights = matchPart(part, textDocument);
+      highlights = matchPart(part, pattern.matchAtStartOfLine, textDocument);
     } else {
       highlights = highlights
         .map((highlight) =>
@@ -197,14 +211,20 @@ export function matchPatternInDocument(
 
 function matchPart(
   part: PatternPart,
+  matchAtStartOfLine: boolean,
   textDocument: TextDocument
 ): Highlight[] {
   switch (part.type) {
-    case "text":
-      return matchRegex(escapeRegExp(part.text), textDocument);
+    case "text": {
+      const regExp = escapeRegExp(part.text)
+      const regExpWithStartOfLineFlag = matchAtStartOfLine ? `^${regExp}` : regExp
+
+      return matchRegex(regExpWithStartOfLineFlag, textDocument);
+    }
+
 
     case "group":
-      return matchGroupPart(part, textDocument);
+      return matchGroupPart(part, matchAtStartOfLine, textDocument);
 
     default:
       return [];
@@ -213,6 +233,7 @@ function matchPart(
 
 function matchGroupPart(
   { expr, name }: GroupPart,
+  matchAtStartOfLine: boolean,
   textDocument: TextDocument
 ): Highlight[] {
   let highlights: Highlight[] = [];
@@ -234,17 +255,30 @@ function matchGroupPart(
         textDocument.id,
         sheetConfig.id
       ).get() as Highlight[])
-        .filter(h => (
-          subtype === "" || (
-            h.data.type && h.data.type.valueOf().startsWith(subtype)
+        .filter(h => {
+          const line = textDocument.text.lineAt(h.span[0])
+
+          return (
+            (!matchAtStartOfLine || line.from === h.span[0]) &&
+            (subtype === "" || (
+              h.data.type &&
+              h.data.type.valueOf().startsWith(subtype)
+            ))
           )
-        ));
+        });
       break;
     }
 
-    case "regExpr":
-      highlights = matchRegex(expr.source, textDocument);
+    case "regExpr": {
+      const regExpWithStartOfLineFlag = (
+        matchAtStartOfLine && !expr.source.startsWith("^")
+          ? `^${expr.source}`
+          : expr.source
+      )
+
+      highlights = matchRegex(regExpWithStartOfLineFlag, textDocument);
       break;
+    }
   }
 
   return highlights.map((highlight) =>

@@ -188,7 +188,6 @@ class InlineWidget extends WidgetType {
   }
 
   toDOM() {
-    console.log("toDOM");
     const wrap = document.createElement("span");
     wrap.className = classNames("rounded-r", {
       "ml-1": this.mode === InlineWidgetMode.Inline,

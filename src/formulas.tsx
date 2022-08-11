@@ -8,7 +8,8 @@ import {
   highlightComponentEntriesMobx,
   HighlightComponentEntry,
   textEditorStateMobx,
-  textEditorViewMobx, SheetValueRow,
+  textEditorViewMobx,
+  SheetValueRow,
 } from "./primitives";
 import { Highlight } from "./highlight";
 import {
@@ -218,7 +219,7 @@ export function evaluateFormula(
   sheetConfig: SheetConfig,
   isFirstColumn: boolean,
   source: string,
-  scope: Scope,
+  scope: Scope
 ) {
   const API = {
     DateTime,
@@ -236,7 +237,14 @@ export function evaluateFormula(
             ? index + indexOfDelimiter
             : index + line.length;
         if (endOfSpan > index) {
-          highlights.push(new Highlight(textDocument.id, sheetConfig.id, [index, endOfSpan], {}))
+          highlights.push(
+            new Highlight(
+              textDocument.id,
+              sheetConfig.id,
+              [index, endOfSpan],
+              {}
+            )
+          );
         }
         index += line.length + 1;
       }
@@ -264,7 +272,11 @@ export function evaluateFormula(
 
         prevIndex = from;
 
-        highlights.push(new Highlight(textDocument.id, sheetConfig.id, [from, to], { groups: match.slice(1) }));
+        highlights.push(
+          new Highlight(textDocument.id, sheetConfig.id, [from, to], {
+            groups: match.slice(1),
+          })
+        );
       }
 
       return highlights;
@@ -321,10 +333,12 @@ export function evaluateFormula(
                 doSpansOverlap(newHighlight.span, old.span)
               )
           )
-          .map((newHighlight) => (Highlight.from({
-            ...newHighlight,
-            data: { ...newHighlight.data, matchedHighlight: value },
-          })));
+          .map((newHighlight) =>
+            Highlight.from({
+              ...newHighlight,
+              data: { ...newHighlight.data, matchedHighlight: value },
+            })
+          );
 
         highlights = highlights.concat(newHighlights);
       }
@@ -427,7 +441,12 @@ export function evaluateFormula(
       if (endIndex === -1) {
         endIndex = textDocument.text.sliceString(0).length;
       }
-      return new Highlight(textDocument.id, sheetConfig.id, [highlight.span[1], endIndex], {})
+      return new Highlight(
+        textDocument.id,
+        sheetConfig.id,
+        [highlight.span[1], endIndex],
+        {}
+      );
     },
 
     TextBefore: (highlight: Highlight, until: string = "\n"): Highlight => {
@@ -444,7 +463,12 @@ export function evaluateFormula(
         startIndex = indicesWhereUntilOccurs.slice(-1)[0]!;
       }
 
-      return new Highlight(textDocument.id, sheetConfig.id, [startIndex, highlight.span[0]], {})
+      return new Highlight(
+        textDocument.id,
+        sheetConfig.id,
+        [startIndex, highlight.span[0]],
+        {}
+      );
     },
 
     NextUntil: (highlight: Highlight, stopCondition: any): Highlight[] => {
@@ -619,7 +643,7 @@ export function evaluateFormula(
         ).get();
         const rowForHighlight = computedData[
           matchedHighlight.sheetConfigId
-          ].find((row) => row.data.name === matchedHighlight);
+        ].find((row) => row.data.name === matchedHighlight);
         if (
           rowForHighlight &&
           rowForHighlight.data.officialName !== undefined
@@ -665,7 +689,11 @@ export function evaluateFormula(
         const end = start + length;
 
         if (typeof token !== "string") {
-          highlights.push(new Highlight(textDocument.id, sheetConfig.id, [start, end], { type: getTokenType(token) }));
+          highlights.push(
+            new Highlight(textDocument.id, sheetConfig.id, [start, end], {
+              type: getTokenType(token),
+            })
+          );
         }
 
         start = end;
@@ -736,7 +764,11 @@ export function evaluateFormula(
       return componentEntry.component;
     },
 
-    TemplateButton: (highlight: Highlight, label: string, text: string) => {
+    TemplateButton: (
+      highlight: Highlight,
+      buttonLabel: string,
+      insertText: string
+    ) => {
       if (highlight === undefined) {
         return undefined;
       }
@@ -749,13 +781,13 @@ export function evaluateFormula(
         }
 
         view.dispatch({
-          changes: { from: highlight.span[1], insert: text },
+          changes: { from: highlight.span[1], insert: insertText },
         });
       };
 
       return (
         <button onClick={onClick} className="px-1 bg-blue-100 rounded">
-          {label.toString()}
+          {buttonLabel.toString()}
         </button>
       );
     },
@@ -771,10 +803,10 @@ export function evaluateFormula(
     with (API) {
       with (scope) {
         ${
-        formulaSource.includes("return")
-          ? formulaSource
-          : `return (${formulaSource})`
-      }
+          formulaSource.includes("return")
+            ? formulaSource
+            : `return (${formulaSource})`
+        }
       }
     }
   `
@@ -918,6 +950,21 @@ export const FORMULA_REFERENCE = [
     args: ["value: number", "precision: number = 0"],
   },
   {
+    name: "Slider",
+    args: ["highlight: Highlight", "initialValue: number = 0"],
+    return: "Component",
+  },
+  {
+    name: "Timer",
+    args: ["durationHighlight: Highlight"],
+    return: "Component",
+  },
+  {
+    name: "TemplateButton",
+    args: ["highlight: Highlight", "buttonLabel: string", "insertText: string"],
+    return: "Component",
+  },
+  {
     name: "DataFromDoc",
     args: ["docName: string", "sheetConfigName: string", "columnName: string"],
     return: "Highlight[]",
@@ -985,11 +1032,12 @@ export function evaluateSheet(
 
         const tempRow = { ...row };
 
-        Object.entries(value.data || {}).forEach(([name, value]: [string, any]) => {
-
-          // special handling, assume if data has __items key that it's a group match (see highlightGroup in pattern)
-          tempRow[name] = value?.data?.__items ? value.data.__items : value;
-        });
+        Object.entries(value.data || {}).forEach(
+          ([name, value]: [string, any]) => {
+            // special handling, assume if data has __items key that it's a group match (see highlightGroup in pattern)
+            tempRow[name] = value?.data?.__items ? value.data.__items : value;
+          }
+        );
 
         return tempRow;
       });
@@ -1004,7 +1052,7 @@ export function evaluateSheet(
           sheetConfig,
           false,
           column.formula,
-          {_index, ...row}
+          { _index, ...row }
         );
 
         return { ...row, [column.name]: result };
@@ -1014,7 +1062,7 @@ export function evaluateSheet(
 
   // Stretch the bounds of this Highlight so it contains all the highlights in its row.
   // Need to be careful to only consider child Highlights which are in this doc, not other docs
-  const result =  (resultRows ?? []).map((rowData) => {
+  const result = (resultRows ?? []).map((rowData) => {
     let from, to;
 
     for (const value of Object.values(rowData)) {
@@ -1036,8 +1084,13 @@ export function evaluateSheet(
       }
     }
 
-    if (from !== undefined && to !== undefined ) {
-      return new Highlight(textDocument.id, sheetConfig.id, [from, to], rowData)
+    if (from !== undefined && to !== undefined) {
+      return new Highlight(
+        textDocument.id,
+        sheetConfig.id,
+        [from, to],
+        rowData
+      );
     }
 
     return {

@@ -16,7 +16,7 @@ const patternGrammar = ohm.grammar(String.raw`
       = MatchGroup | text
 
     MatchGroup
-      = "{" (RegExpr |  HighlightName) (":" Name)? "}"
+      = "{" (RegExpr |  HighlightName) (":" Name)? "}" "+"?
 
     Name
       = alnum+
@@ -73,11 +73,12 @@ patternSemantics.addOperation("toAst", {
   },
 
   // @ts-ignore
-  MatchGroup(_, expr, __, name, ___) {
+  MatchGroup(_, expr, __, name, ___, matchMultipleFlag) {
     return {
       type: "group",
       expr: expr.toAst(),
       name: name.toAst()[0],
+      matchMultiple: matchMultipleFlag.sourceString === "+"
     };
   },
 
@@ -137,6 +138,7 @@ export type GroupPart = {
   type: "group";
   name?: string;
   expr: GroupExpr;
+  matchMultiple: boolean;
 };
 
 export type GroupExpr = RegExpr | HighlightName;
@@ -232,7 +234,7 @@ function matchPart(
 }
 
 function matchGroupPart(
-  { expr, name }: GroupPart,
+  { expr, name, matchMultiple }: GroupPart,
   matchAtStartOfLine: boolean,
   textDocument: TextDocument
 ): Highlight[] {
@@ -251,21 +253,74 @@ function matchGroupPart(
         return [];
       }
 
-      highlights = (getComputedSheetValue(
+      let highlightGroup : Highlight | undefined
+
+      (getComputedSheetValue(
         textDocument.id,
         sheetConfig.id
       ).get() as Highlight[])
-        .filter(h => {
-          const line = textDocument.text.lineAt(h.span[0])
+        .forEach(highlight => {
 
-          return (
-            (!matchAtStartOfLine || line.from === h.span[0]) &&
-            (subtype === "" || (
-              h.data.type &&
-              h.data.type.valueOf().startsWith(subtype)
-            ))
-          )
-        });
+          // reject, if subtype doesn't match
+          if((subtype !== "" && (
+            !highlight.data.type ||
+            !highlight.data.type.valueOf().startsWith(subtype)
+          ))) {
+            if (highlightGroup) {
+              highlights.push(highlightGroup)
+              highlightGroup = undefined
+            }
+
+            return
+          }
+
+          // try to add highlight to group
+          if (highlightGroup) {
+            const textBetween = textDocument.text.sliceString(highlightGroup.span[1], highlight.span[0])
+
+            if (textBetween.trim() === '') {
+              highlightGroup = Highlight.from({
+                ...highlightGroup,
+                span: [highlightGroup.span[0], highlight.span[1]],
+                data: {
+                  __items: highlightGroup.data.__items.concat(highlight)
+                }
+              })
+              return
+            }
+
+            highlights.push(highlightGroup)
+            highlightGroup = undefined
+          }
+
+          // reject if it should match the start of line but doesn't
+          if (matchAtStartOfLine) {
+            const line = textDocument.text.lineAt(highlight.span[0])
+            const isOnStartOfLine = line.from === highlight.span[0]
+
+
+            if (!isOnStartOfLine) {
+              return
+            }
+          }
+
+          if (matchMultiple) {
+            highlightGroup = Highlight.from({
+              ...highlight,
+              data: {
+                __items: [highlight]
+              }
+            })
+
+          } else {
+            highlights.push(highlight)
+          }
+        })
+
+      if (highlightGroup) {
+        highlights.push(highlightGroup)
+      }
+
       break;
     }
 

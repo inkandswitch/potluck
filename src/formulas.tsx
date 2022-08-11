@@ -985,8 +985,10 @@ export function evaluateSheet(
 
         const tempRow = { ...row };
 
-        Object.entries(value.data || {}).forEach(([name, value]) => {
-          tempRow[name] = value;
+        Object.entries(value.data || {}).forEach(([name, value]: [string, any]) => {
+
+          // special handling, assume if data has __items key that it's a group match (see highlightGroup in pattern)
+          tempRow[name] = value?.data?.__items ? value.data.__items : value;
         });
 
         return tempRow;

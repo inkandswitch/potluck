@@ -415,9 +415,10 @@ export function evaluateFormula(
 
       const sheetValueRows = sortBy(
         typeSheetConfigs
-          .flatMap((typeSheetConfig) =>
-            getComputedSheetValue(textDocument.id, typeSheetConfig.id).get()
-          )
+          .flatMap((typeSheetConfig) => {
+            const firstColumnOnly = typeSheetConfig.id === highlight.sheetConfigId
+            return getComputedSheetValue(textDocument.id, typeSheetConfig.id).get()
+          })
           .filter((row) => "span" in row) as Highlight[],
         ({ span }) => span[0]
       );
@@ -432,6 +433,32 @@ export function evaluateFormula(
         ),
         (r) => highlight.span[0] - r.span[1]
       );
+    },
+
+    AllPrevOfType: (
+      highlight: Highlight,
+      type: string | string[]
+    ) => {
+      const typeSheetConfigs = Array.from(sheetConfigsMobx.values()).filter(
+        (sheetConfig) =>
+          isString(type)
+            ? sheetConfig.name === type
+            : type.includes(sheetConfig.name)
+      );
+
+      const sheetValueRows = sortBy(
+        typeSheetConfigs
+          .flatMap((typeSheetConfig) => {
+            const firstColumnOnly = typeSheetConfig.id === highlight.sheetConfigId
+            return getComputedSheetValue(textDocument.id, typeSheetConfig.id, firstColumnOnly).get()
+          })
+          .filter((row) => "span" in row) as Highlight[],
+        ({ span }) => -span[0]
+      );
+
+      return [...sheetValueRows].filter(
+          (r) => "span" in r && r.span[1] < highlight.span[0]
+        )
     },
 
     TextAfter: (highlight: Highlight, until: string = "\n"): Highlight => {

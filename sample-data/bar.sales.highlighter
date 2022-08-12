@@ -9,7 +9,7 @@
     },
     {
       "name": "prices",
-      "formula": "orders.map((o) => \n First(Filter(FindAll(\"price\"), (p) => (\n   TextOfHighlight(p.data.emoji)\n   ===\n   TextOfHighlight(o)\n ))).data.price\n)",
+      "formula": "orders.map((o) => (\n  Filter(\n    AllPrevOfType(o, \"price\"),\n    (p) => ( \n      TextOfHighlight(p.data.emoji)\n      ==\n      TextOfHighlight(o)\n    )\n  )[0].data.price\n))",
       "visibility": "HIDDEN"
     },
     {
@@ -30,7 +30,7 @@
     {
       "name": "col5",
       "formula": "HasCursorFocus($) ? change : undefined",
-      "visibility": "INLINE"
+      "visibility": "HIDDEN"
     }
   ]
 }

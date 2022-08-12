@@ -218,7 +218,7 @@ export function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
     );
   }
 
-  return <span className="font-mono">{JSON.stringify(value)}</span>;
+  return <pre className="font-mono">{JSON.stringify(value, null, 2)}</pre>;
 }
 
 const SheetSettingsPopoverContent = observer(

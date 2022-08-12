@@ -1,0 +1,16 @@
+{
+  "id": "_vyEtxkOAFniN5tNxSg8wF",
+  "name": "time",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{number:hours}:{number:minutes}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "dateTime",
+      "formula": "DateTime.fromObject({\n  hours: ParseInt(hours),\n  minutes: ParseInt(minutes)\n})",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

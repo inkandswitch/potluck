@@ -214,6 +214,12 @@ function evalCondition(condition: any, item: any): any {
   return condition;
 }
 
+const toNumber = (value: number | Highlight): number => {
+  return isValueRowHighlight(value)
+    ? parseFloat(getTextForHighlight(value)!)
+    : value;
+};
+
 export function evaluateFormula(
   textDocument: TextDocument,
   sheetConfig: SheetConfig,
@@ -416,8 +422,12 @@ export function evaluateFormula(
       const sheetValueRows = sortBy(
         typeSheetConfigs
           .flatMap((typeSheetConfig) => {
-            const firstColumnOnly = typeSheetConfig.id === highlight.sheetConfigId
-            return getComputedSheetValue(textDocument.id, typeSheetConfig.id).get()
+            const firstColumnOnly =
+              typeSheetConfig.id === highlight.sheetConfigId;
+            return getComputedSheetValue(
+              textDocument.id,
+              typeSheetConfig.id
+            ).get();
           })
           .filter((row) => "span" in row) as Highlight[],
         ({ span }) => span[0]
@@ -435,10 +445,7 @@ export function evaluateFormula(
       );
     },
 
-    AllPrevOfType: (
-      highlight: Highlight,
-      type: string | string[]
-    ) => {
+    AllPrevOfType: (highlight: Highlight, type: string | string[]) => {
       const typeSheetConfigs = Array.from(sheetConfigsMobx.values()).filter(
         (sheetConfig) =>
           isString(type)
@@ -449,16 +456,21 @@ export function evaluateFormula(
       const sheetValueRows = sortBy(
         typeSheetConfigs
           .flatMap((typeSheetConfig) => {
-            const firstColumnOnly = typeSheetConfig.id === highlight.sheetConfigId
-            return getComputedSheetValue(textDocument.id, typeSheetConfig.id, firstColumnOnly).get()
+            const firstColumnOnly =
+              typeSheetConfig.id === highlight.sheetConfigId;
+            return getComputedSheetValue(
+              textDocument.id,
+              typeSheetConfig.id,
+              firstColumnOnly
+            ).get();
           })
           .filter((row) => "span" in row) as Highlight[],
         ({ span }) => -span[0]
       );
 
       return [...sheetValueRows].filter(
-          (r) => "span" in r && r.span[1] < highlight.span[0]
-        )
+        (r) => "span" in r && r.span[1] < highlight.span[0]
+      );
     },
 
     TextAfter: (highlight: Highlight, until: string = "\n"): Highlight => {
@@ -621,6 +633,17 @@ export function evaluateFormula(
     },
 
     Round: round,
+
+    Sum: (list: Array<number | Highlight>): number => {
+      return list.reduce((a, b) => toNumber(a) + toNumber(b), 0) as number;
+    },
+
+    Average: (list: Array<number | Highlight>): number => {
+      return (
+        (list.reduce((a, b) => toNumber(a) + toNumber(b), 0) as number) /
+        list.length
+      );
+    },
 
     DataFromDoc: (
       docName: string,
@@ -983,6 +1006,14 @@ export const FORMULA_REFERENCE = [
   {
     name: "IsNumber",
     args: ["value: any"],
+  },
+  {
+    name: "Sum",
+    args: ["values: (number | Highlight)[]"],
+  },
+  {
+    name: "Average",
+    args: ["values: (number | Highlight)[]"],
   },
   {
     name: "Round",

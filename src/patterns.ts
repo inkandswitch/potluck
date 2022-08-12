@@ -16,7 +16,7 @@ const patternGrammar = ohm.grammar(String.raw`
       = MatchGroup | text
 
     MatchGroup
-      = "{" (RegExpr |  HighlightName) (":" Name)? "}" "+"?
+      = "{" (RegExpr |  HighlightName) "+"? (":" Name)? "}" 
 
     Name
       = alnum+
@@ -71,7 +71,7 @@ patternSemantics.addOperation("toAst", {
 
     const matchAtStartOfLine = firstPart && firstPart.type === 'group' && firstPart.expr.type == 'regExpr' && firstPart.expr.source === "^"
     const matchAtEndOfLine = lastPart && lastPart.type === 'group' && lastPart.expr.type == 'regExpr' && lastPart.expr.source === "$"
-      
+
     let partsWithoutFlags = middle
 
     if (firstPart && !matchAtStartOfLine) {
@@ -100,7 +100,7 @@ patternSemantics.addOperation("toAst", {
   },
 
   // @ts-ignore
-  MatchGroup(_, expr, __, name, ___, matchMultipleFlag) {
+  MatchGroup(_, expr, matchMultipleFlag, __, name, ___) {
     return {
       type: "group",
       expr: expr.toAst(),

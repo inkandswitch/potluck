@@ -1,7 +1,7 @@
 Bar
 # Prices
 
-beer 🍺 = 3 Euros
+beer 🍺 = 1 Euros
 apple juice spritzer 🍎 = 2 Euros
 coke🥤 = 2 Euros
 coffee ☕ = 2 Euros

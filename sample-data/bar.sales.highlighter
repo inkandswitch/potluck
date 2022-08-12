@@ -4,7 +4,7 @@
   "properties": [
     {
       "name": "$",
-      "formula": "^{emoji:orders}+$",
+      "formula": "{/^/}{emoji+:orders}{/$/}",
       "visibility": "HIDDEN"
     },
     {

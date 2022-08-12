@@ -35,6 +35,8 @@ import {
   ArrowDownIcon,
   ArrowUpIcon,
   CalendarIcon,
+  CaretDownIcon,
+  CaretUpIcon,
   CookieIcon,
   DotsVerticalIcon,
   EyeClosedIcon,
@@ -71,6 +73,7 @@ export type SheetViewProps = {
   columns: PropertyDefinition[];
   rows: SheetValueRow[];
   rowsActiveInDoc: SheetValueRow[];
+  isExpanded: boolean;
 };
 
 function EditableHighlightInput({
@@ -297,32 +300,20 @@ const SheetFormulaBar = observer(
     textDocument,
     textDocumentSheet,
     sheetConfig,
+    isExpanded,
   }: {
     textDocument: TextDocument;
     textDocumentSheet: TextDocumentSheet;
     sheetConfig: SheetConfig;
+    isExpanded: boolean;
   }) => {
-    const isExpanded = isSheetExpandedMobx.get(textDocumentSheet.id);
-
-    const toggleIsExpanded = action(() => {
-      isSheetExpandedMobx.set(textDocumentSheet.id, !isExpanded);
-    });
-
     const firstColumn = sheetConfig.properties[0];
     return (
       <div
         className={classNames(
-          "bg-white flex items-center gap-2 pl-2 overflow-hidden",
-          isExpanded ? "h-8 border-b border-gray-200" : "h-full"
+          "bg-white flex items-center gap-2 pl-2 overflow-hidden h-8 border-b border-gray-200"
         )}
       >
-        <button className="flex" onClick={() => toggleIsExpanded()}>
-          <span
-            className={`icon icon-expandable bg-gray-500 ${
-              isExpanded ? "is-expanded" : ""
-            }`}
-          />
-        </button>
         <SearchFormulaInput
           value={firstColumn.formula}
           onChange={action((value) => {
@@ -668,6 +659,7 @@ export const SheetTable = observer(
     columns,
     rows,
     rowsActiveInDoc,
+    isExpanded,
   }: SheetViewProps) => {
     const [sortBy, setSortBy] = useState<
       { columnName: string; direction: "asc" | "desc" } | undefined
@@ -704,6 +696,10 @@ export const SheetTable = observer(
       );
     }
 
+    if (!isExpanded) {
+      sortedRows = sortedRows.slice(0, 2);
+    }
+
     const headFormula = transformColumnFormula(columns[0].formula, true);
     const groupNames = getPatternExprGroupNames(headFormula);
 
@@ -724,6 +720,9 @@ export const SheetTable = observer(
     return (
       <>
         <div className="max-h-[250px] overflow-auto relative w-full flex text-sm">
+          {!isExpanded && (
+            <div className="absolute bottom-0 h-12 w-full bg-gradient-to-t from-gray-200 z-10"></div>
+          )}
           <table className="flex-1">
             <thead>
               <tr
@@ -924,8 +923,6 @@ export const SheetComponent = observer(
     }
     const columns = sheetConfig.properties;
 
-    const isExpanded = isSheetExpandedMobx.get(id);
-
     const SheetViewComponent: FC<SheetViewProps> = {
       [SheetView.Table]: SheetTable,
       [SheetView.Calendar]: SheetCalendar,
@@ -946,6 +943,17 @@ export const SheetComponent = observer(
         ),
       { equals: comparer.shallow }
     ).get();
+
+    // If the user has selected a highlight in the doc that is from this sheet,
+    // we temporarily expand the sheet to show the highlight.
+    const temporarilyExpanded =
+      (rowsActiveInDoc.length > 0 || rows.length <= 2) &&
+      !textDocumentSheet.hideHighlightsInDocument;
+    const isExpanded = isSheetExpandedMobx.get(id) || temporarilyExpanded;
+
+    const toggleIsExpanded = action(() => {
+      isSheetExpandedMobx.set(textDocumentSheet.id, !isExpanded);
+    });
 
     return (
       <div>
@@ -1031,28 +1039,26 @@ export const SheetComponent = observer(
                 )}
               </button>
             </div>
-            {isExpanded ? (
-              <div className="rounded-bl bg-gray-100 h-[31px] border-b border-l border-gray-200">
-                <Popover.Root modal={true}>
-                  <Popover.Anchor asChild={true}>
-                    <Popover.Trigger asChild={true}>
-                      <button className="text-gray-400 hover:text-gray-600 flex w-full h-full items-center justify-center">
-                        <DotsVerticalIcon />
-                      </button>
-                    </Popover.Trigger>
-                  </Popover.Anchor>
-                  <Popover.Portal>
-                    <Popover.Content side="bottom" sideOffset={4} align="start">
-                      <SheetSettingsPopoverContent
-                        textDocument={textDocument}
-                        textDocumentSheet={textDocumentSheet}
-                        sheetConfig={sheetConfig}
-                      />
-                    </Popover.Content>
-                  </Popover.Portal>
-                </Popover.Root>
-              </div>
-            ) : null}
+            <div className="rounded-bl bg-gray-100 h-[31px] border-b border-l border-gray-200">
+              <Popover.Root modal={true}>
+                <Popover.Anchor asChild={true}>
+                  <Popover.Trigger asChild={true}>
+                    <button className="text-gray-400 hover:text-gray-600 flex w-full h-full items-center justify-center">
+                      <DotsVerticalIcon />
+                    </button>
+                  </Popover.Trigger>
+                </Popover.Anchor>
+                <Popover.Portal>
+                  <Popover.Content side="bottom" sideOffset={4} align="start">
+                    <SheetSettingsPopoverContent
+                      textDocument={textDocument}
+                      textDocumentSheet={textDocumentSheet}
+                      sheetConfig={sheetConfig}
+                    />
+                  </Popover.Content>
+                </Popover.Portal>
+              </Popover.Root>
+            </div>
           </div>
           <div
             className={classNames(
@@ -1064,26 +1070,34 @@ export const SheetComponent = observer(
               textDocument={textDocument}
               textDocumentSheet={textDocumentSheet}
               sheetConfig={sheetConfig}
+              isExpanded={isExpanded}
             />
 
-            {isExpanded && (
-              <SheetViewComponent
-                textDocument={textDocument}
-                sheetConfig={sheetConfig}
-                columns={columns}
-                rows={rows}
-                rowsActiveInDoc={rowsActiveInDoc}
-              />
-            )}
+            <SheetViewComponent
+              textDocument={textDocument}
+              sheetConfig={sheetConfig}
+              columns={columns}
+              rows={rows}
+              rowsActiveInDoc={rowsActiveInDoc}
+              isExpanded={isExpanded}
+            />
           </div>
         </div>
         <div
-          className={classNames(
-            "text-xs whitespace-nowrap mt-1 ml-8",
-            rowsActiveInDoc.length > 0 ? "text-blue-500" : "text-gray-400"
-          )}
+          className="text-xs whitespace-nowrap mt-1 ml-8 text-gray-400 cursor-pointer"
+          onClick={toggleIsExpanded}
         >
-          {rows.length} result{rows.length !== 1 ? "s" : ""}
+          {!isExpanded && (
+            <span>
+              <CaretDownIcon className="inline" /> Show all {rows.length} result
+              {rows.length !== 1 ? "s" : ""}
+            </span>
+          )}
+          {isExpanded && !temporarilyExpanded && (
+            <span>
+              <CaretUpIcon className="inline" /> Collapse
+            </span>
+          )}
         </div>
       </div>
     );

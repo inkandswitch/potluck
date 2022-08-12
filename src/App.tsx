@@ -37,7 +37,7 @@ import {
 } from "@radix-ui/react-icons";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { ToastViewport } from "@radix-ui/react-toast";
-import { DocumentSidebar } from "./DocumentSidebar";
+import { DocumentSidebar, PersistenceButton } from "./DocumentSidebar";
 import { patternToString } from "./patterns";
 
 const TextDocumentName = observer(
@@ -368,6 +368,7 @@ const App = observer(() => {
             <Pencil2Icon className="text-gray-600" />
           </button>
           <div className="grow" />
+          <PersistenceButton />
           <SearchButton />
         </div>
         <TextDocumentComponent

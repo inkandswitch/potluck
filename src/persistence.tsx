@@ -1,6 +1,6 @@
 import { Text } from "@codemirror/state";
 import { fileSave } from "browser-fs-access";
-import { comparer, reaction, runInAction } from "mobx";
+import { comparer, observable, reaction, runInAction } from "mobx";
 import {
   selectedTextDocumentIdBox,
   SheetConfig,
@@ -13,10 +13,13 @@ import {
 import React, { useState } from "react";
 import { generateNanoid } from "./utils";
 import * as Toast from "@radix-ui/react-toast";
+import { get, set } from "idb-keyval";
 
 function prettyStringify(value: any): string {
   return JSON.stringify(value, null, 2);
 }
+
+const IDB_DIRECTORY_HANDLE_KEY = "directoryHandle";
 
 // we'll always start file paths with / so "/foo.txt" is a foo.txt in the root
 // directory.
@@ -24,6 +27,28 @@ function prettyStringify(value: any): string {
 export const TEXT_FILE_EXTENSION = "txt";
 export const DOCUMENT_METADATA_EXTENSION = "metadata";
 export const HIGHLIGHTER_FILE_EXTENSION = "highlighter";
+
+export const directoryPersistenceBox = observable.box<
+  DirectoryPersistence | undefined
+>(undefined, { deep: false });
+export const existingDirectoryHandleBox = observable.box<
+  FileSystemDirectoryHandle | undefined
+>(undefined);
+
+async function init() {
+  const existingDirectoryHandle = await get(IDB_DIRECTORY_HANDLE_KEY);
+  if (existingDirectoryHandle !== undefined) {
+    const permission = await existingDirectoryHandle.queryPermission({
+      mode: "readwrite",
+    });
+    if (permission === "prompt" || permission === "granted") {
+      runInAction(() => {
+        existingDirectoryHandleBox.set(existingDirectoryHandle);
+      });
+    }
+  }
+}
+init();
 
 function getRelativePath(fileHandle: File) {
   return fileHandle.webkitRelativePath.substring(
@@ -66,10 +91,26 @@ export class DirectoryPersistence {
 
   constructor() {}
 
-  async init(writePrimitives: boolean) {
-    this.directoryHandle = await window.showDirectoryPicker({
-      mode: "readwrite",
-    });
+  async init(
+    writePrimitives: boolean,
+    directoryHandle?: FileSystemDirectoryHandle
+  ) {
+    if (directoryHandle !== undefined) {
+      // const perm = await lastDirectoryHandle.queryPermission({
+      //   mode: "readwrite",
+      // });
+      // if (perm !== "granted") {
+      //   const perm = await lastDirectoryHandle.requestPermission({
+      //     mode: "readwrite",
+      //   });
+      // }
+      this.directoryHandle = directoryHandle;
+    } else {
+      this.directoryHandle = await window.showDirectoryPicker({
+        mode: "readwrite",
+      });
+      set(IDB_DIRECTORY_HANDLE_KEY, this.directoryHandle);
+    }
     // @ts-ignore
     for await (const entry of this.directoryHandle.values()) {
       const relativePath = `/${entry.name}`;
@@ -97,6 +138,9 @@ export class DirectoryPersistence {
     }
 
     await this.initSync(writePrimitives);
+    runInAction(() => {
+      directoryPersistenceBox.set(this);
+    });
   }
 
   async initSync(writePrimitives: boolean) {
@@ -223,6 +267,9 @@ export class DirectoryPersistence {
     for (const unsubscribe of this.unsubscribes) {
       unsubscribe();
     }
+    runInAction(() => {
+      directoryPersistenceBox.set(undefined);
+    });
   }
 }
 

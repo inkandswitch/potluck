@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import { action, computed, values } from "mobx";
+import { action, computed, runInAction, values } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   selectedTextDocumentIdBox,
@@ -9,7 +9,11 @@ import {
 } from "./primitives";
 import { useState } from "react";
 import { FileTextIcon } from "@radix-ui/react-icons";
-import { DirectoryPersistence } from "./persistence";
+import {
+  DirectoryPersistence,
+  directoryPersistenceBox,
+  existingDirectoryHandleBox,
+} from "./persistence";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import {
   CheckCircledIcon,
@@ -17,12 +21,47 @@ import {
   UpdateIcon,
 } from "@radix-ui/react-icons";
 
-const PersistenceButton = observer(() => {
-  const [directoryPersistence, setDirectoryPersistence] = useState<
-    DirectoryPersistence | undefined
-  >(undefined);
+const SyncExistingDirectoryButton = observer(() => {
+  const existingDirectoryHandle = existingDirectoryHandleBox.get();
+  if (existingDirectoryHandle === undefined) {
+    return null;
+  }
+
   return (
-    <div className="flex gap-2 bg-white bg-opacity-50 p-2 rounded">
+    <button
+      onClick={async () => {
+        const permission = await (
+          existingDirectoryHandle as any
+        ).queryPermission({
+          mode: "readwrite",
+        });
+        if (permission === "prompt") {
+          const requestedPermission = await (
+            existingDirectoryHandle as any
+          ).requestPermission({
+            mode: "readwrite",
+          });
+          if (requestedPermission !== "granted") {
+            runInAction(() => {
+              existingDirectoryHandleBox.set(undefined);
+            });
+            return;
+          }
+        }
+        const d = new DirectoryPersistence();
+        d.init(false, existingDirectoryHandle);
+      }}
+      className="text-[10px] bg-blue-50 px-1 py-0.5 rounded-sm text-blue-500 hover:bg-blue-100 transition"
+    >
+      sync /{existingDirectoryHandle.name}
+    </button>
+  );
+});
+
+export const PersistenceButton = observer(() => {
+  const directoryPersistence = directoryPersistenceBox.get();
+  return (
+    <>
       <Tooltip.Root>
         <Tooltip.Trigger asChild={true}>
           <button
@@ -32,13 +71,8 @@ const PersistenceButton = observer(() => {
               }
 
               const isMetaKey = e.metaKey;
-              async function go() {
-                const d = new DirectoryPersistence();
-                await d.init(isMetaKey);
-                setDirectoryPersistence(d);
-              }
-
-              go();
+              const d = new DirectoryPersistence();
+              d.init(isMetaKey);
             }}
             className="text-gray-600 hover:text-gray-700"
           >
@@ -66,7 +100,6 @@ const PersistenceButton = observer(() => {
                 if (directoryPersistence !== undefined) {
                   directoryPersistence.destroy();
                 }
-                setDirectoryPersistence(undefined);
               }}
               className="text-gray-400 hover:text-gray-700"
             >
@@ -80,8 +113,10 @@ const PersistenceButton = observer(() => {
             </Tooltip.Content>
           </Tooltip.Portal>
         </Tooltip.Root>
-      ) : null}
-    </div>
+      ) : (
+        <SyncExistingDirectoryButton />
+      )}
+    </>
   );
 });
 
@@ -147,8 +182,6 @@ export const DocumentSidebar = observer(() => {
             v0.5
           </span>
         </div>
-
-        <PersistenceButton />
       </div>
       <div className="grow overflow-auto">
         {sortedDocuments.map((textDocument) => (

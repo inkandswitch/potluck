@@ -1,6 +1,6 @@
 import { sheetConfigsMobx, TextDocument } from "./primitives";
 import { Highlight } from "./highlight";
-import { escapeRegExp } from "lodash";
+import { escapeRegExp, last } from "lodash";
 import ohm from "ohm-js";
 import { getComputedSheetValue } from "./compute";
 
@@ -10,7 +10,7 @@ const patternGrammar = ohm.grammar(String.raw`
       = "MatchPattern" "(" "\"" Expr "\"" ")"
 
     Expr
-      = "^"? Part* "$"?
+      = Part*
 
     Part
       = MatchGroup | text
@@ -34,13 +34,10 @@ const patternGrammar = ohm.grammar(String.raw`
       = ~"/" any
 
     text
-      = (textChar|endTextChar)+
+      = textChar+
 
     textChar
-      = ~("{"| "\"") any ~end
-    
-    endTextChar
-      = ~("{"| "\"" | "$") any end  
+      = ~("{"| "\"") any 
   }
 `);
 
@@ -57,11 +54,38 @@ patternSemantics.addOperation("toAst", {
   },
 
   // @ts-ignore
-  Expr(startOfLineFlag, parts, endOfLineFlag) {
+  Expr(partsNode) {
+    const parts : PatternPart[] = partsNode.toAst()
+
+    let firstPart : PatternPart | undefined  = undefined
+    let lastPart : PatternPart | undefined = undefined
+    let middle: PatternPart[]
+
+    if (parts.length <= 1) {
+      middle = parts
+    } else {
+      firstPart = parts[0]
+      lastPart = last(parts)
+      middle = parts.slice(1, -1)
+    }
+
+    const matchAtStartOfLine = firstPart && firstPart.type === 'group' && firstPart.expr.type == 'regExpr' && firstPart.expr.source === "^"
+    const matchAtEndOfLine = lastPart && lastPart.type === 'group' && lastPart.expr.type == 'regExpr' && lastPart.expr.source === "$"
+      
+    let partsWithoutFlags = middle
+
+    if (firstPart && !matchAtStartOfLine) {
+      partsWithoutFlags.unshift(firstPart)
+    }
+
+    if (lastPart && !matchAtEndOfLine) {
+      partsWithoutFlags.push(lastPart)
+    }
+
     return {
-      parts: parts.toAst(),
-      matchAtStartOfLine: startOfLineFlag.sourceString === "^",
-      matchAtEndOfLine: endOfLineFlag.sourceString === "$"
+      parts: partsWithoutFlags,
+      matchAtStartOfLine,
+      matchAtEndOfLine,
     };
   },
 
@@ -191,7 +215,6 @@ export function matchPatternInDocument(
   textDocument: TextDocument,
   sheetConfigId: string
 ): Highlight[] {
-
 
 
   const pattern = parsePattern(source);

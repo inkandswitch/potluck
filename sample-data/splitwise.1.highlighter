@@ -9,12 +9,12 @@
     },
     {
       "name": "userItems",
-      "formula": "$.Prev(\"userMoney\")\n.Where(\n \"userMoney.data.name.isEqualTo(name)\"\n)",
+      "formula": "$.allPrev(\"userMoney\")\n.filter((userMoney) => (\n userMoney.data.name.isEqualTo(name)\n))",
       "visibility": "HIDDEN"
     },
     {
       "name": "sum",
-      "formula": "userItems\n.SumOf(\"data.money.data.amount\")",
+      "formula": "userItems\n.sumOf(\"data.money.data.amount\")",
       "visibility": "HIDDEN"
     },
     {

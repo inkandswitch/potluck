@@ -1,0 +1,36 @@
+{
+  "id": "_EPSPtlS2leXEhRmSEoQZh",
+  "name": "teammate",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/@shen|@sonnentag|@max|@geoffrey|@pvh/}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "font-weight",
+      "formula": "\"normal\"",
+      "visibility": "STYLE"
+    },
+    {
+      "name": "background",
+      "formula": "\"#eeeeee\"",
+      "visibility": "STYLE"
+    },
+    {
+      "name": "padding",
+      "formula": "\"2px\"",
+      "visibility": "STYLE"
+    },
+    {
+      "name": "border-radius",
+      "formula": "\"5px\"",
+      "visibility": "STYLE"
+    },
+    {
+      "name": "highlighted",
+      "formula": "FindAll(\"highlightedTeammate\")",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

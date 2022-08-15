@@ -1,0 +1,11 @@
+{
+  "id": "_1F0eRt4v6Onwr8fDfaXQU",
+  "name": "highlightedTeammate",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "Put your own name here to highlight yours specifically: {teammate:teammate}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "sheets": [
+    {
+      "id": "_9t8ilvJ7XPrDn5LM9rcou",
+      "configId": "time-tracking.time"
+    },
+    {
+      "id": "_JIXZaoTWFccSUrT7JkXCx",
+      "configId": "todos.1"
+    },
+    {
+      "id": "_vAlraHxh3rPGMefQn1BNn",
+      "configId": "todos.2"
+    },
+    {
+      "id": "_T7wi3WvEAe0ZoOzM2gAxY",
+      "configId": "workshop.duration"
+    },
+    {
+      "id": "_Pi6GccwquTRbC1uqyfAw5",
+      "configId": "_1F0eRt4v6Onwr8fDfaXQU"
+    },
+    {
+      "id": "_9guUeM0PS7Q7Uj5Rmtltt",
+      "configId": "markdown"
+    },
+    {
+      "id": "_vr6DjALacbU2J62wnuczP",
+      "configId": "_EPSPtlS2leXEhRmSEoQZh"
+    }
+  ]
+}

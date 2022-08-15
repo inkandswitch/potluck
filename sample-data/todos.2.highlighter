@@ -1,6 +1,6 @@
 {
   "id": "todos.2",
-  "name": "[ ]",
+  "name": "incomplete",
   "properties": [
     {
       "name": "$",

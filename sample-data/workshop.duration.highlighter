@@ -1,6 +1,6 @@
 {
   "id": "workshop.duration",
-  "name": "duration",
+  "name": "agendaDuration",
   "properties": [
     {
       "name": "$",
@@ -9,7 +9,7 @@
     },
     {
       "name": "prevDurations",
-      "formula": "AllPrevOfType($, \"duration\")",
+      "formula": "AllPrevOfType($, \"agendaDuration\")",
       "visibility": "HIDDEN"
     },
     {

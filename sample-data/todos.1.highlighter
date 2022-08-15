@@ -1,6 +1,6 @@
 {
   "id": "todos.1",
-  "name": "[x]",
+  "name": "completed",
   "properties": [
     {
       "name": "$",

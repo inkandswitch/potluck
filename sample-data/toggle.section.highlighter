@@ -1,0 +1,21 @@
+{
+  "id": "toggle.section",
+  "name": "toggleSection",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/<(\\\\n|[^▼▶])*>/}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "isExpanded",
+      "formula": "$.prev(\"toggle\") == \"▼\"",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col3",
+      "formula": "isExpanded == false ? \"...\" : undefined",
+      "visibility": "REPLACE"
+    }
+  ]
+}

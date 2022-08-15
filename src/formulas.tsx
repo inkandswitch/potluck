@@ -816,8 +816,8 @@ export function evaluateFormula(
 
     TemplateButton: (
       highlight: Highlight,
-      buttonLabel: string,
-      updateText: string | (() => string),
+      buttonLabel: string | Highlight,
+      updateText: string | (() => string) | Highlight,
       operation: "append" | "prepend" | "replace" = "append"
     ) => {
       if (highlight === undefined) {
@@ -832,7 +832,7 @@ export function evaluateFormula(
         }
 
         const insert =
-          typeof updateText === "function" ? updateText() : updateText;
+          typeof updateText === "function" ? updateText() : updateText.toString();
         view.dispatch({
           changes:
             operation === "replace"

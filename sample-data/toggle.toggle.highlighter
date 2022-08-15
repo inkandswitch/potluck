@@ -1,0 +1,16 @@
+{
+  "id": "toggle.toggle",
+  "name": "toggle",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/▶|▼/}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col3",
+      "formula": "TemplateButton($, $, $ == \"▼\" ? \"▶\" : \"▼\", \"replace\")",
+      "visibility": "REPLACE"
+    }
+  ]
+}

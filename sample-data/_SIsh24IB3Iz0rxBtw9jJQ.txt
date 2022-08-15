@@ -1,0 +1,79 @@
+_Welcome to Potluck!
+Potluck is an environment for making *personal software* out of text documents.
+
+You can start out using it just like a notes app, typing in text. But then you can add *live searches* which detect patterns in your text as you type: dates, times, quantities, food ingredients, a todo item, your favorite emoji ⭐️... anything you like.
+
+You can then write little spreadsheet-style formulas to run computations using these search results, and then you can show the results back in the text doc. Just with these few simple concepts, you can build many kinds of software:
+
+- 🥘 **Recipe app**: scale up ingredients and show a timer in the directions
+- 💪 **Workout tracker**: A simple text-based workout log with a calendar view
+- ✅ **Todo list**: write a todo list with time tracking and convenient formatting
+- ✈️ **Trip plan**: make a trip plan that shows open times + flight statuses
+- 🌸 **Plant watering**: conveniently keep track of when to water your plants
+- 🍞 **Bake Sale**: Keep track of sales and prices at a cash register
+- 💵 **Stock Portfolio** tracker with live stock prices
+
+All of these examples are pre-loaded here, feel free to poke around. As you start using Potluck, you can come up with your own live searches and your own tools to meet your own needs.
+
+## Getting started
+
+We're going to make a simple live search to get familiar with the mechanics. Here's what it will do. Each time we type in text like "23 is a number" it will show the doubled number in the text, like "23 is a number [46]".
+
+**Making a search**
+
+To start, hit Cmd-Shift-F / Ctrl-Shift-F (or click the magnifying glass in upper right) to open the search panel. This is where we create live searches to recognize patterns in our text. Each live search gets a table of results in the sidebar. You can see there is already a Markdown search there which is powering the Markdown formatting in this doc.
+
+Type into the searchbox:
+{number} is a number
+
+Then hit Enter. You just created your first live search! As you might have guessed, this will match anytime we type a number, followed by the words "is a number". Inside the curly braces we can write any existing search that's already in Potluck, or we can even write a full regular expression if you're familiar with those.
+
+You can hover over each row in the search results to see where it came from.
+
+**Seeing a new search result**
+
+Try editing this text below to include your favorite number:
+
+? is a number
+
+You should see an underline appear in the text doc because it matched your live search. The table in the sidebar also now has a new row including your new text. As you can see, searches are live: they update when you edit the text.
+
+**Doing a computation**
+
+Next let's double the number. Click in the formula bar for the search (next to the eyeball icon) and edit it to say:
+{number:num} is a number
+
+Now there's a second column in the table which has extracted just the number from the search result. You can name the result of any curly brace section of your pattern and extract a column for it.
+
+Next, click the "+" button on the right side of the table. A new column will appear in the table, along with a textbox to enter a formula. (Currently there's a bug where the box may appear in the top-left corner of the screen.)
+
+Type into the box:
+num * 2
+
+You should see your new column in the table fill up with doubled number values. By the way, you can type any JavaScript expression as a formula into this box.
+
+**Showing the computation in the text**
+
+Time for the last step: showing these doubled numbers in the text doc.
+
+Click the settings icon in the column header to get the formula editor popup. For "Display in document", select "Next to text".
+
+Now if you scroll back up in the doc, you'll see the doubled numbers showing up in the text! Try editing the text below to see it happen live:
+
+? is a number
+
+You've now seen the basic mechanics of how Potluck works!
+
+## Next steps
+
+To explore further:
+
+- try looking through the various documents in the sidebar and see what they do and how they're implemented
+- try making your own documents and playing around!
+- ask us for help if you have questions
+
+A few more tips:
+
+- There's a question mark icon in the formula editor for a column which shows all the formulas available in the system
+- Try the different forms of "Display in document": next to, above, replace
+- You can also try adding conditional formatting to a document using CSS properties as column names; see the Markdown search in this doc for an example.

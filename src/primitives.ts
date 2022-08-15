@@ -10,9 +10,9 @@ import { Highlight } from "./highlight";
 export type Span = [from: number, to: number];
 
 export type SheetValueRowWithoutSpan = {
-  documentId: string,
-  sheetConfigId: string,
-  data: { [columnName: string]: any },
+  documentId: string;
+  sheetConfigId: string;
+  data: { [columnName: string]: any };
 };
 export type SheetValueRow = Highlight | SheetValueRowWithoutSpan;
 
@@ -85,7 +85,7 @@ export const textEditorStateMobx = observable.box(
   EditorState.create({ doc: "" })
 );
 
-export const textEditorViewMobx = observable.box<EditorView>()
+export const textEditorViewMobx = observable.box<EditorView>();
 
 const defaultState = getStateFromFiles(DefaultFiles);
 export const textDocumentsMobx = observable.map<string, TextDocument>(
@@ -248,6 +248,6 @@ export const hoverHighlightsMobx = observable.array<Highlight>([]);
 
 export const isSheetExpandedMobx = observable.map<string, boolean>({});
 
-export const showDocumentSidebarBox = observable.box(false);
-export const showSearchPanelBox = observable.box(true);
+export const showDocumentSidebarBox = observable.box(true);
+export const showSearchPanelBox = observable.box(false);
 export const isSearchBoxFocused = observable.box(false);

@@ -22,9 +22,12 @@ export class Highlight {
 
     return orderBy(
       typeSheetConfigs
-        .flatMap((typeSheetConfig) =>
-          getComputedSheetValue(this.documentId, typeSheetConfig.id).get()
-        )
+        .flatMap((typeSheetConfig) => {
+          const firstColumnOnly =
+            typeSheetConfig.id === this.sheetConfigId;
+
+          return getComputedSheetValue(this.documentId, typeSheetConfig.id, firstColumnOnly).get()
+        })
         .filter((row) => (
           "span" in row &&
           row.span[1] < this.span[0]
@@ -35,7 +38,7 @@ export class Highlight {
     );
   }
 
-  prev (type: string | string[]) {
+  prev(type: string | string[]) {
     return this.allPrev(type)[0]
   }
 
@@ -47,11 +50,14 @@ export class Highlight {
           : type.includes(sheetConfig.name)
     );
 
-    const highlights = orderBy(
+    return orderBy(
       typeSheetConfigs
-        .flatMap((typeSheetConfig) =>
-          getComputedSheetValue(this.documentId, typeSheetConfig.id).get()
-        )
+        .flatMap((typeSheetConfig) => {
+          const firstColumnOnly =
+            typeSheetConfig.id === this.sheetConfigId;
+
+          return getComputedSheetValue(this.documentId, typeSheetConfig.id, firstColumnOnly).get()
+        })
         .filter((row) => (
           "span" in row &&
           row.span[0] > this.span[1]
@@ -60,11 +66,9 @@ export class Highlight {
       [({ span }) => span[0]],
       ['asc']
     );
-
-    return highlights
   }
 
-  next (type: string | string[]) {
+  next(type: string | string[]) {
     return this.allNext(type)[0]
   }
 
@@ -110,10 +114,10 @@ export class Highlight {
 
 
 Object.defineProperty(Array.prototype, 'sumOf', {
-  value: function(path?: string) {
+  value: function (path?: string) {
     let sum = 0;
 
-    this.forEach((item:any ) => {
+    this.forEach((item: any) => {
       const number = coerceValueToNumber(path ? get(item, path) : item)
 
       console.log(item, number, path)

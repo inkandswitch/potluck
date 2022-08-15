@@ -1,15 +1,10 @@
 {
-  "id": "_E9h7s3PpOiy7qPuiNrpFq",
+  "id": "workshop.duration",
   "name": "duration",
   "properties": [
     {
       "name": "$",
       "formula": "{number:minutes} minutes",
-      "visibility": "HIDDEN"
-    },
-    {
-      "name": "prevTime",
-      "formula": "PrevOfType($, \"time\")",
       "visibility": "HIDDEN"
     },
     {
@@ -19,7 +14,7 @@
     },
     {
       "name": "prevDateTime",
-      "formula": "DateTime.fromObject({\n hours: ParseInt(prevTime.data.hours),\n minutes: ParseInt(prevTime.data.minutes)\n})",
+      "formula": "DateTime.fromObject({\n hours: ParseInt($.prev(\"time\").data.hours),\n minutes: ParseInt($.prev(\"time\").data.minutes)\n})",
       "visibility": "HIDDEN"
     },
     {
@@ -45,7 +40,7 @@
     {
       "name": "durationText",
       "formula": "`${startTimeText} - ${endTimeText}`",
-      "visibility": "INLINE"
+      "visibility": "REPLACE"
     }
   ]
 }

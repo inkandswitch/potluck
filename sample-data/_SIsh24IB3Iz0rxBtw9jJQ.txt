@@ -74,6 +74,7 @@ To explore further:
 
 A few more tips:
 
+- By default this is just a playground app, and it doesn't save data. You can sync the web app with a directory on your local filesystem if you want to save files.
 - There's a question mark icon in the formula editor for a column which shows all the formulas available in the system
 - Try the different forms of "Display in document": next to, above, replace
 - You can also try adding conditional formatting to a document using CSS properties as column names; see the Markdown search in this doc for an example.

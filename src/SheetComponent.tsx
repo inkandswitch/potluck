@@ -127,7 +127,7 @@ const EditableHighlight = forwardRef<HTMLSpanElement, { highlight: Highlight }>(
     return (
       <span
         className={classNames(
-          "bg-white py-0.5 border font-sans cursor-default rounded-md",
+          "inline-block bg-white py-0.5 border font-sans cursor-default rounded-md",
           isEditing
             ? "border-dashed border-gray-300"
             : "cm-highlight border-gray-200 hover:bg-yellow-200"
@@ -875,7 +875,7 @@ export const SheetTable = observer(
                     return (
                       <td
                         className={classNames(
-                          "border border-gray-200 px-1 py-1 relative",
+                          "border border-gray-200 px-1 py-1 relative min-h-[32px]",
                           colIndex === 0 ? "border-l-transparent" : undefined,
                           rowIndex === sortedRows.length - 1
                             ? "border-b-transparent"

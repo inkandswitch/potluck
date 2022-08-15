@@ -34,7 +34,7 @@ export const HighlightHoverCardContent = observer(
           {textDocument.name} (Line{" "}
           {startLine === endLine ? startLine : `${startLine} - ${endLine}`})
         </div>
-        <div className="whitespace-pre-wrap">
+        <div className="whitespace-pre-wrap max-w-[75vw]">
           {highlight.span[0] > startPosOfHighlightLine ? (
             <span>
               {textDocument.text.sliceString(

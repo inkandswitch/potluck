@@ -91,6 +91,10 @@ import file_88 from "../sample-data/trip-plan.txt?raw"
 import file_89 from "../sample-data/workout.metadata?raw"
 import file_90 from "../sample-data/workout.txt?raw"
 import file_91 from "../sample-data/workout.workout.highlighter?raw"
+import file_92 from "../sample-data/workshop.duration.highlighter?raw"
+import file_93 from "../sample-data/workshop.metadata?raw"
+import file_94 from "../sample-data/workshop.time.highlighter?raw"
+import file_95 from "../sample-data/workshop.txt?raw"
 
 export const DefaultFiles = {
   "/aeropress.metadata" : file_0,
@@ -184,5 +188,9 @@ export const DefaultFiles = {
   "/trip-plan.txt" : file_88,
   "/workout.metadata" : file_89,
   "/workout.txt" : file_90,
-  "/workout.workout.highlighter" : file_91
+  "/workout.workout.highlighter" : file_91,
+  "/workshop.duration.highlighter" : file_92,
+  "/workshop.metadata" : file_93,
+  "/workshop.time.highlighter" : file_94,
+  "/workshop.txt" : file_95
 }

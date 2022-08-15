@@ -1,9 +1,7 @@
 import { sheetConfigsMobx, SheetValueRow, Span, textDocumentsMobx } from "./primitives";
 import { coerceValueToNumber, getTextForHighlight, isNumericish, isValueRowHighlight } from "./utils";
-import { highlight } from "prismjs";
 import { isNaN, isString, orderBy, get, pick } from "lodash";
 import { getComputedSheetValue } from "./compute";
-import { evaluateFormula } from "./formulas";
 
 export class Highlight {
   constructor(
@@ -14,7 +12,7 @@ export class Highlight {
   ) {
   }
 
-  Prev(type: string | string[]) {
+  allPrev(type: string | string[]) {
     const typeSheetConfigs = Array.from(sheetConfigsMobx.values()).filter(
       (sheetConfig) =>
         isString(type)
@@ -22,7 +20,7 @@ export class Highlight {
           : type.includes(sheetConfig.name)
     );
 
-    const highlights = orderBy(
+    return orderBy(
       typeSheetConfigs
         .flatMap((typeSheetConfig) =>
           getComputedSheetValue(this.documentId, typeSheetConfig.id).get()
@@ -35,11 +33,13 @@ export class Highlight {
       [({ span }) => span[0]],
       ['desc']
     );
-
-    return new HighlightCollection(this, highlights, isString(type) ? type : undefined)
   }
 
-  Next(type: string | string[]) {
+  prev (type: string | string[]) {
+    return this.allPrev(type)[0]
+  }
+
+  allNext(type: string | string[]) {
     const typeSheetConfigs = Array.from(sheetConfigsMobx.values()).filter(
       (sheetConfig) =>
         isString(type)
@@ -61,11 +61,15 @@ export class Highlight {
       ['asc']
     );
 
-    return new HighlightCollection(this, highlights, isString(type) ? type : undefined)
+    return highlights
+  }
+
+  next (type: string | string[]) {
+    return this.allNext(type)[0]
   }
 
   valueOf() {
-    const spanText = this.Text()
+    const spanText = this.text()
 
     if (!spanText) {
       return
@@ -79,19 +83,19 @@ export class Highlight {
   }
 
   toString() {
-    return this.Text()
+    return this.text()
   }
 
-  Text() {
+  text() {
     return getTextForHighlight(this)
   }
 
   isEqualTo(value: any) {
     if (isValueRowHighlight(value)) {
-      return this.Text() === value.Text()
+      return this.text() === value.text()
     }
 
-    return this.Text() === value
+    return this.text() === value
   }
 
   static from(highlight: {
@@ -105,43 +109,11 @@ export class Highlight {
 }
 
 
-class ChainableCollection<T> {
-  constructor(readonly row: SheetValueRow, readonly items: T[], readonly itemName?: string) {
-  }
-
-  As(itemName: string) {
-    if (this.itemName) {
-      throw new Error('item name is already set')
-    }
-
-    // @ts-ignore
-    return new this.constructor(this.items, itemName)
-  }
-
-  Where(conditionSource: string) {
-    const textDocument = textDocumentsMobx.get(this.row.documentId)
-    const sheetConfig = sheetConfigsMobx.get(this.row.sheetConfigId)
-
-    if (!textDocument || !sheetConfig) {
-      return new Error("invalid row")
-    }
-
-    const filteredItems = this.items.filter((item) => (
-      evaluateFormula(textDocument, sheetConfig, false, conditionSource, (
-        this.itemName
-          ? { ...this.row.data, [this.itemName]: item }
-          : this.row
-      ))
-    ))
-
-    // @ts-ignore
-    return new this.constructor(this.row, filteredItems, this.itemName)
-  }
-
-  SumOf(path?: string) {
+Object.defineProperty(Array.prototype, 'sumOf', {
+  value: function(path?: string) {
     let sum = 0;
 
-    this.items.forEach((item) => {
+    this.forEach((item:any ) => {
       const number = coerceValueToNumber(path ? get(item, path) : item)
 
       console.log(item, number, path)
@@ -151,29 +123,6 @@ class ChainableCollection<T> {
       }
     })
 
-    return sum
+    return sum;
   }
-
-  Pick(path: string) {
-
-    const pickedAttributes = this.items.map((item) => get(item, path))
-
-    // @ts-ignore
-    return new this.constructor(this.row, pickedAttributes, this.itemName)
-  }
-}
-
-export class HighlightCollection extends ChainableCollection<Highlight> {
-  constructor(readonly row: SheetValueRow, readonly items: Highlight[], readonly itemName?: string) {
-    super(row, items, itemName)
-  }
-
-  Text() {
-    return new ChainableCollection(this.row, this.items.map(h => h.Text()))
-  }
-}
-
-
-export function isChainableCollection(value: any) {
-  return value instanceof ChainableCollection
-}
+});

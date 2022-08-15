@@ -63,7 +63,7 @@ import {
 } from "@codemirror/autocomplete";
 import { IObservableArray } from "mobx/dist/internal";
 import { getPatternExprGroupNames } from "./patterns";
-import { Highlight, isChainableCollection } from "./highlight";
+import { Highlight } from "./highlight";
 
 let i = 1;
 
@@ -197,15 +197,13 @@ export function ValueDisplay({ value, doc }: { value: any; doc: Text }) {
     );
   }
 
-  if (isArray(value) || isChainableCollection(value)) {
-    const items = isArray(value) ? value : value.items;
-
-    const lastIndex = items.length - 1;
+  if (isArray(value)) {
+    const lastIndex = value.length - 1;
 
     return (
       <span>
         <span className="text-gray-400">[</span>
-        {items.map((item: any, index: number) =>
+        {value.map((item: any, index: number) =>
           index === lastIndex ? (
             <ValueDisplay value={item} doc={doc} key={index} />
           ) : (

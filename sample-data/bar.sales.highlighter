@@ -4,17 +4,17 @@
   "properties": [
     {
       "name": "$",
-      "formula": "{/^/}{emoji+:orders}{/$/}",
+      "formula": "{/^/}{emoji+:items}{/$/}",
       "visibility": "HIDDEN"
     },
     {
       "name": "prices",
-      "formula": "orders.map((o) => (\n  Filter(\n    AllPrevOfType(o, \"price\"),\n    (p) => ( \n      TextOfHighlight(p.data.emoji)\n      ==\n      TextOfHighlight(o)\n    )\n  )[0].data.price\n))",
+      "formula": "items.map(item => (\n  item\n   .allPrev(\"price\")\n   .find(price => (\n     price.data.item.isEqualTo(item)\n   ))\n))",
       "visibility": "HIDDEN"
     },
     {
       "name": "sum",
-      "formula": "prices\n  .map((v) => parseInt(TextOfHighlight(v)))\n  .reduce((s, v) => s+v)",
+      "formula": "prices.sumOf(\"data.price\")",
       "visibility": "HIDDEN"
     },
     {

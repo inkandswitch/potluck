@@ -650,6 +650,48 @@ const SheetColumnSettingsPopoverContent = observer(
   }
 );
 
+function SheetTableColumnSettingsButton({
+  sheetConfig,
+  column,
+  columnIndex,
+  defaultOpen,
+}: {
+  sheetConfig: SheetConfig;
+  column: PropertyDefinition;
+  columnIndex: number;
+  defaultOpen: boolean;
+}) {
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (defaultOpen) {
+      // without this timeout, popover would show up in top-left viewport
+      // seems like issue with opening popover on mount
+      setTimeout(() => {
+        setOpen(true);
+      }, 50);
+    }
+  }, []);
+
+  return (
+    <Popover.Root open={open} onOpenChange={setOpen} modal={true}>
+      <Popover.Anchor asChild={true}>
+        <Popover.Trigger asChild={true}>
+          <button className="text-gray-400 hover:text-gray-500">
+            <MixerVerticalIcon />
+          </button>
+        </Popover.Trigger>
+      </Popover.Anchor>
+      <Popover.Content side="top" sideOffset={8} align="end" alignOffset={-8}>
+        <SheetColumnSettingsPopoverContent
+          sheetConfig={sheetConfig}
+          columnIndex={columnIndex}
+          column={column}
+        />
+      </Popover.Content>
+    </Popover.Root>
+  );
+}
+
 export const SheetTable = observer(
   ({
     textDocument,
@@ -751,33 +793,15 @@ export const SheetTable = observer(
                         </div>
                         {isEditable ? (
                           <>
-                            <Popover.Root
+                            <SheetTableColumnSettingsButton
+                              sheetConfig={sheetConfig}
+                              columnIndex={index - groupColumnsOffset}
+                              column={column}
                               defaultOpen={
                                 didJustAddColumn &&
                                 index === columnsWithPatternGroups.length - 1
                               }
-                              modal={true}
-                            >
-                              <Popover.Anchor asChild={true}>
-                                <Popover.Trigger asChild={true}>
-                                  <button className="text-gray-400 hover:text-gray-500">
-                                    <MixerVerticalIcon />
-                                  </button>
-                                </Popover.Trigger>
-                              </Popover.Anchor>
-                              <Popover.Content
-                                side="top"
-                                sideOffset={8}
-                                align="end"
-                                alignOffset={-8}
-                              >
-                                <SheetColumnSettingsPopoverContent
-                                  sheetConfig={sheetConfig}
-                                  columnIndex={index - groupColumnsOffset}
-                                  column={column}
-                                />
-                              </Popover.Content>
-                            </Popover.Root>
+                            />
                             <div className="hidden">
                               <button
                                 onClick={(e) => {

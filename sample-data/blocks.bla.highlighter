@@ -1,0 +1,36 @@
+{
+  "id": "blocks.bla",
+  "name": "remove",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "⬆️",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "block",
+      "formula": "$.prev(\"block\")",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "lines",
+      "formula": "SplitLines().filter(line => (\n  line.span[0] > block.span[0] &&\n  line.span[1] < block.span[1]\n))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "first",
+      "formula": "lines[0]",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "rest",
+      "formula": "lines.splice(1)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "button",
+      "formula": "TemplateButton(block, \"remove first\", `${first}\\n[\\n${rest.join(\"\\n\")}\\n]`, \"replace\")",
+      "visibility": "INLINE"
+    }
+  ]
+}

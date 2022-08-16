@@ -1,0 +1,31 @@
+{
+  "id": "blocks.shuffle",
+  "name": "shuffleBlock",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "🔀",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "block",
+      "formula": "$.prev(\"block\")",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "lines",
+      "formula": "SplitLines().filter(line => (\n  line.span[0] > block.span[0] &&\n  line.span[1] < block.span[1]\n))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "shuffledLines",
+      "formula": "lines.sortBy(line => Math.random())",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "button",
+      "formula": "TemplateButton(block, \"shuffle\", `[\\n${shuffledLines.join(\"\\n\")}\\n]`, \"replace\")",
+      "visibility": "INLINE"
+    }
+  ]
+}

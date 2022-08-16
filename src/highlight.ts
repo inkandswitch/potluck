@@ -1,6 +1,6 @@
 import { sheetConfigsMobx, SheetValueRow, Span, textDocumentsMobx } from "./primitives";
 import { coerceValueToNumber, getTextForHighlight, isNumericish, isValueRowHighlight } from "./utils";
-import { isNaN, isString, orderBy, get, pick } from "lodash";
+import { isNaN, isString, orderBy, get, pick, sortBy, isEqual, groupBy} from "lodash";
 import { getComputedSheetValue } from "./compute";
 
 export class Highlight {
@@ -102,6 +102,22 @@ export class Highlight {
     return this.text() === value
   }
 
+  wholeLine () {
+    const textDocument = textDocumentsMobx.get(this.documentId)
+
+    if (!textDocument) {
+      return
+    }
+
+    const fromLine = textDocument.text.lineAt(this.span[0])
+    const toLine = textDocument.text.lineAt(this.span[0])
+
+    return Highlight.from({
+      ...this,
+      span: [fromLine.from, toLine.to]
+    })
+  }
+
   static from(highlight: {
     documentId: string,
     sheetConfigId: string,
@@ -130,3 +146,21 @@ Object.defineProperty(Array.prototype, 'sumOf', {
     return sum;
   }
 });
+
+Object.defineProperty(Array.prototype, "sortBy", {
+  value: function (fn: (item: any) => any) {
+    return sortBy(this, fn);
+  }
+})
+
+Object.defineProperty(Array.prototype, "isEqual", {
+  value: function (value: any) {
+    return isEqual(this, value)
+  }
+})
+
+Object.defineProperty(Array.prototype, "groupBy", {
+  value: function (fn: (item: any) => any) {
+    return Object.entries(groupBy(this, fn)).map(([group, items]) => ({group, items }))
+  }
+})

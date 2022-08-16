@@ -1,0 +1,11 @@
+{
+  "id": "blocks.block",
+  "name": "block",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/\\\\[(\\\\n|[^\\\\]])+\\\\]/}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

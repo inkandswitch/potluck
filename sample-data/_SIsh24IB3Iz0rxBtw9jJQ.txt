@@ -45,7 +45,7 @@ Next let's double the number. Click in the formula bar for the search (next to t
 
 Now there's a second column in the table which has extracted just the number from the search result. You can name the result of any curly brace section of your pattern and extract a column for it.
 
-Next, click the "+" button on the right side of the table. A new column will appear in the table, along with a textbox to enter a formula. (Currently there's a bug where the box may appear in the top-left corner of the screen.)
+Next, click the "+" button on the right side of the table. A new column will appear in the table, along with a textbox to enter a formula.
 
 Type into the box:
 num * 2

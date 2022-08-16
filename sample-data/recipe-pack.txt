@@ -1,0 +1,11 @@
+recipe pack
+This pack of searches gives you the following features!
+
+Durations are turned into timers
+1 minute
+
+Quantities are recognized
+15 g of flour and 2 cups of water
+
+which can be scaled by when you use the text "scale by"
+scale by

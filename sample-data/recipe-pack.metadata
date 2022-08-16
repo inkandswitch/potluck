@@ -1,0 +1,20 @@
+{
+  "sheets": [
+    {
+      "id": "_iKYWj3K4sDt13KilVZVMq",
+      "configId": "food.scale",
+      "highlightSearchRange": [
+        217,
+        225
+      ]
+    },
+    {
+      "id": "_AsFd1yr4rZzvExxiJopfi",
+      "configId": "food.quantity"
+    },
+    {
+      "id": "_OMwt6fLRimCRHPoEniDbN",
+      "configId": "common.duration"
+    }
+  ]
+}

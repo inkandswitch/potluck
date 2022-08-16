@@ -16,19 +16,19 @@
 }
 
 .icon-plus {
-  mask-image: url("plus-icon.svg");
-  -webkit-mask-image: url("plus-icon.svg");
+  mask-image: url("assets/plus-icon.svg");
+  -webkit-mask-image: url("assets/plus-icon.svg");
 }
 
 .icon-asterisk {
-  mask-image: url('asterisk-icon.svg');
-  -webkit-mask-image: url('asterisk-icon.svg');
+  mask-image: url('assets/asterisk-icon.svg');
+  -webkit-mask-image: url('assets/asterisk-icon.svg');
 }
 
 .icon-expandable {
   transition: transform 100ms ease-in-out;
-  mask-image: url('chevron-forward.svg');
-  -webkit-mask-image: url('chevron-forward.svg');
+  mask-image: url('assets/chevron-forward.svg');
+  -webkit-mask-image: url('assets/chevron-forward.svg');
 }
 
 .icon-expandable.is-expanded {
@@ -54,7 +54,7 @@
 
 .cm-highlight {
   padding-bottom: 2px;
-  background-image: url(./splat-underline-2-default.svg);
+  background-image: url(./assets/splat-underline-2-default.svg);
   background-size: 100% 4px;
   background-position: bottom;
   background-repeat: no-repeat;
@@ -62,7 +62,7 @@
 
 input[type="range"] {
   @apply h-1 w-14;
-  background-image: url(./slider-track.svg);
+  background-image: url(./assets/slider-track.svg);
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center center;
@@ -71,7 +71,7 @@ input[type="range"] {
 
 input[type="range"]::-webkit-slider-thumb {
   @apply h-1.5 w-1.5 rounded-full cursor-ew-resize;
-  background-image: url(./slider-handle.svg);
+  background-image: url(./assets/slider-handle.svg);
   background-repeat: no-repeat;
   background-size: contain;
   -webkit-appearance: none;
@@ -80,7 +80,7 @@ input[type="range"]::-webkit-slider-thumb {
 .annotation-token {
   @apply font-mono text-sm;
   color: #1355ff;
-  background-image: url(./whiteout.svg);
+  background-image: url(./assets/whiteout.svg);
   background-size: auto 100%;
   background-repeat: repeat-x;
   font-family: "Schoolbell", sans-serif;

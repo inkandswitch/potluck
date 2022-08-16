@@ -1,8 +1,8 @@
 import { action, computed, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
-import playIcon from "./play-icon.svg";
-import pauseIcon from "./pause-icon.svg";
+import playIcon from "./assets/play-icon.svg";
+import pauseIcon from "./assets/pause-icon.svg";
 import { generateNanoid } from "./utils";
 
 function formatDuration(durationSeconds: number) {

@@ -1,6 +1,10 @@
 {
   "sheets": [
     {
+      "id": "_YcmEbl94YLaKvCBmx4EhF",
+      "configId": "common.duration"
+    },
+    {
       "id": "_9t8ilvJ7XPrDn5LM9rcou",
       "configId": "time-tracking.time"
     },
@@ -11,10 +15,6 @@
     {
       "id": "_vAlraHxh3rPGMefQn1BNn",
       "configId": "todos.2"
-    },
-    {
-      "id": "_T7wi3WvEAe0ZoOzM2gAxY",
-      "configId": "workshop.duration"
     },
     {
       "id": "_Pi6GccwquTRbC1uqyfAw5",

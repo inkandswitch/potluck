@@ -3,20 +3,41 @@ Potluck Weekly Meeting 8/15
 Start at SOC 2:00
 
 15 minutes chit chat
-30 minutes goals for the week
+60 minutes minutes goals for the week
 - Start writing!
-    - 
 - Get more usage: more user tests + larger group session
 - Polish + bugfixes
+  - [ ] @max make the formula + pattern bars look more different
 
-45 minutes specific topics:
+other topics:
 - Related Work
 - Potluck + AI
 
+15 minutes sync
+
+## coffee demo
+- it has computed properties + widgets, doesn't have formatting / buttons
+- it's pretty involved. make a simpler first step? unit conversion?
+- maybe hardcoded scaling is simple enough.
+
+## javascript??
+- is it just incidental? or do we lean into the familiarity?
+
 ## next steps
 
-- [ ] sample todo by @max
-- [ ] sample todo by @sonnentag 
+- intro: @shen
+- design principles: @geoffrey
+- demo @max
+- findings @sonnentag: 4-6 findings, one sentence per
+- related work: @geoffrey (maybe @shen helps)
+
+Goal: legible artifact by Friday
+Non-goal: uniformity of prose
+
+## other notes
+
+- Shen is out Thurs afternoon ~ this week
+- chatting w/ Nathan on Tues
 
 ## instructions for using this doc
 Team member names get highlighted: @shen  @sonnentag @max @geoffrey

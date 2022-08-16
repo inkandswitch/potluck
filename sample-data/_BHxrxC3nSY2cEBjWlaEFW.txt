@@ -1,5 +1,5 @@
 Geoffrey's feedback
 - hard to find docs because they're sorted alpha not chrono
 - hard to copy all the relevant sheets from one doc to another (eg, all the todos stuff.) Requires adding them by name 1 by 1. Also need to learn to use them. Should each highlighter come with directions / examples? Maybe it's time for "packs"?
-- bug: FindAll("highlightedTeammate") doesn't work in the meeting notes tracker
+- bug: FindAll("highlightedTeammate") doesn't work in the meeting notes tracker?
 - would be nice to have cmd-b for markdown bold

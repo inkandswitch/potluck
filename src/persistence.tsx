@@ -35,6 +35,21 @@ export const existingDirectoryHandleBox = observable.box<
   FileSystemDirectoryHandle | undefined
 >(undefined);
 
+let lastSelectedSyncDocumentId =
+  localStorage.getItem("lastSyncDocumentId") ?? undefined;
+reaction(
+  () =>
+    directoryPersistenceBox.get() !== undefined
+      ? selectedTextDocumentIdBox.get()
+      : undefined,
+  (selectedTextDocumentId) => {
+    if (selectedTextDocumentId !== undefined) {
+      localStorage.setItem("lastSyncDocumentId", selectedTextDocumentId);
+      lastSelectedSyncDocumentId = selectedTextDocumentId;
+    }
+  }
+);
+
 async function init() {
   const existingDirectoryHandle = await get(IDB_DIRECTORY_HANDLE_KEY);
   if (existingDirectoryHandle !== undefined) {
@@ -160,7 +175,12 @@ export class DirectoryPersistence {
           )
         );
         const textDocumentIds = textDocuments.map((d) => d.id);
-        if (!textDocumentIds.includes(selectedTextDocumentIdBox.get())) {
+        if (
+          lastSelectedSyncDocumentId !== undefined &&
+          textDocumentIds.includes(lastSelectedSyncDocumentId)
+        ) {
+          selectedTextDocumentIdBox.set(lastSelectedSyncDocumentId);
+        } else if (!textDocumentIds.includes(selectedTextDocumentIdBox.get())) {
           selectedTextDocumentIdBox.set(textDocumentIds[0]);
         }
       });

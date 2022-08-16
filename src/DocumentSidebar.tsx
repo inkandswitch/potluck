@@ -123,7 +123,17 @@ export const PersistenceButton = observer(() => {
 const DocumentSidebarItem = observer(
   ({ textDocument }: { textDocument: TextDocument }) => {
     const firstLineText = computed(
-      () => textDocument.text.lineAt(0).text
+      () => {
+        let firstNonEmptyLine = ""
+        const lines = textDocument.text.iterLines()
+        for (const line of lines) {
+          if (line.length > 0) {
+            firstNonEmptyLine = line
+            break
+          }
+        }
+        return firstNonEmptyLine
+      }
     ).get();
     const isSelected = computed(
       () => textDocument.id === selectedTextDocumentIdBox.get()

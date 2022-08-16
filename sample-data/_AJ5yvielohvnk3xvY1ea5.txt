@@ -1,5 +1,13 @@
 8/16 meeting
-- writing check-in
-- i&s essay guide
-- block actions!
-- auto-run searches?
+- standup 10 minutes
+- writing check-in 10 minutes
+  - i&s essay guide
+- block actions! 10 minutes
+- auto-run searches? 10 minutes
+
+next steps:
+
+- [ ] persistence improvements / pinned notes / chronological sort @shen
+- [ ] add more default highlighters @geoffrey
+- [ ] add a simple grouping mechanism (naming convention based) (display grouped in sidebar; add as a group) @shen
+- [ ] add readmes for searches

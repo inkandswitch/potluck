@@ -321,13 +321,13 @@ function getHiddenSheetConfigIdsByDocumentId(documentId: string): {
 const highlightDecorations = EditorView.decorations.compute(
   [highlightsField, hoverHighlightsField],
   (state) => {
-    const selectionRange = state.selection.asSingle().main;
-    const selectionSpan: Span = [selectionRange.from, selectionRange.to];
     const highlights = state.field(highlightsField);
     const documentId = state.facet(textDocumentIdFacet);
     const isConfigSheetIdHidden =
       getHiddenSheetConfigIdsByDocumentId(documentId);
 
+    const selectionRange = state.selection.asSingle().main;
+    const selectionSpan: Span = [selectionRange.from, selectionRange.to];
     const selectionHighlights = highlights.filter(
       (highlight) =>
         isValueRowHighlight(highlight) &&
@@ -343,7 +343,7 @@ const highlightDecorations = EditorView.decorations.compute(
             columnValue.documentId === documentId
               ? [
                   Decoration.mark({
-                    class: "cm-highlight-hover",
+                    class: "cm-highlight-selection",
                   }).range(columnValue.span[0], columnValue.span[1]),
                 ]
               : []

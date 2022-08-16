@@ -39,6 +39,7 @@
   @apply px-3 py-1 bg-blue-500 text-white rounded;
 }
 
+.cm-focused .cm-highlight-selection,
 .cm-highlight-hover {
   @apply bg-yellow-200
 }

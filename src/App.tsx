@@ -19,6 +19,9 @@ import {
   selectedPendingSearchComputed,
   textEditorStateMobx,
   isSearchBoxFocused,
+  TextDocumentSheet,
+  SheetValueRow,
+  GROUP_NAME_PREFIX,
 } from "./primitives";
 import { observer } from "mobx-react-lite";
 import { KeyboardEventHandler, useEffect, useRef, useState } from "react";
@@ -30,6 +33,8 @@ import { getComputedDocumentValues } from "./compute";
 import { generateNanoid } from "./utils";
 import { FileDropWrapper } from "./persistence";
 import {
+  ChevronDownIcon,
+  ChevronRightIcon,
   Cross1Icon,
   HamburgerMenuIcon,
   MagnifyingGlassIcon,
@@ -39,6 +44,7 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 import { ToastViewport } from "@radix-ui/react-toast";
 import { DocumentSidebar, PersistenceButton } from "./DocumentSidebar";
 import { patternToString } from "./patterns";
+import { groupBy } from "lodash";
 
 const TextDocumentName = observer(
   ({ textDocument }: { textDocument: TextDocument }) => {
@@ -72,21 +78,107 @@ const TextDocumentComponent = observer(
   }
 );
 
+const SheetComponentGroup = observer(
+  ({
+    textDocument,
+    documentValueRows,
+    groupName,
+    sheets,
+  }: {
+    textDocument: TextDocument;
+    documentValueRows: { [sheetConfigId: string]: SheetValueRow[] };
+    groupName: string;
+    sheets: TextDocumentSheet[];
+  }) => {
+    const isExpanded = isSheetExpandedMobx.get(
+      `${GROUP_NAME_PREFIX}${groupName}`
+    );
+    return (
+      <div>
+        <div className="flex items-center">
+          <button
+            onClick={action(() => {
+              isSheetExpandedMobx.set(
+                `${GROUP_NAME_PREFIX}${groupName}`,
+                !isExpanded
+              );
+            })}
+            className="flex items-center justify-center w-8 h-8 text-gray-400 hover:text-gray-600"
+          >
+            {isExpanded ? <ChevronDownIcon /> : <ChevronRightIcon />}
+          </button>
+          <div className="text-gray-500 text-sm grow">
+            <span className="font-semibold">{groupName}</span>
+            {!isExpanded ? (
+              <span className="ml-2 text-gray-400">
+                {sheets.length} search{sheets.length !== 1 ? "es" : null}
+              </span>
+            ) : null}
+          </div>
+          {isExpanded ? (
+            <button
+              onClick={action(() => {
+                for (const documentSheet of sheets) {
+                  documentSheet.groupName = undefined;
+                }
+              })}
+              className="text-xs text-gray-400 hover:text-gray-600"
+            >
+              ungroup
+            </button>
+          ) : null}
+        </div>
+        {isExpanded ? (
+          <div className="-mx-4 px-4 pt-2 pb-4 bg-gray-200 flex flex-col gap-4">
+            {sheets.map((sheet) => {
+              return (
+                <SheetComponent
+                  id={sheet.id}
+                  textDocument={textDocument}
+                  textDocumentSheetId={sheet.id}
+                  rows={documentValueRows[sheet.configId]}
+                  key={sheet.id}
+                />
+              );
+            })}
+          </div>
+        ) : null}
+      </div>
+    );
+  }
+);
+
+const NO_GROUP_NAME = "nooooo_group";
 const DocumentSheets = observer(
   ({ textDocumentId }: { textDocumentId: string }) => {
     const textDocument = textDocumentsMobx.get(textDocumentId)!;
     const documentValueRows = getComputedDocumentValues(textDocumentId).get();
+    const groupedSheets = groupBy(
+      textDocument.sheets,
+      (sheet) => sheet.groupName ?? NO_GROUP_NAME
+    );
     return (
       <>
         <div className="flex flex-col gap-6">
-          {textDocument.sheets.map((sheet) => {
+          {Object.keys(groupedSheets).map((groupName) =>
+            groupName !== NO_GROUP_NAME ? (
+              <SheetComponentGroup
+                textDocument={textDocument}
+                documentValueRows={documentValueRows}
+                groupName={groupName}
+                sheets={groupedSheets[groupName]}
+                key={groupName}
+              />
+            ) : null
+          )}
+          {(groupedSheets[NO_GROUP_NAME] ?? []).map((sheet) => {
             return (
               <SheetComponent
                 id={sheet.id}
                 textDocument={textDocument}
-                sheetConfigId={sheet.configId}
-                key={sheet.id}
+                textDocumentSheetId={sheet.id}
                 rows={documentValueRows[sheet.configId]}
+                key={sheet.id}
               />
             );
           })}
@@ -288,6 +380,37 @@ const SearchBox = observer(
                         </div>
                       ) : null}
                     </div>
+                  ) : pendingSearch._type === "document" ? (
+                    <div className="text-sm flex whitespace-nowrap">
+                      <div className=" text-gray-400 mr-2 w-12 flex-shrink-0">
+                        Doc
+                      </div>
+                      {(() => {
+                        const document = textDocumentsMobx.get(
+                          pendingSearch.documentId
+                        )!;
+                        return (
+                          <>
+                            <span className="font-medium">
+                              {document.sheets.length} search
+                              {document.sheets.length !== 1
+                                ? "es"
+                                : null} from {document.name}
+                            </span>
+                            {searchState.selectedSearchIndex === index ? (
+                              <div className="font-mono text-gray-400 text-sm ml-2 overflow-ellipsis overflow-hidden whitespace-nowrap">
+                                {document.sheets
+                                  .map(
+                                    (sheet) =>
+                                      sheetConfigsMobx.get(sheet.configId)!.name
+                                  )
+                                  .join(", ")}
+                              </div>
+                            ) : null}
+                          </>
+                        );
+                      })()}
+                    </div>
                   ) : (
                     <div className="text-sm flex">
                       <div className=" text-gray-400 mr-2 w-12">New</div>{" "}
@@ -302,11 +425,12 @@ const SearchBox = observer(
               ))}
             </div>
           )}
-          {selectedPendingSearch !== undefined && (
+          {selectedPendingSearch !== undefined &&
+          selectedPendingSearch._type !== "document" ? (
             <div className="absolute top-2 right-2 bg-white z-10 text-gray-400 text-sm">
               {results.length} results
             </div>
-          )}
+          ) : null}
         </div>
       </>
     );

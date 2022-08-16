@@ -46,6 +46,7 @@ export enum SheetView {
 export type TextDocumentSheet = {
   id: string;
   configId: string;
+  groupName?: string;
   highlightSearchRange?: Span;
   hideHighlightsInDocument?: boolean;
 };
@@ -136,7 +137,10 @@ export const searchTermBox: IObservableValue<SearchBoxState> =
 
 type PendingSearch =
   | { _type: "saved"; sheetConfig: SheetConfig }
-  | { _type: "new"; search: string };
+  | { _type: "new"; search: string }
+  | { _type: "document"; documentId: string };
+
+export const GROUP_NAME_PREFIX = "group:";
 
 /** Get all the pending searches to suggest for a given string entered into the searchbox */
 export function getPendingSearches(search: string): PendingSearch[] {
@@ -149,12 +153,22 @@ export function getPendingSearches(search: string): PendingSearch[] {
       _type: "saved" as const,
       sheetConfig,
     })),
+    ...getMatchingDocuments(search).map((textDocument) => ({
+      _type: "document" as const,
+      documentId: textDocument.id,
+    })),
   ];
 }
 
 export function getMatchingSheetConfigs(search: string): SheetConfig[] {
   return Array.from(sheetConfigsMobx.values()).filter((sheetConfig) =>
     sheetConfig.name.toLowerCase().includes(search.toLowerCase())
+  );
+}
+
+export function getMatchingDocuments(search: string): TextDocument[] {
+  return Array.from(textDocumentsMobx.values()).filter((textDocument) =>
+    textDocument.name.toLowerCase().includes(search.toLowerCase())
   );
 }
 
@@ -199,13 +213,29 @@ export const savePendingSearchToSheet = (
         configId: sheetConfigId,
       });
       isSheetExpandedMobx.set(textDocumentSheetId, true);
-    } else {
+    } else if (pendingSearch._type === "saved") {
       const textDocumentSheetId = generateNanoid();
       textDocument.sheets.unshift({
         id: textDocumentSheetId,
         configId: pendingSearch.sheetConfig.id,
       });
       isSheetExpandedMobx.set(textDocumentSheetId, true);
+    } else if (pendingSearch._type === "document") {
+      const textDocumentToAdd = textDocumentsMobx.get(
+        pendingSearch.documentId
+      )!;
+      for (const textDocumentSheet of textDocumentToAdd.sheets) {
+        const textDocumentSheetId = generateNanoid();
+        textDocument.sheets.unshift({
+          id: textDocumentSheetId,
+          configId: textDocumentSheet.configId,
+          groupName: textDocumentToAdd.name,
+        });
+        isSheetExpandedMobx.set(
+          `${GROUP_NAME_PREFIX}${textDocumentToAdd.name}`,
+          true
+        );
+      }
     }
   });
 };
@@ -221,7 +251,7 @@ export const searchResults = computed<Highlight[]>(() => {
 
   if (pendingSearch._type === "new") {
     formula = pendingSearch.search;
-  } else {
+  } else if (pendingSearch._type === "saved") {
     formula = pendingSearch.sheetConfig.properties[0].formula;
   }
 

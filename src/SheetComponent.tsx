@@ -925,21 +925,21 @@ export const SheetComponent = observer(
   ({
     id,
     textDocument,
-    sheetConfigId,
+    textDocumentSheetId,
     rows,
   }: {
     id: string;
     textDocument: TextDocument;
-    sheetConfigId: string;
+    textDocumentSheetId: string;
     rows: SheetValueRow[];
   }) => {
     const [sheetView, setSheetView] = useState(SheetView.Table);
 
     const textDocumentSheet = textDocument.sheets.find(
-      (sheet) => sheet.configId === sheetConfigId
+      (sheet) => sheet.id === textDocumentSheetId
     )!;
 
-    const sheetConfig = sheetConfigsMobx.get(sheetConfigId);
+    const sheetConfig = sheetConfigsMobx.get(textDocumentSheet.configId);
     if (sheetConfig === undefined) {
       return null;
     }

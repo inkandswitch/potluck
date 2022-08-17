@@ -22,6 +22,8 @@ import {
   TextDocumentSheet,
   SheetValueRow,
   GROUP_NAME_PREFIX,
+  DEFAULT_SEARCHES_ID,
+  copySheetsAcrossDocuments,
 } from "./primitives";
 import { observer } from "mobx-react-lite";
 import { KeyboardEventHandler, useEffect, useRef, useState } from "react";
@@ -44,7 +46,7 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 import { ToastViewport } from "@radix-ui/react-toast";
 import { DocumentSidebar, PersistenceButton } from "./DocumentSidebar";
 import { patternToString } from "./patterns";
-import { groupBy } from "lodash";
+import { create, groupBy } from "lodash";
 
 const TextDocumentName = observer(
   ({ textDocument }: { textDocument: TextDocument }) => {
@@ -459,6 +461,24 @@ const App = observer(() => {
     };
   }, []);
 
+  const createNewDocument = action(() => {
+    const newDocumentId = generateNanoid();
+
+    const defaultSearchesDoc = textDocumentsMobx.get(DEFAULT_SEARCHES_ID)!;
+
+    textDocumentsMobx.set(newDocumentId, {
+      id: newDocumentId,
+      name: "Untitled",
+      text: Text.empty,
+      sheets: [],
+    });
+    copySheetsAcrossDocuments(
+      defaultSearchesDoc,
+      textDocumentsMobx.get(newDocumentId)!
+    );
+    selectedTextDocumentIdBox.set(newDocumentId);
+  });
+
   return (
     <FileDropWrapper className="h-screen flex">
       <DocumentSidebar />
@@ -477,18 +497,7 @@ const App = observer(() => {
             <HamburgerMenuIcon className="text-gray-600" />
           </button>
 
-          <button
-            onClick={action(() => {
-              const newDocumentId = generateNanoid();
-              textDocumentsMobx.set(newDocumentId, {
-                id: newDocumentId,
-                name: "Untitled",
-                text: Text.empty,
-                sheets: [],
-              });
-              selectedTextDocumentIdBox.set(newDocumentId);
-            })}
-          >
+          <button onClick={createNewDocument}>
             <Pencil2Icon className="text-gray-600" />
           </button>
           <div className="grow" />

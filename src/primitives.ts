@@ -7,6 +7,10 @@ import { DefaultFiles } from "./DefaultState";
 import { EditorView } from "@codemirror/view";
 import { Highlight } from "./highlight";
 
+// Note: this is coupled to the filename of the doc that contains the default searches;
+// if that filename changes this also has to change
+export const DEFAULT_SEARCHES_ID = "default-searches";
+
 export type Span = [from: number, to: number];
 
 export type SheetValueRowWithoutSpan = {
@@ -188,6 +192,25 @@ export const selectedPendingSearchComputed = computed<
   return pendingSearches[selectedSearchIndex];
 });
 
+/* Copy all the sheets from one doc to another as a group. Mutates the destination doc. */
+export const copySheetsAcrossDocuments = (
+  from: TextDocument,
+  to: TextDocument
+) => {
+  for (const textDocumentSheet of from.sheets) {
+    const textDocumentSheetId = generateNanoid();
+    to.sheets.unshift({
+      id: textDocumentSheetId,
+      configId: textDocumentSheet.configId,
+      groupName: from.name,
+    });
+    isSheetExpandedMobx.set(
+      `${GROUP_NAME_PREFIX}${from.name}`,
+      false // hide details of a bundle by default
+    );
+  }
+};
+
 export const savePendingSearchToSheet = (
   pendingSearch: PendingSearch,
   textDocument: TextDocument
@@ -224,18 +247,7 @@ export const savePendingSearchToSheet = (
       const textDocumentToAdd = textDocumentsMobx.get(
         pendingSearch.documentId
       )!;
-      for (const textDocumentSheet of textDocumentToAdd.sheets) {
-        const textDocumentSheetId = generateNanoid();
-        textDocument.sheets.unshift({
-          id: textDocumentSheetId,
-          configId: textDocumentSheet.configId,
-          groupName: textDocumentToAdd.name,
-        });
-        isSheetExpandedMobx.set(
-          `${GROUP_NAME_PREFIX}${textDocumentToAdd.name}`,
-          false // hide details of a bundle by default
-        );
-      }
+      copySheetsAcrossDocuments(textDocumentToAdd, textDocument);
     }
   });
 };

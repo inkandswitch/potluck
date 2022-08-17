@@ -1,0 +1,11 @@
+System defaults
+Here are all the searches that are installed by default on docs in Potluck.
+
+Of course, you can always remove any/all of these from a given doc, and add more searches as well.
+
+Markdown: **bold**, *italic*
+number: 123
+duration: 2 minutes
+tags: #tag
+phone: (123) 456-7890
+date: 1/1/22

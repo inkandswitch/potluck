@@ -1,12 +1,32 @@
 {
   "sheets": [
     {
-      "id": "_VZNZA4WGboyKJQgWTXZAI",
-      "configId": "_EPSPtlS2leXEhRmSEoQZh"
+      "id": "_VU6isfrUenQk3Wdg05qGc",
+      "configId": "common.number"
     },
     {
-      "id": "_Uhskv5vKNRnoU6092Vuoe",
+      "id": "_YDKITIckz6nDms4vHUM8x",
       "configId": "common.duration"
+    },
+    {
+      "id": "_fDC1BebE8R09VEltAN6ld",
+      "configId": "goodreads.1"
+    },
+    {
+      "id": "_wRX26NlxkoH38ioBxXncv",
+      "configId": "markdown"
+    },
+    {
+      "id": "_RwIa8qsVEEBI1yN9N9JV2",
+      "configId": "crm.1"
+    },
+    {
+      "id": "_eTtQylRi3bH4xBKfuZvXk",
+      "configId": "common.date"
+    },
+    {
+      "id": "_VZNZA4WGboyKJQgWTXZAI",
+      "configId": "_EPSPtlS2leXEhRmSEoQZh"
     }
   ]
 }

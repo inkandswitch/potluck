@@ -11,3 +11,4 @@ next steps:
 - [ ] add more default highlighters @geoffrey
 - [ ] add a simple grouping mechanism (naming convention based) (display grouped in sidebar; add as a group) @shen
 - [ ] add readmes for searches
+

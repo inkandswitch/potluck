@@ -1,0 +1,28 @@
+{
+  "sheets": [
+    {
+      "id": "_WX9HAV8CpFFbJdYW3JijD",
+      "configId": "common.date"
+    },
+    {
+      "id": "_mEAGvWWAof2XNyFwmgUe0",
+      "configId": "crm.1"
+    },
+    {
+      "id": "_HH6NzuEldBXPsvRUWJx7b",
+      "configId": "markdown"
+    },
+    {
+      "id": "_r97dmT32ybw8jF0kk7bRw",
+      "configId": "goodreads.1"
+    },
+    {
+      "id": "_gz2GcSLR4lTZudJAKquYN",
+      "configId": "common.duration"
+    },
+    {
+      "id": "_sMSYj7m9SZQPciwkYsK40",
+      "configId": "common.number"
+    }
+  ]
+}

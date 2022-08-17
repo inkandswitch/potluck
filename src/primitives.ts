@@ -233,7 +233,7 @@ export const savePendingSearchToSheet = (
         });
         isSheetExpandedMobx.set(
           `${GROUP_NAME_PREFIX}${textDocumentToAdd.name}`,
-          true
+          false // hide details of a bundle by default
         );
       }
     }

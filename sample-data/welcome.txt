@@ -58,9 +58,9 @@ Time for the last step: showing these doubled numbers in the text doc.
 
 Click the settings icon in the column header to get the formula editor popup. For "Display in document", select "Next to text".
 
-Now if you scroll back up in the doc, you'll see the doubled numbers showing up in the text! Try editing the text below to see it happen live:
+You'll see the doubled number appear below:
 
-? is a number
+100 is a number
 
 You've now seen the basic mechanics of how Potluck works!
 

@@ -60,6 +60,7 @@ export type TextDocument = {
   name: string;
   text: Text;
   sheets: TextDocumentSheet[];
+  lastModified?: number;
 };
 
 export interface HighlightComponent {
@@ -92,7 +93,7 @@ export const textEditorStateMobx = observable.box(
 
 export const textEditorViewMobx = observable.box<EditorView>();
 
-const defaultState = getStateFromFiles(DefaultFiles);
+const defaultState = getStateFromFiles(DefaultFiles, {});
 export const textDocumentsMobx = observable.map<string, TextDocument>(
   defaultState.textDocuments.map((textDocument) => [
     textDocument.id,

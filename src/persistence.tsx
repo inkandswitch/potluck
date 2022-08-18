@@ -101,6 +101,7 @@ declare global {
 export class DirectoryPersistence {
   directoryHandle: FileSystemDirectoryHandle | undefined;
   fileHandles: { [filePath: string]: FileSystemFileHandle } = {};
+  fileLastModified: { [filePath: string]: number } = {};
   fileCache: { [filePath: string]: string } = {};
   unsubscribes: (() => void)[] = [];
 
@@ -147,6 +148,7 @@ export class DirectoryPersistence {
           if (file.handle !== undefined) {
             this.fileHandles[relativePath] = file.handle;
           }
+          this.fileLastModified[relativePath] = file.lastModified;
           this.fileCache[relativePath] = await file.text();
         }
       }
@@ -162,7 +164,8 @@ export class DirectoryPersistence {
     if (!writePrimitives) {
       runInAction(() => {
         const { textDocuments, sheetConfigs } = getStateFromFiles(
-          this.fileCache
+          this.fileCache,
+          this.fileLastModified
         );
         textDocumentsMobx.replace(
           new Map(
@@ -197,7 +200,11 @@ export class DirectoryPersistence {
         },
         async (serializedDocuments) => {
           for (const [id, contents] of serializedDocuments) {
-            await this.writeFile(`/${id}.${TEXT_FILE_EXTENSION}`, contents);
+            await this.writeFile(
+              `/${id}.${TEXT_FILE_EXTENSION}`,
+              contents,
+              textDocumentsMobx.get(id)
+            );
           }
         },
         {
@@ -249,7 +256,11 @@ export class DirectoryPersistence {
     ];
   }
 
-  async writeFile(filePath: string, contents: string) {
+  async writeFile(
+    filePath: string,
+    contents: string,
+    textDocument?: TextDocument
+  ) {
     if (this.fileCache[filePath] === contents) {
       return;
     }
@@ -280,7 +291,13 @@ export class DirectoryPersistence {
       fileHandle,
       true
     );
+    this.fileLastModified[filePath] = Date.now();
     this.fileCache[filePath] = contents;
+    if (textDocument !== undefined) {
+      runInAction(() => {
+        textDocument.lastModified = Date.now();
+      });
+    }
   }
 
   destroy() {
@@ -388,7 +405,10 @@ function getDocumentSheetConfig(
   }));
 }
 
-export function getStateFromFiles(files: { [filePath: string]: string }): {
+export function getStateFromFiles(
+  files: { [filePath: string]: string },
+  fileLastModified: { [filePath: string]: number }
+): {
   textDocuments: TextDocument[];
   sheetConfigs: SheetConfig[];
 } {
@@ -408,7 +428,7 @@ export function getStateFromFiles(files: { [filePath: string]: string }): {
         return [id, JSON.parse(contents)];
       })
   );
-  const textDocuments = Object.entries(files)
+  const textDocuments: TextDocument[] = Object.entries(files)
     .filter(([filePath]) => filePath.endsWith(TEXT_FILE_EXTENSION))
     .map(([filePath, contents]) => {
       const id = getTextDocumentId(filePath);
@@ -429,6 +449,7 @@ export function getStateFromFiles(files: { [filePath: string]: string }): {
             configId: c.configId,
             highlightSearchRange: c.highlightSearchRange,
           })),
+        lastModified: fileLastModified[filePath],
       };
     });
   return { textDocuments, sheetConfigs };

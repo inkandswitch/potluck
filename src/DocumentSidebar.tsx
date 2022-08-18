@@ -122,19 +122,17 @@ export const PersistenceButton = observer(() => {
 
 const DocumentSidebarItem = observer(
   ({ textDocument }: { textDocument: TextDocument }) => {
-    const firstLineText = computed(
-      () => {
-        let firstNonEmptyLine = ""
-        const lines = textDocument.text.iterLines()
-        for (const line of lines) {
-          if (line.length > 0) {
-            firstNonEmptyLine = line
-            break
-          }
+    const firstLineText = computed(() => {
+      let firstNonEmptyLine = "";
+      const lines = textDocument.text.iterLines();
+      for (const line of lines) {
+        if (line.length > 0) {
+          firstNonEmptyLine = line;
+          break;
         }
-        return firstNonEmptyLine
       }
-    ).get();
+      return firstNonEmptyLine;
+    }).get();
     const isSelected = computed(
       () => textDocument.id === selectedTextDocumentIdBox.get()
     ).get();
@@ -171,6 +169,15 @@ export const DocumentSidebar = observer(() => {
 
   const sortedDocuments = [...textDocumentsMobx.values()];
   sortedDocuments.sort((a, b) => {
+    if (a.lastModified !== undefined) {
+      if (b.lastModified !== undefined) {
+        return b.lastModified - a.lastModified;
+      }
+      return -1;
+    }
+    if (a.lastModified === undefined && b.lastModified !== undefined) {
+      return 1;
+    }
     if (a.name.startsWith(SORT_FIRST_PREFIX)) {
       if (b.name.startsWith(SORT_FIRST_PREFIX)) {
         return a.name.localeCompare(b.name);

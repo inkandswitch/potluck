@@ -1,0 +1,16 @@
+{
+  "sheets": [
+    {
+      "id": "_ZdLqzeZVmLp5mdwVJIoP7",
+      "configId": "math-pack.formula"
+    },
+    {
+      "id": "_YPMob42qojduJMcd8ww5f",
+      "configId": "math-pack.operator"
+    },
+    {
+      "id": "_4UesOgfjwlOg0KMa3G8Vu",
+      "configId": "common.number"
+    }
+  ]
+}

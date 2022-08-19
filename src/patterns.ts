@@ -31,7 +31,7 @@ const patternGrammar = ohm.grammar(String.raw`
       = "/" regExprChar+ "/"
 
     regExprChar
-      = ~"/" any
+      = "\\/" | ~"/" any
 
     text
       = textChar+

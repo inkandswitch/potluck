@@ -1,0 +1,9 @@
+math pack
+
+Evaluates math expressions in your document
+
+1 + 2
+
+3000 $ / 4 people
+
+(100 / 50) + 5 * 2 

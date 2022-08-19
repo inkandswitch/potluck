@@ -1,0 +1,41 @@
+{
+  "id": "math-pack.formula",
+  "name": "formula",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "=SplitLines()",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "numbers",
+      "formula": "Filter(FindAll(\"number\"), SameLine($))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "operators",
+      "formula": "Filter(FindAll(\"operator\"), SameLine($))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "formula",
+      "formula": "numbers.concat(operators)\n  .sortBy(h => h.span[0])\n  .map(h => h.text())\n  .join(\" \")",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "result",
+      "formula": "eval(formula)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "showResult",
+      "formula": "operators.length >= 1 && numbers.length >= 2 &&\nresult !== undefined",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "sticker",
+      "formula": "showResult ? `= ${result}` : \"\"",
+      "visibility": "INLINE"
+    }
+  ]
+}

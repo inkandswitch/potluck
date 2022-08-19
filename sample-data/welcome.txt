@@ -31,9 +31,9 @@ To start, hit **Cmd-Shift-F / Ctrl-Shift-F** (or click the magnifying glass in u
 
 You just created your first live search! It matches any number, followed by the word "bananas".
 
-Try typing "10 bananas" somewhere in the doc. You'll see the search update.
+*See it update*: Try typing "10 bananas" somewhere in the doc. You'll see the search update.
 
-You can also name your search. Try renaming from "search1" to "numBananas"
+*Rename the search*: The search has a name "search1" by default.  Rename it from "search1" to "numBananas" (you can directly just edit the name) so we can easily reference it later on.
 
 *Advanced tips*
 - Inside the { ... }, you can put the name of any existing search in Potluck. That includes your own 
@@ -65,11 +65,11 @@ Now you have strings of emojis in your table!
 
 **Showing the computation in the text**
 
-Time for the last step: showing these doubled numbers in the text doc.
+The emojis are only in the table. Let's show them in the doc too!
 
 Click the settings icon next to col2, and for "Display in document", select "Next to text".
 
-You should now see emojis next to this text! 3 bananas
+You should now see emojis next to this text: 3 bananas
 
 *Advanced tips*
 - Try out the other "display in document" settings like replacing the text.
@@ -77,15 +77,21 @@ You should now see emojis next to this text! 3 bananas
 
 **Querying across searches**
 
-Final step: let's tabulate the total number of bananas in this whole doc. We'll display the total right here with a label:
+Final step: let's tabulate the total number of bananas in this whole doc so we know how many we've been eating!
+
+We'll display the total right here with a label:
 
 Total bananas:
 
-First make a new live search for the text "Total bananas:"  Next, make a new column in that table and add this formula:
+First, make a new search, which finds the label text above ("Total bananas:"). This search might seem a little weird but the point is just to find the label in the doc so we can tell the system where to put the total number.
+
+Next, make a new column in that table and add this formula:
 
 ```
 Sum(FindAll("numBananas").map(row => row.data.num))
 ```
+
+(If the formula doesn't work, it might be because you didn't rename your original search from "search1" to "numBananas" in the previous step)
 
 Then change the display setting to show the sum next to the label. You now have a banana total! If you add more bananas in the doc they'll show up in the total.
 

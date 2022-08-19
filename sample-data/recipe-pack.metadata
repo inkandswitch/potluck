@@ -6,15 +6,18 @@
       "highlightSearchRange": [
         217,
         225
-      ]
+      ],
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_AsFd1yr4rZzvExxiJopfi",
-      "configId": "food.quantity"
+      "configId": "food.quantity",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_OMwt6fLRimCRHPoEniDbN",
-      "configId": "common.duration"
+      "configId": "common.duration",
+      "hideHighlightsInDocument": false
     }
   ]
 }

@@ -2,31 +2,38 @@
   "sheets": [
     {
       "id": "_YcmEbl94YLaKvCBmx4EhF",
-      "configId": "common.duration"
+      "configId": "common.duration",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_9t8ilvJ7XPrDn5LM9rcou",
-      "configId": "time-tracking.time"
+      "configId": "time-tracking.time",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_JIXZaoTWFccSUrT7JkXCx",
-      "configId": "todos.1"
+      "configId": "todos.1",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_vAlraHxh3rPGMefQn1BNn",
-      "configId": "todos.2"
+      "configId": "todos.2",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_Pi6GccwquTRbC1uqyfAw5",
-      "configId": "_1F0eRt4v6Onwr8fDfaXQU"
+      "configId": "_1F0eRt4v6Onwr8fDfaXQU",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_9guUeM0PS7Q7Uj5Rmtltt",
-      "configId": "markdown"
+      "configId": "markdown",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_vr6DjALacbU2J62wnuczP",
-      "configId": "_EPSPtlS2leXEhRmSEoQZh"
+      "configId": "_EPSPtlS2leXEhRmSEoQZh",
+      "hideHighlightsInDocument": false
     }
   ]
 }

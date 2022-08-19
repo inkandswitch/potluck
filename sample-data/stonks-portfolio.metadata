@@ -2,11 +2,13 @@
   "sheets": [
     {
       "id": "_vYbP2uJkzwO2zAXyV9ZDY",
-      "configId": "stonks-portfolio.1"
+      "configId": "stonks-portfolio.1",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_ns9sZr9wgelKJDzzVezCe",
-      "configId": "stonks-portfolio.2"
+      "configId": "stonks-portfolio.2",
+      "hideHighlightsInDocument": false
     }
   ]
 }

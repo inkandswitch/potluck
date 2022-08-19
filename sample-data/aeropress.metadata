@@ -2,27 +2,33 @@
   "sheets": [
     {
       "id": "eiIXzGv8Zq1zybgMZdd1z",
-      "configId": "common.number"
+      "configId": "common.number",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "X8bBiHSTseJNK4lyNkl2D",
-      "configId": "food.quantity"
+      "configId": "food.quantity",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "JdoUlaXUw0gg15KLpYHp6",
-      "configId": "common.duration"
+      "configId": "common.duration",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "fUpyOI1wmdDbCnuq6dNfU",
-      "configId": "food.scale"
+      "configId": "food.scale",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "PL4sKTsqJcM18ppBJIviZ",
-      "configId": "common.date"
+      "configId": "common.date",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "Htzihyo06gMLB1lCrEl24",
-      "configId": "markdown"
+      "configId": "markdown",
+      "hideHighlightsInDocument": false
     }
   ]
 }

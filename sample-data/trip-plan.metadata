@@ -2,39 +2,48 @@
   "sheets": [
     {
       "id": "_InLcuS3AkMLP7bsKI5v6N",
-      "configId": "trip-plan.activity"
+      "configId": "trip-plan.activity",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_QgP1hr72eFZyXOKb6GBwM",
-      "configId": "trip-plan.city"
+      "configId": "trip-plan.city",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_rHwaFAMcGPKOYFHMzGvaJ",
-      "configId": "common.number"
+      "configId": "common.number",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_nAjrSj3fnSHKYYvocIVGd",
-      "configId": "markdown"
+      "configId": "markdown",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_VDr76rWqTSaAMmFNLpru5",
-      "configId": "trip-plan.day"
+      "configId": "trip-plan.day",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_NKhtuqG94fi030KZVPz1J",
-      "configId": "trip-plan.openingRange"
+      "configId": "trip-plan.openingRange",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_Y179IOu73uTbYWrdxv9bt",
-      "configId": "trip-plan.time"
+      "configId": "trip-plan.time",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_yqGX28lejuaacUHpNFDBh",
-      "configId": "trip-plan.timeSpan"
+      "configId": "trip-plan.timeSpan",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_WqCbdCTLROphJfThUc0r9",
-      "configId": "trip-plan.openingHours"
+      "configId": "trip-plan.openingHours",
+      "hideHighlightsInDocument": false
     }
   ]
 }

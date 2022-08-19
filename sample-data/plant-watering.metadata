@@ -2,19 +2,23 @@
   "sheets": [
     {
       "id": "_YjFCVDgEzibOUK6K3LxWu",
-      "configId": "plant-watering.3"
+      "configId": "plant-watering.3",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_huIBzMy6hmTCw4wVsuplT",
-      "configId": "plant-watering.1"
+      "configId": "plant-watering.1",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_LBgVEkvqVGud4fOF2zhLD",
-      "configId": "plant-watering.2"
+      "configId": "plant-watering.2",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_ZvwUhTM9imJ1Fq3EVr3tI",
-      "configId": "common.date"
+      "configId": "common.date",
+      "hideHighlightsInDocument": false
     }
   ]
 }

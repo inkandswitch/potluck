@@ -2,31 +2,38 @@
   "sheets": [
     {
       "id": "_VU6isfrUenQk3Wdg05qGc",
-      "configId": "common.number"
+      "configId": "common.number",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_YDKITIckz6nDms4vHUM8x",
-      "configId": "common.duration"
+      "configId": "common.duration",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_fDC1BebE8R09VEltAN6ld",
-      "configId": "goodreads.1"
+      "configId": "goodreads.1",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_wRX26NlxkoH38ioBxXncv",
-      "configId": "markdown"
+      "configId": "markdown",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_RwIa8qsVEEBI1yN9N9JV2",
-      "configId": "crm.1"
+      "configId": "crm.1",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_eTtQylRi3bH4xBKfuZvXk",
-      "configId": "common.date"
+      "configId": "common.date",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_VZNZA4WGboyKJQgWTXZAI",
-      "configId": "_EPSPtlS2leXEhRmSEoQZh"
+      "configId": "_EPSPtlS2leXEhRmSEoQZh",
+      "hideHighlightsInDocument": false
     }
   ]
 }

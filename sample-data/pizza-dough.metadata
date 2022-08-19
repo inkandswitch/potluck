@@ -2,15 +2,18 @@
   "sheets": [
     {
       "id": "cUDHSgTWKnDpZFr5T7lqY",
-      "configId": "pizza-dough.inputs"
+      "configId": "pizza-dough.inputs",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "FAAxgnKxU0RFIdA75whQf",
-      "configId": "pizza-dough.number-of-balls"
+      "configId": "pizza-dough.number-of-balls",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "OPDhVR1ZH5zXQ51JOCO76",
-      "configId": "pizza-dough.water"
+      "configId": "pizza-dough.water",
+      "hideHighlightsInDocument": false
     }
   ]
 }

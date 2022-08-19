@@ -2,23 +2,28 @@
   "sheets": [
     {
       "id": "_Wsf3s8IyOld9knDg1rdnC",
-      "configId": "common.number"
+      "configId": "common.number",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_1Co3scDP2mNoUzFoYltQ5",
-      "configId": "markdown"
+      "configId": "markdown",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_H7EWwGZc6qecFzGl0UTWc",
-      "configId": "time-tracking.project"
+      "configId": "time-tracking.project",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_mMM1kgsMOjd4Jtwadj75F",
-      "configId": "time-tracking.time"
+      "configId": "time-tracking.time",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_2gPgKJTGW7qDrcqP7ofMb",
-      "configId": "time-tracking.open-time"
+      "configId": "time-tracking.open-time",
+      "hideHighlightsInDocument": false
     }
   ]
 }

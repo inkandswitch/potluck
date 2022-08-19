@@ -6,15 +6,18 @@
       "highlightSearchRange": [
         12,
         117
-      ]
+      ],
+      "hideHighlightsInDocument": false
     },
     {
       "id": "OJfD4K5OMu5qEHvZiRONd",
-      "configId": "common.number"
+      "configId": "common.number",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "dGc1oJZ2MSClD14RZNPe4",
-      "configId": "food.quantity"
+      "configId": "food.quantity",
+      "hideHighlightsInDocument": false
     }
   ]
 }

@@ -2,11 +2,13 @@
   "sheets": [
     {
       "id": "_iePFJrk4l7HU0IS6H18Yb",
-      "configId": "hikes.1"
+      "configId": "hikes.1",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_RLKSxiJoTh8r5YvnWUzpE",
-      "configId": "hikes.2"
+      "configId": "hikes.2",
+      "hideHighlightsInDocument": false
     }
   ]
 }

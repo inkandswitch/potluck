@@ -2,7 +2,8 @@
   "sheets": [
     {
       "id": "_ww9wvgHRl83zAO8h9CtoG",
-      "configId": "markdown"
+      "configId": "markdown",
+      "hideHighlightsInDocument": true
     }
   ]
 }

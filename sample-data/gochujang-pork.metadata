@@ -6,23 +6,28 @@
       "highlightSearchRange": [
         662,
         1430
-      ]
+      ],
+      "hideHighlightsInDocument": false
     },
     {
       "id": "69ETypGNV9MGLGuYDJVMT",
-      "configId": "common.number"
+      "configId": "common.number",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "rtmeGoGDzu10C1mxqo8rG",
-      "configId": "food.quantity"
+      "configId": "food.quantity",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "RAknoIAG0p2vDdGvW6Dvi",
-      "configId": "food.scale"
+      "configId": "food.scale",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "DNQtQEvwr9jkN8cHFWgeE",
-      "configId": "common.duration"
+      "configId": "common.duration",
+      "hideHighlightsInDocument": false
     }
   ]
 }

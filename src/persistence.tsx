@@ -394,6 +394,7 @@ type SerializedDocumentSheet = {
   id: string;
   configId: string;
   highlightSearchRange: Span | undefined;
+  hideHighlightsInDocument: boolean;
 };
 function getDocumentSheetConfig(
   textDocument: TextDocument
@@ -402,6 +403,7 @@ function getDocumentSheetConfig(
     id: documentSheet.id,
     configId: documentSheet.configId,
     highlightSearchRange: documentSheet.highlightSearchRange,
+    hideHighlightsInDocument: documentSheet.hideHighlightsInDocument || false,
   }));
 }
 
@@ -448,6 +450,7 @@ export function getStateFromFiles(
             id: c.id,
             configId: c.configId,
             highlightSearchRange: c.highlightSearchRange,
+            hideHighlightsInDocument: c.hideHighlightsInDocument || false,
           })),
         lastModified: fileLastModified[filePath],
       };

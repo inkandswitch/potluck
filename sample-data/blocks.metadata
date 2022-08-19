@@ -2,35 +2,43 @@
   "sheets": [
     {
       "id": "_YR7856hxyyG2NKZsJAzws",
-      "configId": "blocks.remove"
+      "configId": "blocks.remove",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_saVunZsu1B5sKwfqSIkGb",
-      "configId": "blocks.block"
+      "configId": "blocks.block",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_I9PHjLNehuiyq4vYgEYdm",
-      "configId": "blocks.collapse"
+      "configId": "blocks.collapse",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_AP3bdNza4OSrHgfB8V2wz",
-      "configId": "blocks.shuffle"
+      "configId": "blocks.shuffle",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_oqy9W8cxf0i1NQD6xhUdb",
-      "configId": "blocks.sort"
+      "configId": "blocks.sort",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_ZJYg11klR2KoVhlWmeL2W",
-      "configId": "blocks.sorting-hat"
+      "configId": "blocks.sorting-hat",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_CPg91EyQ0EVBMmTCFAGt0",
-      "configId": "blocks.example-ingredient"
+      "configId": "blocks.example-ingredient",
+      "hideHighlightsInDocument": false
     },
     {
       "id": "_O2LJ8Q1oZ5OV271idEx3m",
-      "configId": "markdown"
+      "configId": "markdown",
+      "hideHighlightsInDocument": false
     }
   ]
 }

@@ -1,5 +1,5 @@
 all ingredients
-ground chuck beef Aisle: foo
+ground chuck beef, Aisle: foo
 onion powder
 gochujang
 fish sauce

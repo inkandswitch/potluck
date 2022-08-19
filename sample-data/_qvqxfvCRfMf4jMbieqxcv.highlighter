@@ -1,0 +1,16 @@
+{
+  "id": "_qvqxfvCRfMf4jMbieqxcv",
+  "name": "search1",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "## Ingredients",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col2",
+      "formula": "`\\n${FindAll(\"ingredients\").map(h => TextOfHighlight(h)).join(\"\\n\")}`",
+      "visibility": "INLINE"
+    }
+  ]
+}

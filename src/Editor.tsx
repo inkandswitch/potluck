@@ -46,7 +46,10 @@ import { Pattern, PatternPart, patternToString } from "./patterns";
 import { orderBy } from "lodash";
 
 const ANNOTATION_TOKEN_CLASSNAME = "annotation-token";
-const MAX_SUPERSCRIPT_LENGTH = 20;
+
+// Max char length of an annotation. Currently set to an absurdly high value to effectively not limit;
+// but I left it in as a constant to make it easy to change later if needed.
+const MAX_SUPERSCRIPT_LENGTH = 10000;
 
 enum SuperscriptWidgetMode {
   Normal,

@@ -1,0 +1,36 @@
+{
+  "id": "workout.exercise",
+  "name": "exercise",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/bench|squat|run|elliptical/}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "date",
+      "formula": "PrevOfType($, \"dates\")",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "numbers",
+      "formula": "Filter(NextUntil($, HasType(\"exercise\")), SameLine($))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "weight",
+      "formula": "First(numbers)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "sets",
+      "formula": "Second(numbers)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "reps",
+      "formula": "Third(numbers)",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

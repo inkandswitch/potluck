@@ -1,6 +1,10 @@
 {
   "sheets": [
     {
+      "id": "_telDp1hoD0hM9mc47lhN8",
+      "configId": "workout.exercise"
+    },
+    {
       "id": "34sdhiogfz1c6INpAO6Y7",
       "configId": "common.number"
     },

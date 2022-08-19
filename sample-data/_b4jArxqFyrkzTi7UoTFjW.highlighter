@@ -18,13 +18,18 @@
       "visibility": "HIDDEN"
     },
     {
+      "name": "needsWater",
+      "formula": "daysSince > numberInt",
+      "visibility": "HIDDEN"
+    },
+    {
       "name": "color",
-      "formula": "daysSince > number ? \"red\" : \"green\"",
+      "formula": "needsWater ? \"red\" : \"green\"",
       "visibility": "STYLE"
     },
     {
-      "name": "updateDate",
-      "formula": "daysSince > numberInt ? TemplateButton($, \"🚿\", DateTime.now().toLocaleString(), \"replace\") : \"\"",
+      "name": "button",
+      "formula": "needsWater ? TemplateButton($, \"🚿\", DateTime.now().toLocaleString(), \"replace\") : \"\"",
       "visibility": "INLINE"
     }
   ]

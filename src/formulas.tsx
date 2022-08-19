@@ -638,6 +638,11 @@ export function evaluateFormula(
       return list.reduce((a, b) => toNumber(a) + toNumber(b), 0) as number;
     },
 
+    // Return a string that consists of repeating the text n times.
+    Repeat: (text: string, count: number | Highlight): string => {
+      return Array(toNumber(count)).fill(text).join("");
+    },
+
     Average: (list: Array<number | Highlight>): number => {
       return (
         (list.reduce((a, b) => toNumber(a) + toNumber(b), 0) as number) /
@@ -832,7 +837,9 @@ export function evaluateFormula(
         }
 
         const insert =
-          typeof updateText === "function" ? updateText() : updateText.toString();
+          typeof updateText === "function"
+            ? updateText()
+            : updateText.toString();
         view.dispatch({
           changes:
             operation === "replace"
@@ -1018,6 +1025,10 @@ export const FORMULA_REFERENCE = [
   {
     name: "Round",
     args: ["value: number", "precision: number = 0"],
+  },
+  {
+    name: "Repeat",
+    args: ["text: string", "count: number | Highlight"],
   },
   {
     name: "Slider",

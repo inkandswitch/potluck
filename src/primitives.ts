@@ -7,6 +7,8 @@ import { DefaultFiles } from "./DefaultState";
 import { EditorView } from "@codemirror/view";
 import { Highlight } from "./highlight";
 
+let counter = 1;
+
 // Note: this is coupled to the filename of the doc that contains the default searches;
 // if that filename changes this also has to change
 export const DEFAULT_SEARCHES_ID = "default-searches";
@@ -221,7 +223,7 @@ export const savePendingSearchToSheet = (
       const sheetConfigId = generateNanoid();
       const sheetConfig: SheetConfig = {
         id: sheetConfigId,
-        name: pendingSearch.search,
+        name: `search${counter++}`,
         properties: [
           {
             name: "$",

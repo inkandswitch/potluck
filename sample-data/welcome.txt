@@ -1,9 +1,9 @@
 _Welcome to Potluck!
 Potluck is an environment for making *personal software* out of text documents.
 
-You can start out using it just like a notes app, typing in text. But then you can add *live searches* which detect patterns in your text as you type: dates, times, quantities, food ingredients, a todo item, your favorite emoji ⭐️... anything you like.
+It's like a regular notes app, but you can add *live searches* which detect patterns in your text as you type: dates, times, quantities, food ingredients, anything you like. You can then write little Javascript formulas to run computations and show the results back in the text doc.
 
-You can then write little spreadsheet-style formulas to run computations using these search results, and then you can show the results back in the text doc. Just with these few simple concepts, you can build many kinds of software:
+Just with these simple concepts, you can build many kinds of software:
 
 - 🥘 **Recipe app**: scale up ingredients and show a timer in the directions
 - 💪 **Workout tracker**: A simple text-based workout log with a calendar view
@@ -13,56 +13,86 @@ You can then write little spreadsheet-style formulas to run computations using t
 - 🍞 **Bake Sale**: Keep track of sales and prices at a cash register
 - 💵 **Stock Portfolio** tracker with live stock prices
 
-All of these examples are pre-loaded here, feel free to poke around. As you start using Potluck, you can come up with your own live searches and your own tools to meet your own needs.
+All of these examples are pre-loaded in the left sidebar, feel free to poke around.
 
 ## Getting started
 
-We're going to make a simple live search to get familiar with the mechanics. Here's what it will do. Each time we type in text like "23 is a number" it will show the doubled number in the text, like "23 is a number [46]".
+To learn the ropes, let's build a banana counter doc.
 
-**Making a search**
+When we type something like "7 bananas" anywhere in the doc, it will show a row of banana emojis next to the text, corresponding to the number of bananas. Fun!
 
-To start, hit Cmd-Shift-F / Ctrl-Shift-F (or click the magnifying glass in upper right) to open the search panel. This is where we create live searches to recognize patterns in our text. Each live search gets a table of results in the sidebar. You can see there is already a Markdown search there which is powering the Markdown formatting in this doc.
+**Making a live search**
 
-Type into the searchbox:
-{number} is a number
+To start, hit **Cmd-Shift-F / Ctrl-Shift-F** (or click the magnifying glass in upper right) to open the search panel. Type the text below into the searchbox, then hit Enter.
 
-Then hit Enter. You just created your first live search! As you might have guessed, this will match anytime we type a number, followed by the words "is a number". Inside the curly braces we can write the name of an existing Potluck search, or we can even write a full regular expression if you're familiar with those. Focus the search input to see existing searches you can use.
+```
+{number} bananas
+```
 
-You can hover over each row in the search results to see where it came from.
+You just created your first live search! It matches any number, followed by the word "bananas".
 
-**Seeing a new search result**
+Try typing "10 bananas" somewhere in the doc. You'll see the search update.
 
-Try editing this text below to include your favorite number:
+You can also name your search. Try renaming from "search1" to "numBananas"
 
-? is a number
-
-You should see an underline appear in the text doc because it matched your live search. The table in the searches pane also now has a new row including your new text. As you can see, searches are live: they update when you edit the text.
+*Advanced tips*
+- Inside the { ... }, you can put the name of any existing search in Potluck. That includes your own 
+- {number} is a built in pattern in Potluck, which is why you can search for it. There are lots of other built in patterns you can include inside curly braces. The autocomplete in the search box gives you a full list.
+- You can even write a regular expression if you know how, by writing something like this inside curly braces: {/[a-z]+/}
 
 **Doing a computation**
 
-Next let's double the number. Click in the formula bar for the search (next to the eyeball icon) and edit it to say:
-{number:num} is a number
+Next let's add some emojis.
 
-Now there's a second column in the table which has extracted just the number from the search result. You can name the result of any curly brace section of your pattern and extract a column for it.
+First, let's add a **capture group** to our search to extract just the number from the pattern. Edit the search to be like this:
 
-Next, click the "+" button on the right side of the table. A new column will appear in the table, along with a textbox to enter a formula.
+```
+{number:num} bananas
+```
 
-Type into the box:
-num * 2
+Next, click the "+" button on the right side of the table. In the formula box, type in:
 
-You should see your new column in the table fill up with doubled number values. By the way, you can type any JavaScript expression as a formula into this box.
+```
+Repeat("🍌", num)
+```
+
+Now you have strings of emojis in your table!
+
+*Advanced tips*
+- You can rename the column using the settings box
+- If you know Javascript, you can type any JS into the formula box. It's just evaluating a JS expression.
+- There are a bunch of helpful functions like Repeat built into the system. You can see a reference with the ? button in the formula bar.
 
 **Showing the computation in the text**
 
 Time for the last step: showing these doubled numbers in the text doc.
 
-Click the settings icon in the column header to get the formula editor popup. For "Display in document", select "Next to text".
+Click the settings icon next to col2, and for "Display in document", select "Next to text".
 
-You'll see the doubled number appear below:
+You should now see emojis next to this text! 3 bananas
 
-100 is a number
+*Advanced tips*
+- Try out the other "display in document" settings like replacing the text.
+- There's a special option for styling the text. To use this, you need to name the column as a CSS property, and return a CSS value as the formula result. Check out the built-in Markdown search on this doc for some examples.
 
-You've now seen the basic mechanics of how Potluck works!
+**Querying across searches**
+
+Final step: let's tabulate the total number of bananas in this whole doc. We'll display the total right here with a label:
+
+Total bananas:
+
+First make a new live search for the text "Total bananas:"  Next, make a new column in that table and add this formula:
+
+```
+Sum(FindAll("numBananas").map(row => row.data.num))
+```
+
+Then change the display setting to show the sum next to the label. You now have a banana total! If you add more bananas in the doc they'll show up in the total.
+
+OK hold on, how does this formula work?
+- FindAll takes the name of a search and returns all the rows in the table
+- Each row has a .data property which includes all the columns in the row
+- We extract the `num` column from each row in the numBananas table, and then sum them with the Sum formula
 
 ## Next steps
 
@@ -76,5 +106,3 @@ A few more tips:
 
 - By default this is just a playground app, and it doesn't save data. You can sync the web app with a directory on your local filesystem if you want to save files. Hit the "refresh" icon in the top right to start syncing with your filesystem.
 - There's a question mark icon in the formula editor for a column which shows all the formulas available in the system
-- Try the different forms of "Display in document": next to, above, replace
-- You can also try adding conditional formatting to a document using CSS properties as column names; see the Markdown search in this doc for an example.

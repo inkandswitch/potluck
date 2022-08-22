@@ -353,9 +353,15 @@ export function evaluateFormula(
     },
 
     FindAll: (type: string) => {
-      const typeSheetConfig = Array.from(sheetConfigsMobx.values()).find(
+      const typeSheetConfigs = Array.from(sheetConfigsMobx.values()).filter(
         (sheetConfig) => sheetConfig.name === type
       );
+      const typeSheetConfig =
+        typeSheetConfigs.find((sheetConfig) =>
+          textDocument.sheets.some(
+            (documentSheet) => documentSheet.configId === sheetConfig.id
+          )
+        ) ?? typeSheetConfigs[0];
 
       if (!typeSheetConfig) {
         return [];

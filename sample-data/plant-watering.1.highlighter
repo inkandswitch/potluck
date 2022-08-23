@@ -1,15 +1,15 @@
 {
   "id": "plant-watering.1",
-  "name": "checker",
+  "name": "interval",
   "properties": [
     {
       "name": "$",
-      "formula": "{interval:interval} {dates:dates}",
+      "formula": "every {number:interval} days",
       "visibility": "HIDDEN"
     },
     {
-      "name": "intervalNum",
-      "formula": "ParseInt(TextOfHighlight(interval.data.number))",
+      "name": "intervalInt",
+      "formula": "ParseInt(interval)",
       "visibility": "HIDDEN"
     },
     {
@@ -18,9 +18,9 @@
       "visibility": "HIDDEN"
     },
     {
-      "name": "color",
-      "formula": "daysSince > intervalNum ? \"red\" : \"green\"",
-      "visibility": "STYLE"
+      "name": "needsWater",
+      "formula": "daysSince > intervalInt",
+      "visibility": "HIDDEN"
     }
   ]
 }

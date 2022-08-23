@@ -1,7 +1,8 @@
-plant watering tracker
-using current date in formula. "interesting" formula of calculating days since date
+Plant Watering Tracker
+## Plants
 
-monstera [6] 8/11/2022
-fig plant [3] 8/5/22
-backyard tree [10] 8/1/22
-bonsai tree [3] 8/4/22
+🌱 Fiddle leaf: every 6 days, last watered on 8/19/2022
+🌱 Montsera: every 4 days, last watered on 8/21/2022
+🌱 Yuzu tree: every 5 days, last watered on 8/17/2022
+- The Yuzu tree needs some holes in the pot so that water can drain.
+🌱 Pine Bonsai: every 4 days, last watered on 8/19/2022

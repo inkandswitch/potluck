@@ -1,11 +1,31 @@
 {
   "id": "plant-watering.2",
-  "name": "interval",
+  "name": "schedule",
   "properties": [
     {
       "name": "$",
-      "formula": "[{/\\\\d+/:number}]",
+      "formula": "{dates:lastWatered}",
       "visibility": "HIDDEN"
+    },
+    {
+      "name": "daysSince",
+      "formula": "Round((Date.now() - Date.parse(lastWatered)) / (24 * 60 * 60 * 1000), 1)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "needsWater",
+      "formula": "daysSince > PrevOfType($, \"interval\").data.intervalInt",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "color",
+      "formula": "needsWater ? \"red\": \"green\"",
+      "visibility": "STYLE"
+    },
+    {
+      "name": "button",
+      "formula": "TemplateButton($, \"🚿\", DateTime.now().toLocaleString(), \"replace\")",
+      "visibility": "INLINE"
     }
   ]
 }

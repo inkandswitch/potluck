@@ -428,7 +428,8 @@ function useFormulaInput(
   value: string,
   onChange: (value: string) => void,
   cmContentTheme: any,
-  useLineWrapping = false
+  useLineWrapping = false,
+  disableAutocomplete = false
 ): React.MutableRefObject<EditorView | undefined> {
   const viewRef = useRef<EditorView | undefined>(undefined);
   const valueRef = useRef(value);
@@ -458,17 +459,19 @@ function useFormulaInput(
         autocompletion(),
         tooltips({ parent: document.body }),
         useLineWrapping ? [EditorView.lineWrapping] : [],
-        new LanguageSupport(javascriptLanguage, [
-          javascriptLanguage.data.of({
-            autocomplete: FORMULA_REFERENCE.map(
-              ({ name, args, return: returnType }) => ({
-                label: name,
-                type: "function",
-                info: `(${args.join(", ")}) => ${returnType}`,
-              })
-            ),
-          }),
-        ]),
+        !disableAutocomplete
+          ? new LanguageSupport(javascriptLanguage, [
+              javascriptLanguage.data.of({
+                autocomplete: FORMULA_REFERENCE.map(
+                  ({ name, args, return: returnType }) => ({
+                    label: name,
+                    type: "function",
+                    info: `(${args.join(", ")}) => ${returnType}`,
+                  })
+                ),
+              }),
+            ])
+          : [],
         keymap.of([...closeBracketsKeymap]),
       ],
       parent: rootRef.current!,
@@ -510,10 +513,17 @@ function SearchFormulaInput({
   onChange: (value: string) => void;
 }) {
   const rootRef = useRef<HTMLDivElement>(null);
-  useFormulaInput(rootRef, value, onChange, {
-    fontSize: "14px",
-    fontFamily: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
-  });
+  useFormulaInput(
+    rootRef,
+    value,
+    onChange,
+    {
+      fontSize: "14px",
+      fontFamily: `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace`,
+    },
+    false,
+    true
+  );
   return <div className="grow overflow-auto" ref={rootRef}></div>;
 }
 

@@ -430,7 +430,7 @@ const SearchBox = observer(
           {selectedPendingSearch !== undefined &&
           selectedPendingSearch._type !== "document" ? (
             <div className="absolute top-2 right-2 bg-white z-10 text-gray-400 text-sm">
-              {results.length} results
+              {results.length} result{results.length !== 1 ? "s" : null}
             </div>
           ) : null}
         </div>

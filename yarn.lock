@@ -1511,6 +1511,11 @@ fastq@^1.6.0:
   dependencies:
     reusify "^1.0.4"
 
+file-dialog@^0.0.8:
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/file-dialog/-/file-dialog-0.0.8.tgz#9137155ffe4abf4e1546aba3ed17e395fbf92aba"
+  integrity sha512-KnYitqNf/rANEhUxWzkINAaMVc7SshejwA5HEd5Wr8lEJQX1Js1LCndectS44SXTnXWK+jbHQYs4R6CaG+7Jkg==
+
 fill-range@^7.0.1:
   version "7.0.1"
   resolved "https://registry.npmjs.org/fill-range/-/fill-range-7.0.1.tgz"

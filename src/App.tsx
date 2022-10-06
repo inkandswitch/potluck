@@ -40,6 +40,8 @@ import {
   Cross1Icon,
   HamburgerMenuIcon,
   MagnifyingGlassIcon,
+  UploadIcon,
+  DownloadIcon,
   Pencil2Icon,
 } from "@radix-ui/react-icons";
 import * as Tooltip from "@radix-ui/react-tooltip";
@@ -47,6 +49,7 @@ import { ToastViewport } from "@radix-ui/react-toast";
 import { DocumentSidebar, PersistenceButton } from "./DocumentSidebar";
 import { patternToString } from "./patterns";
 import { create, groupBy } from "lodash";
+import fileDialog from "file-dialog"
 
 const TextDocumentName = observer(
   ({ textDocument }: { textDocument: TextDocument }) => {
@@ -65,7 +68,7 @@ const TextDocumentName = observer(
   }
 );
 
-const TextDocumentComponent = observer(
+export const TextDocumentComponent = observer(
   ({ textDocumentId }: { textDocumentId: string }) => {
     const textDocument = textDocumentsMobx.get(textDocumentId)!;
 
@@ -190,6 +193,142 @@ const DocumentSheets = observer(
   }
 );
 
+// adapted from: https://stackoverflow.com/questions/3665115/how-to-create-a-file-in-memory-for-user-to-download-but-not-through-server#18197341
+function download(filename: string, text: string) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
+
+type DocumentExport = {
+  textDocument: TextDocument,
+  sheetConfigs: SheetConfig[]
+}
+
+function generateExportForCurrentDocument(): DocumentExport | undefined {
+  const id = selectedTextDocumentIdBox.get()
+  const textDocument = textDocumentsMobx.get(id)
+
+  if (!textDocument) {
+    return
+  }
+
+  const sheetConfigs: { [id: string]: SheetConfig } = {}
+
+  if (textDocument?.sheets) {
+    for (const sheet of textDocument.sheets) {
+      const sheetConfig = sheetConfigsMobx.get(sheet.configId)
+
+      if (sheetConfig) {
+        sheetConfigs[sheet.configId] = sheetConfig
+      }
+    }
+  }
+
+  return {
+    textDocument,
+    sheetConfigs: Object.values(sheetConfigs)
+  }
+}
+
+async function importDocumentsFromFile() {
+  const files = await fileDialog()
+
+  return Promise.all(
+    Array.from(files)
+      .map((file, index) => {
+        const isLast = index === (files.length - 1)
+
+        return (
+          file.text()
+            .then((text) => {
+              const { sheetConfigs, textDocument }: any = JSON.parse(text)
+
+
+              console.log(textDocument)
+
+              runInAction(() => {
+                sheetConfigs.forEach((sheetConfig: SheetConfig) => {
+                  sheetConfigsMobx.set(sheetConfig.id, sheetConfig)
+                })
+
+                textDocumentsMobx.set(textDocument.id, {
+                  ...textDocument,
+                  text: Text.of(textDocument.text)
+                })
+
+                if (isLast) {
+                  selectedTextDocumentIdBox.set(textDocument.id)
+                }
+              })
+            })
+            .catch(() => {
+              alert(`Could not read file ${file.name}`)
+            })
+        )
+      })
+  )
+}
+
+const ExportButton = observer(() => {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild={true}>
+        <button
+          onClick={() => {
+            const documentExport = generateExportForCurrentDocument()
+
+            if (!documentExport) {
+              alert('Failed to export document')
+              return
+            }
+
+            const name = `${documentExport.textDocument?.name || "document"}.json`
+            const content = JSON.stringify(documentExport, null, 2)
+
+            download(name, content)
+          }}
+          className="text-gray-600 hover:text-gray-700"
+        >
+          <UploadIcon />
+        </button>
+      </Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
+          Export current document
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  );
+});
+
+const ImportButton = observer(() => {
+  return (
+    <Tooltip.Root>
+      <Tooltip.Trigger asChild={true}>
+        <button
+          onClick={() => importDocumentsFromFile()}
+          className="text-gray-600 hover:text-gray-700"
+        >
+          <DownloadIcon />
+        </button>
+      </Tooltip.Trigger>
+      <Tooltip.Portal>
+        <Tooltip.Content className="text-xs bg-gray-700 text-white px-2 py-1 rounded">
+          Import document
+        </Tooltip.Content>
+      </Tooltip.Portal>
+    </Tooltip.Root>
+  );
+});
+
 const SearchButton = observer(() => {
   const isShowingSearchPanelBox = showSearchPanelBox.get();
 
@@ -294,7 +433,7 @@ const SearchBox = observer(
           if (
             searchState.selectedSearchIndex !== undefined &&
             searchState.selectedSearchIndex <
-              pendingSearchesComputed.get().length - 1
+            pendingSearchesComputed.get().length - 1
           ) {
             searchTermBox.set({
               ...searchState,
@@ -428,7 +567,7 @@ const SearchBox = observer(
             </div>
           )}
           {selectedPendingSearch !== undefined &&
-          selectedPendingSearch._type !== "document" ? (
+            selectedPendingSearch._type !== "document" ? (
             <div className="absolute top-2 right-2 bg-white z-10 text-gray-400 text-sm">
               {results.length} result{results.length !== 1 ? "s" : null}
             </div>
@@ -500,6 +639,8 @@ const App = observer(() => {
           <button onClick={createNewDocument}>
             <Pencil2Icon className="text-gray-600" />
           </button>
+          <ExportButton />
+          <ImportButton />
           <div className="grow" />
           <PersistenceButton />
           <SearchButton />

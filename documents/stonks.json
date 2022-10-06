@@ -1,0 +1,66 @@
+{
+  "textDocument": {
+    "id": "stonks-portfolio",
+    "name": "stonks portfolio",
+    "text": [
+      "would like to import outside data",
+      "doing row-wise computation is pretty straightforward in potluck",
+      "",
+      "$GME 250@$5.00",
+      "$AMC 100@$1.00",
+      "",
+      "portfolio value"
+    ],
+    "sheets": [
+      {
+        "id": "_vYbP2uJkzwO2zAXyV9ZDY",
+        "configId": "stonks-portfolio.1",
+        "hideHighlightsInDocument": false
+      },
+      {
+        "id": "_ns9sZr9wgelKJDzzVezCe",
+        "configId": "stonks-portfolio.2",
+        "hideHighlightsInDocument": false
+      }
+    ]
+  },
+  "sheetConfigs": [
+    {
+      "id": "stonks-portfolio.1",
+      "name": "portfolio value",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "portfolio value",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "col8",
+          "formula": "FindAll(\"holdings\").map(h => h.data.currentPrice * TextOfHighlight(h.data.shares)).reduce((a, b) => a + b, 0)",
+          "visibility": "INLINE"
+        }
+      ]
+    },
+    {
+      "id": "stonks-portfolio.2",
+      "name": "holdings",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "${/\\\\w+/:ticker} {number:shares}@${/[\\\\d\\.]+/:cost}",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "currentPrice",
+          "formula": "TextOfHighlight(ticker) === \"GME\" ? 40 : 20",
+          "visibility": "SUPERSCRIPT"
+        },
+        {
+          "name": "col10",
+          "formula": "`$${currentPrice * ParseInt(shares)}`",
+          "visibility": "INLINE"
+        }
+      ]
+    }
+  ]
+}

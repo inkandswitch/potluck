@@ -1,0 +1,192 @@
+{
+  "textDocument": {
+    "id": "bar",
+    "name": "bake sale",
+    "text": [
+      "# Prices",
+      "",
+      "cake 🍰 = 4 Euro",
+      "cupcake 🧁 = 3 Euro ",
+      "apple juice 🍎 = 2 Euro",
+      "coke🥤 = 2 Euro",
+      "coffee ☕ = 2 Euro",
+      "",
+      "# Sales",
+      "enter emojis for each order on a new line",
+      "",
+      "🍎🥤",
+      "🧁",
+      "🧁☕️",
+      "☕️",
+      "🍰",
+      "",
+      "Cake is too expensive 🍰 = 3 Euros",
+      "",
+      "🍰",
+      "",
+      "Total: ",
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      ""
+    ],
+    "sheets": [
+      {
+        "id": "_2TRyK9cYdyhE5k2QGQNrX",
+        "configId": "markdown",
+        "hideHighlightsInDocument": false
+      },
+      {
+        "id": "_csZJCgJ3S78PObHxaQCt6",
+        "configId": "common.emoji",
+        "hideHighlightsInDocument": false
+      },
+      {
+        "id": "_M4kQAPANPacHMzSlMrxGj",
+        "configId": "common.number",
+        "hideHighlightsInDocument": false
+      },
+      {
+        "id": "_XnudOhOYOAwZ0O41RC71M",
+        "configId": "bar.price",
+        "hideHighlightsInDocument": false
+      },
+      {
+        "id": "_FByk6n1gPfsxtVnlmbw9g",
+        "configId": "bar.sales",
+        "hideHighlightsInDocument": false
+      },
+      {
+        "id": "_76ua3Ul5NMlnigIHzspSm",
+        "configId": "bar.total",
+        "hideHighlightsInDocument": false
+      }
+    ]
+  },
+  "sheetConfigs": [
+    {
+      "id": "markdown",
+      "name": "markdown",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "=Markdown()",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "type",
+          "formula": "$.data.type",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "font-weight",
+          "formula": "type.startsWith(\"h\") || type === \"bold\" ? \"bold\" : \"normal\"",
+          "visibility": "STYLE"
+        },
+        {
+          "name": "font-style",
+          "formula": "type === \"italic\" ? \"italic\" : \"normal\"",
+          "visibility": "STYLE"
+        },
+        {
+          "name": "font-size",
+          "formula": "({\"h1\": \"1.3rem\",\n  \"h2\": \"1rem\"}[type]) || \"normal\"",
+          "visibility": "STYLE"
+        }
+      ]
+    },
+    {
+      "id": "common.emoji",
+      "name": "emoji",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "{/(\\u00a9|\\u00ae|[\\u2000-\\u3300]|\\ud83c[\\ud000-\\udfff]|\\ud83d[\\ud000-\\udfff]|\\ud83e[\\ud000-\\udfff])/}",
+          "visibility": "HIDDEN"
+        }
+      ]
+    },
+    {
+      "id": "common.number",
+      "name": "number",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "{/[0-9][0-9\\.]*/}",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "value",
+          "formula": "ParseFloat($)",
+          "visibility": "HIDDEN"
+        }
+      ]
+    },
+    {
+      "id": "bar.price",
+      "name": "price",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "{emoji:item} = {number:price} Euro",
+          "visibility": "HIDDEN"
+        }
+      ]
+    },
+    {
+      "id": "bar.sales",
+      "name": "sales",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "{/^/}{emoji+:items}{/$/}",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "prices",
+          "formula": "items.map(item => (\n  item\n   .allPrev(\"price\")\n   .find(price => (\n     price.data.item.isEqualTo(item)\n   ))\n))",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "sum",
+          "formula": "prices.sumOf(\"data.price\")",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "sumText",
+          "formula": "`= ${sum} Euro`",
+          "visibility": "INLINE"
+        },
+        {
+          "name": "change",
+          "formula": "let result = []\n\nif (sum < 5) {\n  result.push(` 5 → ${5 - sum}`)\n}\n\nif (sum < 10) {\n  result.push(` 10 → ${10 - sum}`)\n}\n\nreturn result.join(', ')",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "col5",
+          "formula": "HasCursorFocus($) ? change : undefined",
+          "visibility": "HIDDEN"
+        }
+      ]
+    },
+    {
+      "id": "bar.total",
+      "name": "sheet2",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "Total: ",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "col7",
+          "formula": "FindAll(\"sales\").reduce((sum, sale) => sum + sale.data.sum, 0)",
+          "visibility": "INLINE"
+        }
+      ]
+    }
+  ]
+}

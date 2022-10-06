@@ -1,0 +1,70 @@
+{
+  "textDocument": {
+    "id": "todos",
+    "name": "natto todos",
+    "text": [
+      "simple todo list with conditional formatting",
+      "",
+      "[ ] make a gallery view",
+      "[ ] announce multiplayer 08/15/22",
+      "[ ] add keyboard shortcuts",
+      "[x] add zoom ability"
+    ],
+    "sheets": [
+      {
+        "id": "_Do0kWwRB2norSG0x4paId",
+        "configId": "todos.1",
+        "hideHighlightsInDocument": false
+      },
+      {
+        "id": "_LyD5a1lA4LFoMpVDuEz2g",
+        "configId": "todos.2",
+        "hideHighlightsInDocument": false
+      }
+    ]
+  },
+  "sheetConfigs": [
+    {
+      "id": "todos.1",
+      "name": "completed",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "[x]",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "task",
+          "formula": "TextAfter($)",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "text-decoration",
+          "formula": "\"line-through\"",
+          "visibility": "STYLE"
+        }
+      ]
+    },
+    {
+      "id": "todos.2",
+      "name": "incomplete",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "[ ]",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "task",
+          "formula": "TextAfter($)",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "duedate",
+          "formula": "Filter(FindAll(\"dates\"), a => SameLine($, a))",
+          "visibility": "HIDDEN"
+        }
+      ]
+    }
+  ]
+}

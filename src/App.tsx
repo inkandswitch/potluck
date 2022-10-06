@@ -238,6 +238,23 @@ function generateExportForCurrentDocument(): DocumentExport | undefined {
   }
 }
 
+export function loadDocumentExport ({ sheetConfigs, textDocument } : any, selectDocument : boolean = false) {
+  runInAction(() => {
+    sheetConfigs.forEach((sheetConfig: SheetConfig) => {
+      sheetConfigsMobx.set(sheetConfig.id, sheetConfig)
+    })
+
+    textDocumentsMobx.set(textDocument.id, {
+      ...textDocument,
+      text: Text.of(textDocument.text)
+    })
+
+    if (selectDocument) {
+      selectedTextDocumentIdBox.set(textDocument.id)
+    }
+  })
+}
+
 async function importDocumentsFromFile() {
   const files = await fileDialog()
 
@@ -249,25 +266,7 @@ async function importDocumentsFromFile() {
         return (
           file.text()
             .then((text) => {
-              const { sheetConfigs, textDocument }: any = JSON.parse(text)
-
-
-              console.log(textDocument)
-
-              runInAction(() => {
-                sheetConfigs.forEach((sheetConfig: SheetConfig) => {
-                  sheetConfigsMobx.set(sheetConfig.id, sheetConfig)
-                })
-
-                textDocumentsMobx.set(textDocument.id, {
-                  ...textDocument,
-                  text: Text.of(textDocument.text)
-                })
-
-                if (isLast) {
-                  selectedTextDocumentIdBox.set(textDocument.id)
-                }
-              })
+              loadDocumentExport(JSON.parse(text))
             })
             .catch(() => {
               alert(`Could not read file ${file.name}`)

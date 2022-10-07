@@ -1,0 +1,167 @@
+{
+  "textDocument": {
+    "id": "aeropress",
+    "name": "☕️ James Hoffmann Aeropress",
+    "text": [
+      "## Recipe",
+      "Grind 11 g coffee, medium-fine.",
+      "Add 200 g water, brew 2 minutes, plunge!",
+      "",
+      "scale by",
+      "",
+      "## Notes",
+      "6/22/22: Pretty good, but forgot to swirl.",
+      "6/23/22: Felt weak and under-extracted. Grind finer?"
+    ],
+    "sheets": [
+      {
+        "id": "eiIXzGv8Zq1zybgMZdd1z",
+        "configId": "common.number",
+        "hideHighlightsInDocument": false
+      },
+      {
+        "id": "X8bBiHSTseJNK4lyNkl2D",
+        "configId": "food.quantity",
+        "hideHighlightsInDocument": false
+      },
+      {
+        "id": "JdoUlaXUw0gg15KLpYHp6",
+        "configId": "common.duration",
+        "hideHighlightsInDocument": false
+      },
+      {
+        "id": "fUpyOI1wmdDbCnuq6dNfU",
+        "configId": "food.scale",
+        "hideHighlightsInDocument": false
+      },
+      {
+        "id": "PL4sKTsqJcM18ppBJIviZ",
+        "configId": "common.date",
+        "hideHighlightsInDocument": false
+      },
+      {
+        "id": "Htzihyo06gMLB1lCrEl24",
+        "configId": "markdown",
+        "hideHighlightsInDocument": false
+      }
+    ]
+  },
+  "sheetConfigs": [
+    {
+      "id": "common.number",
+      "name": "number",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "{/[0-9][0-9\\.]*/}",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "value",
+          "formula": "ParseFloat($)",
+          "visibility": "HIDDEN"
+        }
+      ]
+    },
+    {
+      "id": "food.quantity",
+      "name": "quantity",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "{number:amount} {/(cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|gram|g|milliliter|ml)s?/:unit}",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "scaleFactor",
+          "formula": "Find(\"scale\")?.data.sliderValue",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "scaledAmount",
+          "formula": "(scaleFactor && scaleFactor !== 1 && amount) ? `${scaleFactor * amount.data.value} ${unit}${amount.data.value === 1 ? 's' : ''}` : undefined",
+          "visibility": "REPLACE"
+        }
+      ]
+    },
+    {
+      "id": "common.duration",
+      "name": "durations",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "{/((\\\\d+\\\\s+(hours?|minutes?|seconds?))\\\\s*)*(\\\\d+\\\\s+(hours?|minutes?|seconds?))/}",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "timer",
+          "formula": "Timer($)",
+          "visibility": "INLINE"
+        }
+      ]
+    },
+    {
+      "id": "food.scale",
+      "name": "scale",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "scale by",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "slider",
+          "formula": "Slider($)",
+          "visibility": "SUPERSCRIPT"
+        },
+        {
+          "name": "sliderValue",
+          "formula": "slider.data.value",
+          "visibility": "INLINE"
+        }
+      ]
+    },
+    {
+      "id": "common.date",
+      "name": "dates",
+      "properties": [
+        {
+          "name": "date",
+          "formula": "{number:month}/{number:day}/{number:year}",
+          "visibility": "HIDDEN"
+        }
+      ]
+    },
+    {
+      "id": "markdown",
+      "name": "markdown",
+      "properties": [
+        {
+          "name": "$",
+          "formula": "=Markdown()",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "type",
+          "formula": "$.data.type",
+          "visibility": "HIDDEN"
+        },
+        {
+          "name": "font-weight",
+          "formula": "type.startsWith(\"h\") || type === \"bold\" ? \"bold\" : \"normal\"",
+          "visibility": "STYLE"
+        },
+        {
+          "name": "font-style",
+          "formula": "type === \"italic\" ? \"italic\" : \"normal\"",
+          "visibility": "STYLE"
+        },
+        {
+          "name": "font-size",
+          "formula": "({\"h1\": \"1.3rem\",\n  \"h2\": \"1rem\"}[type]) || \"normal\"",
+          "visibility": "STYLE"
+        }
+      ]
+    }
+  ]
+}

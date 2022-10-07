@@ -5,16 +5,14 @@ import * as Toast from "@radix-ui/react-toast";
 import {EmbeddedDocument} from "./EmbeddedDocument";
 
 const params = new URLSearchParams(location.search)
-const url = params.get('url')
+const documentUrl = params.get('document')
 
-console.log('foo')
-
-if (url) {
+if (documentUrl) {
   ReactDOM.createRoot(document.getElementById("root")!).render(
     <React.StrictMode>
       <Tooltip.Provider>
         <Toast.Provider>
-          <EmbeddedDocument url={url}/>
+          <EmbeddedDocument url={documentUrl}/>
         </Toast.Provider>
       </Tooltip.Provider>
     </React.StrictMode>

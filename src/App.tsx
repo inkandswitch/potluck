@@ -75,7 +75,7 @@ export const TextDocumentComponent = observer(
     return (
       <div className="grow flex flex-col overflow-hidden">
         <TextDocumentName textDocument={textDocument} />
-        <div className="grow pl-2 overflow-hidden max-w-xl">
+        <div className="grow pl-2 overflow-hidden max-w-2xl">
           <Editor textDocumentId={textDocumentId} />
         </div>
       </div>

@@ -1,0 +1,16 @@
+splitwise
+6/1/22
+scarlett  $50
+sean $20
+paul $10
+
+6/2/22
+sean $50
+sean $30
+paul $20
+
+total [scarlett]
+total [sean]
+total [paul]
+
+

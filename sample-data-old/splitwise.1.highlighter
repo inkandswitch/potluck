@@ -1,0 +1,26 @@
+{
+  "id": "splitwise.1",
+  "name": "output",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "total [{name:name}]",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "userItems",
+      "formula": "$.allPrev(\"userMoney\")\n.filter((userMoney) => (\n userMoney.data.name.isEqualTo(name)\n))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "sum",
+      "formula": "userItems\n.sumOf(\"data.money.data.amount\")",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "sumText",
+      "formula": "`$${sum}`",
+      "visibility": "INLINE"
+    }
+  ]
+}

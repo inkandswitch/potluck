@@ -1,0 +1,11 @@
+{
+  "id": "goodreads.1",
+  "name": "tags",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "#{/\\\\S+/}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

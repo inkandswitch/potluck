@@ -1,0 +1,11 @@
+{
+  "id": "_hCDH5F2LuEr2CrRiS42Gv",
+  "name": "time",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "time",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

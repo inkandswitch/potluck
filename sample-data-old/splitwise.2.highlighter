@@ -1,0 +1,11 @@
+{
+  "id": "splitwise.2",
+  "name": "userMoney",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{name:name} {money:money}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

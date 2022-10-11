@@ -1,0 +1,11 @@
+{
+  "id": "goodreads.3",
+  "name": "#inbox",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "#inbox",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

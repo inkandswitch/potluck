@@ -1,0 +1,11 @@
+{
+  "id": "goodreads.2",
+  "name": "#read",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "#read-{number:rating}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

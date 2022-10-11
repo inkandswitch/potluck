@@ -546,6 +546,36 @@ export function evaluateFormula(
       return result;
     },
 
+    PrevUntil: (highlight: Highlight, stopCondition: any): Highlight[] => {
+      const textDocument = textDocumentsMobx.get(highlight.documentId);
+
+      if (!textDocument) {
+        return [];
+      }
+
+      const sortedHighlights = sortBy(
+        getComputedHighlightsForDocumentAvoidingCircular(
+          textDocument,
+          highlight.sheetConfigId
+        ).get(),
+        ({ span }) => -span[0]
+      );
+
+      let result: Highlight[] = [];
+
+      for (const otherHighlight of sortedHighlights) {
+        if (otherHighlight.span[0] < highlight.span[1]) {
+          if (evalCondition(stopCondition, otherHighlight)) {
+            return result;
+          }
+
+          result.push(otherHighlight);
+        }
+      }
+
+      return result;
+    },
+
     HasType: curry((type: string, highlight: Highlight) => {
       const sheetConfig = Array.from(sheetConfigsMobx.values()).find(
         (sheetConfig) => sheetConfig.name === type
@@ -959,6 +989,11 @@ export const FORMULA_REFERENCE = [
     name: "PrevOfType",
     args: ["highlight: Highlight", "type: string", "distanceLimit?: number"],
     return: "Highlight",
+  },
+  {
+    name: "PrevUntil",
+    args: ["highlight: Highlight", "stopCondition: any"],
+    return: "Highlight[]",
   },
   {
     name: "NextUntil",

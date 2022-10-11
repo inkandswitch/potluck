@@ -6,11 +6,6 @@
       "name": "$",
       "formula": "{number:hours}:{number:minutes}",
       "visibility": "HIDDEN"
-    },
-    {
-      "name": "time",
-      "formula": "DateTime.fromObject({\n  hour: $.data.hours,\n  minutes: $.data.minutes\n})",
-      "visibility": "HIDDEN"
     }
   ]
 }

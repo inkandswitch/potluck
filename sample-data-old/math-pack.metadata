@@ -1,0 +1,19 @@
+{
+  "sheets": [
+    {
+      "id": "_ZdLqzeZVmLp5mdwVJIoP7",
+      "configId": "math-pack.formula",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "_YPMob42qojduJMcd8ww5f",
+      "configId": "math-pack.operator",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "_4UesOgfjwlOg0KMa3G8Vu",
+      "configId": "common.number",
+      "hideHighlightsInDocument": false
+    }
+  ]
+}

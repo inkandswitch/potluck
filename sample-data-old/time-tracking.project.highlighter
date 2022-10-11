@@ -1,0 +1,31 @@
+{
+  "id": "time-tracking.project",
+  "name": "project",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{markdown.h1:project}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "time",
+      "formula": "DateTime.now().toLocaleString(DateTime.TIME_24_SIMPLE)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "unfinishedTime",
+      "formula": "NextOfType($, \"openTime\", 10)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "inProgress",
+      "formula": "unfinishedTime !== undefined",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "startButton",
+      "formula": "!inProgress ? TemplateButton($, \"start\", `\\n${time} -`) : undefined",
+      "visibility": "INLINE"
+    }
+  ]
+}

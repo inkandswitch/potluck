@@ -1,0 +1,59 @@
+{
+  "sheets": [
+    {
+      "id": "_rBNrhouCsIKScVW4rzoUP",
+      "configId": "_qvqxfvCRfMf4jMbieqxcv",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "_ei1bdWIXkCgYHQLqEU8Pp",
+      "configId": "food.ingredient",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "_OMjCFGo4XlMo8EgXzJbqQ",
+      "configId": "common.duration",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "_8l4M46VNQLL2fS424kG6E",
+      "configId": "food.quantity",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "_QeVX2HaMkKRUOIpwLEER5",
+      "configId": "food.scale",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "_9ZHb9D3b2xcrg4ZPoZ7xX",
+      "configId": "common.number",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "_9yOMzkh3EZ2E1dHYo3yg8",
+      "configId": "common.duration",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "_9I4ok3wsBr37d5mtoyLwZ",
+      "configId": "goodreads.1",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "_KHJTAm55FCUQOnhGIpcHz",
+      "configId": "markdown",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "_vguDUU4gpZbEVkeyoGDsN",
+      "configId": "crm.1",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "_e7JegGTX8hQPnwfM8HeAU",
+      "configId": "common.date",
+      "hideHighlightsInDocument": false
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+bake sale
+# Prices
+
+cake 🍰 = 4 Euro
+cupcake 🧁 = 3 Euro 
+apple juice 🍎 = 2 Euro
+coke🥤 = 2 Euro
+coffee ☕ = 2 Euro
+
+# Sales
+enter emojis for each order on a new line
+
+🍎🥤
+🧁
+🧁☕️
+☕️
+🍰
+
+Cake is too expensive 🍰 = 3 Euros
+
+🍰
+
+Total: 
+
+
+
+
+
+

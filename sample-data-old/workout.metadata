@@ -1,0 +1,19 @@
+{
+  "sheets": [
+    {
+      "id": "_telDp1hoD0hM9mc47lhN8",
+      "configId": "workout.exercise",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "34sdhiogfz1c6INpAO6Y7",
+      "configId": "common.number",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "HACBcetciF14iiDndby8U",
+      "configId": "common.date",
+      "hideHighlightsInDocument": false
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 {
-  "id": "time-tracking.time",
+  "id": "workshop.time",
   "name": "time",
   "properties": [
     {
@@ -8,8 +8,8 @@
       "visibility": "HIDDEN"
     },
     {
-      "name": "time",
-      "formula": "DateTime.fromObject({\n  hour: $.data.hours,\n  minutes: $.data.minutes\n})",
+      "name": "dateTime",
+      "formula": "DateTime.fromObject({\n  hours: ParseInt(hours),\n  minutes: ParseInt(minutes)\n})",
       "visibility": "HIDDEN"
     }
   ]

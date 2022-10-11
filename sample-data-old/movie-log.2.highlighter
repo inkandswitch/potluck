@@ -1,0 +1,11 @@
+{
+  "id": "movie-log.2",
+  "name": "rating",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/⭐+/}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

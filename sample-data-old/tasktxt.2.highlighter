@@ -1,0 +1,11 @@
+{
+  "id": "tasktxt.2",
+  "name": "startTime",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "[{number:h}:{number:m}:{number:s}]",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

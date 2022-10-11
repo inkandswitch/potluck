@@ -1,0 +1,11 @@
+{
+  "id": "crm.2",
+  "name": "person",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/\\\\n\\\\n/}{/.*/:name}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

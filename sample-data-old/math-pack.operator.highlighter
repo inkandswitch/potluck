@@ -1,0 +1,11 @@
+{
+  "id": "math-pack.operator",
+  "name": "operator",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/\\\\/|\\\\+|\\\\*|\\\\-|\\\\(|\\\\)/}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

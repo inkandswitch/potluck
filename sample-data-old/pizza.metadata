@@ -1,0 +1,19 @@
+{
+  "sheets": [
+    {
+      "id": "NEUs942EyHg11EAbM0NAy",
+      "configId": "food.ingredient",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "Lnj0VUjOlSZrK39rWUhuh",
+      "configId": "common.number",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "RmXyk98yDMNoLFZeDwTt2",
+      "configId": "food.quantity",
+      "hideHighlightsInDocument": false
+    }
+  ]
+}

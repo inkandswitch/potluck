@@ -1,0 +1,46 @@
+{
+  "id": "workshop.duration",
+  "name": "agendaDuration",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{number:minutes} minutes",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "prevDurations",
+      "formula": "AllPrevOfType($, \"agendaDuration\")",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "prevDateTime",
+      "formula": "DateTime.fromObject({\n hours: ParseInt($.prev(\"time\").data.hours),\n minutes: ParseInt($.prev(\"time\").data.minutes)\n})",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "startTime",
+      "formula": "prevDurations\n  .reduce((dateTime, duration) => (\n    dateTime.plus({\n     minutes: ParseInt(duration.data.minutes)\n    })\n  ),\n  prevDateTime)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "endTime",
+      "formula": "startTime.plus({ \n  minutes: ParseInt(minutes)\n})",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "startTimeText",
+      "formula": "startTime.toLocaleString(DateTime.TIME_SIMPLE)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "endTimeText",
+      "formula": "endTime.toLocaleString(DateTime.TIME_SIMPLE)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "durationText",
+      "formula": "`${startTimeText} - ${endTimeText}`",
+      "visibility": "REPLACE"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "id": "bar.total",
+  "name": "sheet2",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "Total: ",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col7",
+      "formula": "FindAll(\"sales\").reduce((sum, sale) => sum + sale.data.sum, 0)",
+      "visibility": "INLINE"
+    }
+  ]
+}

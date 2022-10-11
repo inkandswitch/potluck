@@ -1,0 +1,11 @@
+{
+  "id": "hikes.2",
+  "name": "distance",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{number}miles",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

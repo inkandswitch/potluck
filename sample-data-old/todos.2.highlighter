@@ -1,0 +1,21 @@
+{
+  "id": "todos.2",
+  "name": "incomplete",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "[ ]",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "task",
+      "formula": "TextAfter($)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "duedate",
+      "formula": "Filter(FindAll(\"dates\"), a => SameLine($, a))",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

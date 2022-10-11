@@ -1,0 +1,8 @@
+stonks portfolio
+would like to import outside data
+doing row-wise computation is pretty straightforward in potluck
+
+$GME 250@$5.00
+$AMC 100@$1.00
+
+portfolio value

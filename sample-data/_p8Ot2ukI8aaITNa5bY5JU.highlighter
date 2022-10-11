@@ -1,0 +1,26 @@
+{
+  "id": "_p8Ot2ukI8aaITNa5bY5JU",
+  "name": "search2",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "Total:",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "durations",
+      "formula": "Filter(\n  PrevUntil($, HasType(\"markdown\")),\n  HasType(\"duration2\")\n)\n",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "total",
+      "formula": "durations.reduce((sum, duration) => (\n  sum + duration.data.hours\n), 0)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col3",
+      "formula": "`${Round(total, 2)} hours`",
+      "visibility": "INLINE"
+    }
+  ]
+}

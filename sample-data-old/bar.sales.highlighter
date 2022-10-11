@@ -1,0 +1,36 @@
+{
+  "id": "bar.sales",
+  "name": "sales",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/^/}{emoji+:items}{/$/}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "prices",
+      "formula": "items.map(item => (\n  item\n   .allPrev(\"price\")\n   .find(price => (\n     price.data.item.isEqualTo(item)\n   ))\n))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "sum",
+      "formula": "prices.sumOf(\"data.price\")",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "sumText",
+      "formula": "`= ${sum} Euro`",
+      "visibility": "INLINE"
+    },
+    {
+      "name": "change",
+      "formula": "let result = []\n\nif (sum < 5) {\n  result.push(` 5 → ${5 - sum}`)\n}\n\nif (sum < 10) {\n  result.push(` 10 → ${10 - sum}`)\n}\n\nreturn result.join(', ')",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col5",
+      "formula": "HasCursorFocus($) ? change : undefined",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

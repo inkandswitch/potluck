@@ -1,0 +1,11 @@
+{
+  "id": "crm.1",
+  "name": "phone",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "({number}) {number}-{number}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

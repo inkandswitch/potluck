@@ -1,0 +1,7 @@
+natto todos
+simple todo list with conditional formatting
+
+[ ] make a gallery view
+[ ] announce multiplayer 08/15/22
+[ ] add keyboard shortcuts
+[x] add zoom ability

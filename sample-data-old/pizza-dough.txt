@@ -1,0 +1,16 @@
+ooni pizza dough
+number of dough balls: 10
+ball weight: 40
+water %: 50%
+salt: 3%
+oil: 1%
+proof hours: 3
+room temp: 75 F
+
+---
+
+Flour:
+Water:
+Salt:
+Yeast:
+Oil

@@ -1,0 +1,11 @@
+{
+  "id": "movie-log.1",
+  "name": "{dates} {tmdb} {rating} {/.*/}",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{dates} {tmdb} {rating} {/.*/}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

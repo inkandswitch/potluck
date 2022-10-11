@@ -1,0 +1,33 @@
+{
+  "sheets": [
+    {
+      "id": "zUe6BSpguigbb8wqVJ8Jo",
+      "configId": "food.ingredient",
+      "highlightSearchRange": [
+        662,
+        1430
+      ],
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "69ETypGNV9MGLGuYDJVMT",
+      "configId": "common.number",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "rtmeGoGDzu10C1mxqo8rG",
+      "configId": "food.quantity",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "RAknoIAG0p2vDdGvW6Dvi",
+      "configId": "food.scale",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "DNQtQEvwr9jkN8cHFWgeE",
+      "configId": "common.duration",
+      "hideHighlightsInDocument": false
+    }
+  ]
+}

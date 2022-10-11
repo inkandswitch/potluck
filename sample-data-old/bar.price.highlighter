@@ -1,0 +1,11 @@
+{
+  "id": "bar.price",
+  "name": "price",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{emoji:item} = {number:price} Euro",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

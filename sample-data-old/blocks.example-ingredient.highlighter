@@ -1,0 +1,21 @@
+{
+  "id": "blocks.example-ingredient",
+  "name": "exampleIngredient",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/eggs|milk|butter|tofu|tomatoes/}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "aisle",
+      "formula": "{\n  \"milk\" : \"dairy\",\n  \"butter\": \"dairy\",\n  \"tomatoes\": \"produce\"\n}[$] || \"other\"",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "isVegan",
+      "formula": "{\n  \"milk\" : false,\n  \"butter\": false\n}[$] !== false",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "id": "splitwise.4",
+  "name": "name",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{/scarlett|yiwen|paul|sean/}",
+      "visibility": "HIDDEN"
+    }
+  ]
+}

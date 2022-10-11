@@ -1,0 +1,41 @@
+{
+  "id": "tasktxt.4",
+  "name": "task",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "[ ]",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "duration",
+      "formula": "First(Filter(FindAll(\"duration\"), SameLine))",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "startTime",
+      "formula": "duration?.data.startTime",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "secondsElapsed",
+      "formula": "startTime !== undefined\n  ? DateTime.fromJSDate(NowDate()).diff(DateTime.fromISO(TextOfHighlight(startTime).substring(1, TextOfHighlight(startTime).length - 1))).as(\"seconds\")\n  : undefined",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "totalSeconds",
+      "formula": "duration !== undefined ? ParseInt(duration.data.number) : undefined",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col9",
+      "formula": "secondsElapsed !== undefined ? `${Round(totalSeconds - secondsElapsed)}s left` : undefined",
+      "visibility": "SUPERSCRIPT"
+    },
+    {
+      "name": "col12",
+      "formula": "startTime !== undefined ? TemplateButton($, \"done\", \"[x]\", \"replace\") : undefined",
+      "visibility": "INLINE"
+    }
+  ]
+}

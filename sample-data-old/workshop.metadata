@@ -1,0 +1,19 @@
+{
+  "sheets": [
+    {
+      "id": "_ELCuyeUPoC9ZD6qbloCCk",
+      "configId": "workshop.time",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "_V9L2URHFvfxK92PthY22T",
+      "configId": "workshop.duration",
+      "hideHighlightsInDocument": false
+    },
+    {
+      "id": "_L2fgDJxV9czPfbYn3PB3E",
+      "configId": "common.number",
+      "hideHighlightsInDocument": false
+    }
+  ]
+}

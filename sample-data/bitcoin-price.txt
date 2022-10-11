@@ -1,4 +1,4 @@
-bitcoin price tracker
+Bitcoin price tracker
 $EUR
 $USD
 $GBP

@@ -1,4 +1,4 @@
-recipe pack
+Recipe pack
 This pack of searches gives you the following features!
 
 Durations are turned into timers

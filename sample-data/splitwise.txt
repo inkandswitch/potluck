@@ -1,6 +1,6 @@
-splitwise
-6/1/22
-scarlett  $50
+Split expenses
+6/1/22 
+scarlett  $50 for tickets
 sean $20
 paul $10
 

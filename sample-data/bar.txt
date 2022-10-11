@@ -1,4 +1,4 @@
-bake sale
+Bake sale
 # Prices
 
 cake 🍰 = 4 Euro

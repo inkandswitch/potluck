@@ -1,4 +1,4 @@
-ooni pizza dough
+Ooni pizza dough
 number of dough balls: 10
 ball weight: 40
 water %: 50%

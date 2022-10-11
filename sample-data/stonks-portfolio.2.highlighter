@@ -10,11 +10,26 @@
     {
       "name": "currentPrice",
       "formula": "TextOfHighlight(ticker) === \"GME\" ? 40 : 20",
-      "visibility": "SUPERSCRIPT"
+      "visibility": "HIDDEN"
     },
     {
-      "name": "col10",
-      "formula": "`$${currentPrice * ParseInt(shares)}`",
+      "name": "total",
+      "formula": "currentPrice * ParseInt(shares)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "change",
+      "formula": "Round((currentPrice - cost) / cost, 2)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "changePercent",
+      "formula": "change >= 0 ? `+${change * 100}%`\n: `${change * 100}%`",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col6",
+      "formula": "`$${currentPrice}, ${changePercent} = $${total}`",
       "visibility": "INLINE"
     }
   ]

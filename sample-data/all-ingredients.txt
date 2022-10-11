@@ -1,4 +1,4 @@
-all ingredients
+All ingredients
 ground chuck beef, Aisle: foo
 onion powder
 gochujang

@@ -8,8 +8,13 @@
       "visibility": "HIDDEN"
     },
     {
-      "name": "col8",
+      "name": "sum",
       "formula": "FindAll(\"holdings\").map(h => h.data.currentPrice * TextOfHighlight(h.data.shares)).reduce((a, b) => a + b, 0)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col7",
+      "formula": "`$${sum}`",
       "visibility": "INLINE"
     }
   ]

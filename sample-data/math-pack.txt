@@ -1,4 +1,4 @@
-math pack
+Math pack
 
 Evaluates math expressions in your document
 

@@ -1,4 +1,4 @@
-Plant Watering Tracker
+Plant Tracker
 ## Plants
 
 🌱 Fiddle leaf: every 6 days, last watered on 8/19/2022

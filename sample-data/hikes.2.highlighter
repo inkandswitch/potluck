@@ -4,8 +4,13 @@
   "properties": [
     {
       "name": "$",
-      "formula": "{number}miles",
+      "formula": "{number:miles} miles",
       "visibility": "HIDDEN"
+    },
+    {
+      "name": "km",
+      "formula": "`= ${Round(miles * 1.60934, 1)} km`",
+      "visibility": "INLINE"
     }
   ]
 }

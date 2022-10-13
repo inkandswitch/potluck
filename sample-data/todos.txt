@@ -1,5 +1,5 @@
-To-dos
-simple todo list with conditional formatting
+Todos
+# Todos
 
 [ ] Read work email
 [x] Finish wordle

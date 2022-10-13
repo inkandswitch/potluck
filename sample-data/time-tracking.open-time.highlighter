@@ -4,7 +4,7 @@
   "properties": [
     {
       "name": "$",
-      "formula": "{time:time}{/-$/}",
+      "formula": "{time2:time}{/-$/}",
       "visibility": "HIDDEN"
     },
     {

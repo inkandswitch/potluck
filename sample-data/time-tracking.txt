@@ -1,19 +1,8 @@
-Time tracking
-# Maintanance
-
-9:00 - 12:00
-15:00 - 17:00 update server
-
-Total: 
-
+Timekeeping
 # Website relaunch
 
-10/10
-14:34 - 16:12 work on logo
-
 9/10
-9:20 - 12:06 work on logo
-14:10 - 15:00
+14:10 - 15:00 work on logo
 15:00 - 17:00 redesign feedback form
 
 Total: 

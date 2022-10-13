@@ -1,6 +1,5 @@
-Plan schedule of workshop
-
-make it easy to come up with a schedule and rearrange items, insert new ones
+Workshop
+# Workshop
 
 Start 19:00
 

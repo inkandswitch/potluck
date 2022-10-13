@@ -28,8 +28,8 @@
       "visibility": "HIDDEN"
     },
     {
-      "name": "col6",
-      "formula": "`$${currentPrice}, ${changePercent} = $${total}`",
+      "name": "col3",
+      "formula": "`-> $${currentPrice} (${changePercent}) = ${total}`",
       "visibility": "INLINE"
     }
   ]

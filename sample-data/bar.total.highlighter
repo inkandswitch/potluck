@@ -8,8 +8,13 @@
       "visibility": "HIDDEN"
     },
     {
-      "name": "col7",
+      "name": "total",
       "formula": "FindAll(\"sales\").reduce((sum, sale) => sum + sale.data.sum, 0)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col2",
+      "formula": "`$ ${total}`",
       "visibility": "INLINE"
     }
   ]

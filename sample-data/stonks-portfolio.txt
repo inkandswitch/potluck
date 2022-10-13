@@ -1,6 +1,8 @@
 Stock portfolio
+# Stocks
 
 $GME 250@$5.00
 $AMC 100@$30.00
+$GOOGL 100@$20
 
-portfolio value
+Portfolio value:

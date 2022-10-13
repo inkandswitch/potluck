@@ -19,18 +19,8 @@
     },
     {
       "name": "sumText",
-      "formula": "`= ${sum} Euro`",
+      "formula": "`= $ ${sum}`",
       "visibility": "INLINE"
-    },
-    {
-      "name": "change",
-      "formula": "let result = []\n\nif (sum < 5) {\n  result.push(` 5 → ${5 - sum}`)\n}\n\nif (sum < 10) {\n  result.push(` 10 → ${10 - sum}`)\n}\n\nreturn result.join(', ')",
-      "visibility": "HIDDEN"
-    },
-    {
-      "name": "col5",
-      "formula": "HasCursorFocus($) ? change : undefined",
-      "visibility": "HIDDEN"
     }
   ]
 }

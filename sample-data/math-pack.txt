@@ -7,3 +7,9 @@ Evaluates math expressions in your document
 3000 $ / 4 people
 
 (100 / 50) + 5 * 2 
+
+
+I have 10 guests
+
+
+vegetarian guests = 

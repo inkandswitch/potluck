@@ -988,7 +988,7 @@ export const SheetComponent = observer(
     });
 
     return (
-      <div>
+      <div className="z-10">
         <div className="pl-8 flex items-center justify-between mb-2">
           <input
             type="text"

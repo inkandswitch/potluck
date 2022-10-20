@@ -1,8 +1,10 @@
 Plant Tracker
-# Plants
-
-🌱 Fiddle leaf: every 6 days, last watered on 8/19/2022
-🌱 Montsera: every 4 days, last watered on 8/21/2022
-🌱 Yuzu tree: every 5 days, last watered on 8/17/2022
-- The Yuzu tree needs some holes in the pot so that water can drain.
-🌱 Pine Bonsai: every 4 days, last watered on 8/19/2022
+🌱 Fiddle leaf (every 6 days)
+    - last watered on 8/19/2022
+🌱 Montsera (every 4 days)
+   - last watered on 8/21/2022
+🌱 Yuzu tree (every 5 days)
+   - last watered on 8/17/2022
+   - needs some holes in the pot so that water can drain
+🌱 Pine Bonsai (every 4 days)
+    - last watered on 8/19/2022

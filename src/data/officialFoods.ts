@@ -1,9 +1,9 @@
 // @ts-ignore
-import officialFoods from "./officialFoodIdsFiltered.csv";
+// import officialFoods from "./officialFoodIdsFiltered.csv";
 // @ts-ignore
-import nutrients from "./nutrient.csv";
+// import nutrients from "./nutrient.csv";
 // @ts-ignore
-import measureUnits from "./measure_unit.csv";
+// import measureUnits from "./measure_unit.csv";
 // @ts-ignore
 import foodNutrients from "./food_nutrient_filtered.csv";
 
@@ -24,7 +24,7 @@ export type FoodNutrient = {
   derivation_id: string;
 };
 
-export const OFFICIAL_FOODS = officialFoods as OfficialFood[];
-export const NUTRIENTS = nutrients as { [key: string]: string }[];
-export const MEASURE_UNITS = measureUnits as { [key: string]: string }[];
-export const FOOD_NUTRIENTS = foodNutrients as FoodNutrient[];
+export const OFFICIAL_FOODS = [] /* officialFoods */ as OfficialFood[];
+export const NUTRIENTS = [] /* nutrients*/ as { [key: string]: string }[];
+export const MEASURE_UNITS = [] /* measureUnits */ as { [key: string]: string }[];
+export const FOOD_NUTRIENTS = [] /* foodNutrients */ as FoodNutrient[];

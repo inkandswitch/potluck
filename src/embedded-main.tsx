@@ -17,4 +17,6 @@ if (documentUrl) {
       </Tooltip.Provider>
     </React.StrictMode>
   );
+
+  window.top?.postMessage({ type: "demoLoaded", name: documentUrl})
 }

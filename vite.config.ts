@@ -2,6 +2,7 @@ import { defineConfig, ViteDevServer } from "vite";
 import react from "@vitejs/plugin-react";
 import dsv from "@rollup/plugin-dsv";
 import { resolve } from 'path';
+import analyze from 'rollup-plugin-analyzer'
 
 // The Vite Chokidar overrides don't actually work unless you write a plugin.
 // This plugin overwrites the `ignored` directories for live-reloading. We do
@@ -22,7 +23,7 @@ const ignored = () => {
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react(), dsv(), ignored()],
+  plugins: [react(), dsv(), ignored(), {...analyze(), apply: "build"}],
   base: '',
   server: {
     host: true

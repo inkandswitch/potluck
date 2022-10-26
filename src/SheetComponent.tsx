@@ -56,11 +56,7 @@ import { EditorView, minimalSetup } from "codemirror";
 import { bracketMatching, LanguageSupport } from "@codemirror/language";
 import { javascriptLanguage } from "@codemirror/lang-javascript";
 import { highlightSpecialChars, keymap, tooltips } from "@codemirror/view";
-import {
-  autocompletion,
-  closeBrackets,
-  closeBracketsKeymap,
-} from "@codemirror/autocomplete";
+import { autocompletion, closeBrackets, closeBracketsKeymap, } from "@codemirror/autocomplete";
 import { IObservableArray } from "mobx/dist/internal";
 import { getPatternExprGroupNames } from "./patterns";
 import { Highlight } from "./highlight";
@@ -945,11 +941,28 @@ export const SheetComponent = observer(
   }) => {
     const [sheetView, setSheetView] = useState(SheetView.Table);
 
+
     const textDocumentSheet = textDocument.sheets.find(
       (sheet) => sheet.id === textDocumentSheetId
     )!;
 
     const sheetConfig = sheetConfigsMobx.get(textDocumentSheet.configId);
+
+
+    // HACK: for demo automatically expand calendar view if search is opened
+    useEffect(() =>  {
+      if (!sheetConfig) {
+        return
+      }
+
+      if (textDocument.id === "workout" && sheetConfig.name === 'exercise') {
+        isSheetExpandedMobx.set(textDocumentSheet.id, true)
+        setSheetView(SheetView.Calendar)
+      }
+
+    }, [textDocument.id, sheetConfig?.name])
+
+
     if (sheetConfig === undefined) {
       return null;
     }

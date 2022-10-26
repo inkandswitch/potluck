@@ -1,4 +1,4 @@
-☕️ James Hoffmann Aeropress
+James Hoffmann Aeropress
 ## Recipe
 Grind 11 g coffee, medium-fine.
 Add 200 g water, brew 2 minutes, plunge!

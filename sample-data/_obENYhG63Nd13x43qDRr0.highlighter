@@ -1,0 +1,21 @@
+{
+  "id": "_obENYhG63Nd13x43qDRr0",
+  "name": "hint",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "ℹ️{/.*/}",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "background",
+      "formula": "\"#ffee58\"",
+      "visibility": "STYLE"
+    },
+    {
+      "name": "font-size",
+      "formula": "\"20px\"",
+      "visibility": "STYLE"
+    }
+  ]
+}

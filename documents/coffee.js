@@ -1,10 +1,11 @@
-{
-  "textDocument": {
+(() => {
+  return {
+    "textDocument": {
     "id": "aeropress",
-    "name": "☕️ James Hoffmann Aeropress",
-    "text": [
+      "name": "☕️ James Hoffmann Aeropress",
+      "text": [
       "## Recipe",
-      "Grind 11 g coffee, medium-fine.",
+      "Grind 11 g coffee, medium-fine. " + Math.random(),
       "Add 200 g water, brew 2 minutes, plunge!",
       "",
       "scale by",
@@ -13,7 +14,7 @@
       "6/22/22: Pretty good, but forgot to swirl.",
       "6/23/22: Felt weak and under-extracted. Grind finer?"
     ],
-    "sheets": [
+      "sheets": [
       {
         "id": "eiIXzGv8Zq1zybgMZdd1z",
         "configId": "common.number",
@@ -46,7 +47,7 @@
       }
     ]
   },
-  "sheetConfigs": [
+    "sheetConfigs": [
     {
       "id": "common.number",
       "name": "number",
@@ -164,4 +165,5 @@
       ]
     }
   ]
-}
+  }
+})()

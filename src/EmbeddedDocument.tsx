@@ -15,9 +15,9 @@ export const EmbeddedDocument = observer(({url}: { url: string }) => {
     setIsLoading(true)
 
     fetch(url)
-      .then((res) => res.json())
+      .then((res) => res.text())
       .then((documentExport) => {
-        loadDocumentExport(documentExport, true)
+        loadDocumentExport(eval(`(() => { return ${documentExport} })()`), true)
         setIsLoading(false)
       })
 

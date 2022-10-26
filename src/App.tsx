@@ -266,7 +266,7 @@ async function importDocumentsFromFile() {
         return (
           file.text()
             .then((text) => {
-              loadDocumentExport(JSON.parse(text))
+              loadDocumentExport(eval(`(() => { return ${text} })()`))
             })
             .catch(() => {
               alert(`Could not read file ${file.name}`)

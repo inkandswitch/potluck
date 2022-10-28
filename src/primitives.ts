@@ -1,4 +1,4 @@
-import { computed, IObservableValue, observable, runInAction } from "mobx";
+import { computed, IObservableValue, observable, runInAction, reaction, autorun } from "mobx";
 import { EditorState, Text } from "@codemirror/state";
 import { generateNanoid } from "./utils";
 import { evaluateFormula } from "./formulas";
@@ -130,6 +130,22 @@ export function addSheetConfig(config?: {
 }
 
 export const selectedTextDocumentIdBox = observable.box("welcome");
+
+let firstRun = true;
+
+autorun(() => {
+  const documentId = selectedTextDocumentIdBox.get()
+
+  if (firstRun) {
+    firstRun = false
+    return
+  }
+
+
+  const queryString = documentId.startsWith("_") ? "" : `?openDocument=${documentId}`
+  const newurl = location.protocol + "//" + location.host + location.pathname + queryString;
+  history.replaceState({path:newurl},'',newurl);
+})
 
 type SearchBoxState = {
   search: string;

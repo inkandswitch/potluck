@@ -908,7 +908,7 @@ export function evaluateFormula(
       }
 
       return (
-        <video width="320" height="240" controls src={url}/>
+        <video width={width} height={height} controls src={url}/>
       )
     },
 

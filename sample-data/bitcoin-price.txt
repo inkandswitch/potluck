@@ -1,5 +1,0 @@
-Bitcoin price tracker
-$EUR
-$USD
-$GBP
-$CAD

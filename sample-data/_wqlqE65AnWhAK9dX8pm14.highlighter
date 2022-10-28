@@ -1,0 +1,16 @@
+{
+  "id": "_wqlqE65AnWhAK9dX8pm14",
+  "name": "link",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "[{/[^\\\\]]+/:label}]({/[^\\\\)]+/:url})",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "col2",
+      "formula": "Link($, url, label)",
+      "visibility": "REPLACE"
+    }
+  ]
+}

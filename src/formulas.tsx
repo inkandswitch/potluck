@@ -910,6 +910,20 @@ export function evaluateFormula(
       return (
         <video width="320" height="240" controls src={url}/>
       )
+    },
+
+    Link: (
+      highlight: Highlight,
+      url: string,
+      label:string = url
+    ) => {
+      if (highlight === undefined) {
+        return undefined;
+      }
+
+      return (
+        <a className="text-[#1355ff]" href={url.toString()}>{label.toString()}</a>
+      )
     }
   };
 

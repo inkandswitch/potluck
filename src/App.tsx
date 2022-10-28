@@ -480,7 +480,9 @@ const SearchBox = observer(
             </div>
           </div>
           {searchBoxFocused && (
-            <div className="max-h-36 overflow-y-scroll absolute top-9 w-full bg-white z-10 border border-gray-100 p-1 rounded-sm">
+            <div className="max-h-36 overflow-y-scroll absolute top-9 w-full bg-white border border-gray-100 p-1 rounded-sm"
+            style={{zIndex: 9999}}
+            >
               {pendingSearchesComputed.get().map((pendingSearch, index) => (
                 <div
                   key={

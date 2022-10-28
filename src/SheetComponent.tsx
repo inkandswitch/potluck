@@ -341,6 +341,7 @@ function FormulaReferenceButton({ className }: { className?: string }) {
         <Popover.Content
           align="end"
           className="font-mono text-xs bg-gray-50 p-4 rounded shadow-lg overflow-auto max-h-[calc(100vh-256px)]"
+          style={{zIndex: 99999}}
         >
           <div className="uppercase mb-2">available formulas</div>
           <table>

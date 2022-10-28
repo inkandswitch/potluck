@@ -1,5 +1,5 @@
 👋 Welcome to Potluck!
-ℹ️ This is a research prototype we've developed at [ink & switch](https://inkandswitch.com). If you are curious to learn more about Potluck we have written an [essay](https://inkandswitch.com/potluck) about the ideas behind it.
+ℹ️ This is a research prototype we've developed at [Ink & Switch](https://inkandswitch.com). If you are curious to learn more about Potluck we have written an [essay](https://inkandswitch.com/potluck) about the ideas behind it.
 
 Potluck is an environment for making *personal software* out of text documents.
 [video src=documents/video.mp4]

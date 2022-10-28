@@ -897,9 +897,9 @@ export function evaluateFormula(
       );
     },
 
-    YoutubeVideo: (
+    Video: (
       highlight: Highlight,
-      videoId: string,
+      url: string,
       width: number = 640,
       height: number = 480
     ) => {
@@ -908,15 +908,7 @@ export function evaluateFormula(
       }
 
       return (
-        <iframe
-          frameBorder="0"
-          scrolling="no"
-          marginHeight={0}
-          marginWidth={0}
-          width={width}
-          height={height}
-          src={`https://www.youtube.com/embed/${videoId}?autoplay=0&fs=0&iv_load_policy=3&showinfo=0&rel=0&cc_load_policy=0&start=0&end=0&origin=http://youtubeembedcode.com`}>
-        </iframe>
+        <video width="320" height="240" controls src={url}/>
       )
     }
   };

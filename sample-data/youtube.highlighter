@@ -1,15 +1,15 @@
 {
   "id": "youtube",
-  "name": "youtube",
+  "name": "video",
   "properties": [
     {
       "name": "$",
-      "formula": "https://www.youtube.com/watch?v={/.{11}/:id}",
+      "formula": "[video src={/[^\\\\]]+/:src}]",
       "visibility": "HIDDEN"
     },
     {
       "name": "col2",
-      "formula": "YoutubeVideo($, id)",
+      "formula": "Video($, src)",
       "visibility": "REPLACE"
     }
   ]

@@ -8,13 +8,8 @@
       "visibility": "HIDDEN"
     },
     {
-      "name": "background",
-      "formula": "\"#ffee58\"",
-      "visibility": "STYLE"
-    },
-    {
-      "name": "font-size",
-      "formula": "\"20px\"",
+      "name": "background-color",
+      "formula": "\"#fff9c4\"",
       "visibility": "STYLE"
     }
   ]

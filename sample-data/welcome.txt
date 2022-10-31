@@ -17,9 +17,10 @@ All of these examples are pre-loaded in the left sidebar, feel free to poke arou
 
 ## Getting started
 
-To learn how Potluck works, let's quickly build a banana counter doc.
+To learn how Potluck works, let's quickly build a banana counter doc. When we type something like "7 bananas" anywhere in the doc, it will show a row of banana emojis next to the text, corresponding to the number of bananas. Fun!
 
-When we type something like "7 bananas" anywhere in the doc, it will show a row of banana emojis next to the text, corresponding to the number of bananas. Fun!
+Here's a short video explaining the tutorial:
+https://www.youtube.com/watch?v=euIldlkEcPY
 
 **Making a live search**
 

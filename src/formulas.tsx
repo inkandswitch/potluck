@@ -897,34 +897,40 @@ export function evaluateFormula(
       );
     },
 
-    Video: (
+    YoutubeVideo: (
       highlight: Highlight,
-      url: string,
+      videoId: string,
       width: number = 640,
-      height: number = 480
+      height: number = 360
     ) => {
       if (highlight === undefined) {
         return undefined;
       }
 
       return (
-        <video width={width} height={height} controls src={url}/>
-      )
+        <iframe
+          frameBorder="0"
+          scrolling="no"
+          marginHeight={0}
+          marginWidth={0}
+          width={width}
+          height={height}
+          src={`https://www.youtube.com/embed/${videoId}?autoplay=0&fs=0&iv_load_policy=3&showinfo=0&rel=0&cc_load_policy=0&start=0&end=0&origin=http://youtubeembedcode.com`}
+        ></iframe>
+      );
     },
 
-    Link: (
-      highlight: Highlight,
-      url: string,
-      label:string = url
-    ) => {
+    Link: (highlight: Highlight, url: string, label: string = url) => {
       if (highlight === undefined) {
         return undefined;
       }
 
       return (
-        <a className="text-[#1355ff]" href={url.toString()}>{label.toString()}</a>
-      )
-    }
+        <a className="text-[#1355ff]" href={url.toString()}>
+          {label.toString()}
+        </a>
+      );
+    },
   };
 
   const formulaSource = transformColumnFormula(source, isFirstColumn);

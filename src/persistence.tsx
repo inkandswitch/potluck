@@ -2,6 +2,7 @@ import { Text } from "@codemirror/state";
 import { fileSave } from "browser-fs-access";
 import { comparer, observable, reaction, runInAction } from "mobx";
 import {
+  createNewDocument,
   selectedTextDocumentIdBox,
   SheetConfig,
   sheetConfigsMobx,
@@ -167,6 +168,14 @@ export class DirectoryPersistence {
           this.fileCache,
           this.fileLastModified
         );
+        if (textDocuments.length === 0) {
+          textDocuments.push({
+            id: generateNanoid(),
+            name: "Untitled",
+            text: Text.empty,
+            sheets: [],
+          });
+        }
         textDocumentsMobx.replace(
           new Map(
             textDocuments.map((textDocument) => [textDocument.id, textDocument])

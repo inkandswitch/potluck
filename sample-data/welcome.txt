@@ -1,10 +1,7 @@
 👋 Welcome to Potluck!
 ℹ️ This is a research prototype we've developed at [Ink & Switch](https://inkandswitch.com). If you are curious to learn more about Potluck we have written an [essay](https://inkandswitch.com/potluck) about the ideas behind it.
 
-Potluck is an environment for making *personal software* out of text documents.
-[video src=documents/video.mp4]
-
-It's like a regular notes app, but you can add *live searches* which detect patterns in your text as you type: dates, times, quantities, food ingredients, anything you like. You can then write little Javascript formulas to run computations and show the results back in the text doc.
+Potluck is an environment for making *personal software* out of text documents. It's like a regular notes app, but you can add *live searches* which detect patterns in your text as you type: dates, times, quantities, food ingredients, anything you like. You can then write little Javascript formulas to run computations and show the results back in the text doc.
 
 Just with these simple concepts, you can build many kinds of software:
 
@@ -20,9 +17,10 @@ All of these examples are pre-loaded in the left sidebar, feel free to poke arou
 
 ## Getting started
 
-To learn the ropes, let's build a banana counter doc.
+To learn how Potluck works, let's quickly build a banana counter doc. When we type something like "7 bananas" anywhere in the doc, it will show a row of banana emojis next to the text, corresponding to the number of bananas. Fun!
 
-When we type something like "7 bananas" anywhere in the doc, it will show a row of banana emojis next to the text, corresponding to the number of bananas. Fun!
+Here's a short video explaining the tutorial:
+https://www.youtube.com/watch?v=euIldlkEcPY
 
 **Making a live search**
 
@@ -39,7 +37,7 @@ You just created your first live search! It matches any number, followed by the 
 *Rename the search*: The search has a name "search1" by default.  Rename it from "search1" to "numBananas" (you can directly just edit the name) so we can easily reference it later on.
 
 *Advanced tips*
-- Inside the { ... }, you can put the name of any existing search in Potluck. That includes your own 
+- Inside the { ... }, you can put the name of any existing search in Potluck, including your own.
 - {number} is a built in pattern in Potluck, which is why you can search for it. There are lots of other built in patterns you can include inside curly braces. The autocomplete in the search box gives you a full list.
 - You can even write a regular expression if you know how, by writing something like this inside curly braces: {/[a-z]+/}
 

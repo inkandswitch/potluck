@@ -2,7 +2,6 @@ import { Text } from "@codemirror/state";
 import { fileSave } from "browser-fs-access";
 import { comparer, observable, reaction, runInAction } from "mobx";
 import {
-  createNewDocument,
   selectedTextDocumentIdBox,
   SheetConfig,
   sheetConfigsMobx,

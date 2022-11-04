@@ -24,7 +24,7 @@
     },
     {
       "name": "button",
-      "formula": "TemplateButton($, \"🚿\", DateTime.now().toLocaleString(), \"replace\")",
+      "formula": "TemplateButton($, \"🚿\", DateTime.now().setLocale('en-US').toLocaleString(), \"replace\")",
       "visibility": "INLINE"
     }
   ]

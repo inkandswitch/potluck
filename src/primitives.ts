@@ -169,7 +169,12 @@ export const searchTermBox: IObservableValue<SearchBoxState> =
 
 export type PendingSearch =
   | { _type: "saved"; sheetConfig: SheetConfig }
-  | { _type: "new"; search: string; computedProperties?: PropertyDefinition[] }
+  | {
+      _type: "new";
+      name?: string;
+      search: string;
+      computations?: PropertyDefinition[];
+    }
   | { _type: "document"; documentId: string };
 
 export const GROUP_NAME_PREFIX = "group:";
@@ -248,14 +253,14 @@ export const savePendingSearchToSheet = (
       const sheetConfigId = generateNanoid();
       const sheetConfig: SheetConfig = {
         id: sheetConfigId,
-        name: `search${counter++}`,
+        name: pendingSearch.name ?? `search${counter++}`,
         properties: [
           {
             name: "$",
             formula: pendingSearch.search,
             visibility: PropertyVisibility.Hidden,
           },
-          ...(pendingSearch.computedProperties || []),
+          ...(pendingSearch.computations || []),
         ],
       };
       sheetConfigsMobx.set(sheetConfigId, sheetConfig);

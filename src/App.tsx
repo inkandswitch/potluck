@@ -52,6 +52,7 @@ import { DocumentSidebar, PersistenceButton } from "./DocumentSidebar";
 import { patternToString } from "./patterns";
 import { create, groupBy } from "lodash";
 import fileDialog from "file-dialog";
+import { createSearchWithLLM } from "./llm";
 
 const TextDocumentName = observer(
   ({ textDocument }: { textDocument: TextDocument }) => {
@@ -417,20 +418,18 @@ const SearchBox = observer(
       runInAction(async () => {
         if (e.key === "Enter" && e.metaKey) {
           isLoadingGPTSearchBox.set(true);
-          await new Promise((r) => setTimeout(r, 5000));
+          const pendingSearch = await createSearchWithLLM(
+            textDocument.text.sliceString(0),
+            (selectedPendingSearch?._type === "new" &&
+              selectedPendingSearch.search) ||
+              searchState.search
+          );
           isLoadingGPTSearchBox.set(false);
 
-          const pendingSearch: PendingSearch = {
-            _type: "new",
-            search: "testing 123",
-            computedProperties: [
-              {
-                name: "test",
-                formula: "2 + 2",
-                visibility: PropertyVisibility.Hidden,
-              },
-            ],
-          };
+          if (pendingSearch._type === "error") {
+            searchTermBox.get().search = "Sorry, error!";
+            return;
+          }
 
           savePendingSearchToSheet(pendingSearch, textDocument);
           searchTermBox.get().search = "";

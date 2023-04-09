@@ -24,6 +24,8 @@ import {
   GROUP_NAME_PREFIX,
   DEFAULT_SEARCHES_ID,
   copySheetsAcrossDocuments,
+  PendingSearch,
+  isLoadingGPTSearchBox,
 } from "./primitives";
 import { observer } from "mobx-react-lite";
 import { KeyboardEventHandler, useEffect, useRef, useState } from "react";
@@ -49,7 +51,7 @@ import { ToastViewport } from "@radix-ui/react-toast";
 import { DocumentSidebar, PersistenceButton } from "./DocumentSidebar";
 import { patternToString } from "./patterns";
 import { create, groupBy } from "lodash";
-import fileDialog from "file-dialog"
+import fileDialog from "file-dialog";
 
 const TextDocumentName = observer(
   ({ textDocument }: { textDocument: TextDocument }) => {
@@ -195,11 +197,14 @@ const DocumentSheets = observer(
 
 // adapted from: https://stackoverflow.com/questions/3665115/how-to-create-a-file-in-memory-for-user-to-download-but-not-through-server#18197341
 function download(filename: string, text: string) {
-  var element = document.createElement('a');
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-  element.setAttribute('download', filename);
+  var element = document.createElement("a");
+  element.setAttribute(
+    "href",
+    "data:text/plain;charset=utf-8," + encodeURIComponent(text)
+  );
+  element.setAttribute("download", filename);
 
-  element.style.display = 'none';
+  element.style.display = "none";
   document.body.appendChild(element);
 
   element.click();
@@ -208,72 +213,73 @@ function download(filename: string, text: string) {
 }
 
 type DocumentExport = {
-  textDocument: TextDocument,
-  sheetConfigs: SheetConfig[]
-}
+  textDocument: TextDocument;
+  sheetConfigs: SheetConfig[];
+};
 
 function generateExportForCurrentDocument(): DocumentExport | undefined {
-  const id = selectedTextDocumentIdBox.get()
-  const textDocument = textDocumentsMobx.get(id)
+  const id = selectedTextDocumentIdBox.get();
+  const textDocument = textDocumentsMobx.get(id);
 
   if (!textDocument) {
-    return
+    return;
   }
 
-  const sheetConfigs: { [id: string]: SheetConfig } = {}
+  const sheetConfigs: { [id: string]: SheetConfig } = {};
 
   if (textDocument?.sheets) {
     for (const sheet of textDocument.sheets) {
-      const sheetConfig = sheetConfigsMobx.get(sheet.configId)
+      const sheetConfig = sheetConfigsMobx.get(sheet.configId);
 
       if (sheetConfig) {
-        sheetConfigs[sheet.configId] = sheetConfig
+        sheetConfigs[sheet.configId] = sheetConfig;
       }
     }
   }
 
   return {
     textDocument,
-    sheetConfigs: Object.values(sheetConfigs)
-  }
+    sheetConfigs: Object.values(sheetConfigs),
+  };
 }
 
-export function loadDocumentExport ({ sheetConfigs, textDocument } : any, selectDocument : boolean = false) {
+export function loadDocumentExport(
+  { sheetConfigs, textDocument }: any,
+  selectDocument: boolean = false
+) {
   runInAction(() => {
     sheetConfigs.forEach((sheetConfig: SheetConfig) => {
-      sheetConfigsMobx.set(sheetConfig.id, sheetConfig)
-    })
+      sheetConfigsMobx.set(sheetConfig.id, sheetConfig);
+    });
 
     textDocumentsMobx.set(textDocument.id, {
       ...textDocument,
-      text: Text.of(textDocument.text)
-    })
+      text: Text.of(textDocument.text),
+    });
 
     if (selectDocument) {
-      selectedTextDocumentIdBox.set(textDocument.id)
+      selectedTextDocumentIdBox.set(textDocument.id);
     }
-  })
+  });
 }
 
 async function importDocumentsFromFile() {
-  const files = await fileDialog()
+  const files = await fileDialog();
 
   return Promise.all(
-    Array.from(files)
-      .map((file, index) => {
-        const isLast = index === (files.length - 1)
+    Array.from(files).map((file, index) => {
+      const isLast = index === files.length - 1;
 
-        return (
-          file.text()
-            .then((text) => {
-              loadDocumentExport(eval(`(() => { return ${text} })()`))
-            })
-            .catch(() => {
-              alert(`Could not read file ${file.name}`)
-            })
-        )
-      })
-  )
+      return file
+        .text()
+        .then((text) => {
+          loadDocumentExport(eval(`(() => { return ${text} })()`));
+        })
+        .catch(() => {
+          alert(`Could not read file ${file.name}`);
+        });
+    })
+  );
 }
 
 const ExportButton = observer(() => {
@@ -282,17 +288,19 @@ const ExportButton = observer(() => {
       <Tooltip.Trigger asChild={true}>
         <button
           onClick={() => {
-            const documentExport = generateExportForCurrentDocument()
+            const documentExport = generateExportForCurrentDocument();
 
             if (!documentExport) {
-              alert('Failed to export document')
-              return
+              alert("Failed to export document");
+              return;
             }
 
-            const name = `${documentExport.textDocument?.name || "document"}.json`
-            const content = JSON.stringify(documentExport, null, 2)
+            const name = `${
+              documentExport.textDocument?.name || "document"
+            }.json`;
+            const content = JSON.stringify(documentExport, null, 2);
 
-            download(name, content)
+            download(name, content);
           }}
           className="text-gray-600 hover:text-gray-700"
         >
@@ -372,6 +380,7 @@ const SearchBox = observer(
     const searchBoxRef = useRef<HTMLInputElement>(null);
     const results = searchResults.get();
     const selectedPendingSearch = selectedPendingSearchComputed.get();
+    const isLoadingGPTSearch = isLoadingGPTSearchBox.get();
 
     const focusSearchBox = () => {
       if (searchState.search === "" || searchState.search === null) {
@@ -405,8 +414,22 @@ const SearchBox = observer(
     }, []);
 
     const handleInputKeydown = (e: KeyboardEvent) => {
-      runInAction(() => {
-        if (e.key === "Enter") {
+      runInAction(async () => {
+        if (e.key === "Enter" && e.metaKey) {
+          isLoadingGPTSearchBox.set(true);
+          await new Promise((r) => setTimeout(r, 5000));
+          isLoadingGPTSearchBox.set(false);
+
+          const pendingSearch: PendingSearch = {
+            _type: "new",
+            search: "testing 123",
+          };
+
+          savePendingSearchToSheet(pendingSearch, textDocument);
+          searchTermBox.get().search = "";
+          searchBoxRef.current?.blur();
+        }
+        if (e.key === "Enter" && !e.metaKey) {
           if (selectedPendingSearch !== undefined) {
             savePendingSearchToSheet(selectedPendingSearch, textDocument);
           }
@@ -432,7 +455,7 @@ const SearchBox = observer(
           if (
             searchState.selectedSearchIndex !== undefined &&
             searchState.selectedSearchIndex <
-            pendingSearchesComputed.get().length - 1
+              pendingSearchesComputed.get().length - 1
           ) {
             searchTermBox.set({
               ...searchState,
@@ -449,6 +472,12 @@ const SearchBox = observer(
         <div className="mt-2 mb-8 relative">
           <div className="flex items-center gap-2 mb-2">
             <div className="grow relative">
+              {/* Show a loading indicator over the input while GPT is loading, with a 50% opacity grey background */}
+              {isLoadingGPTSearch && (
+                <div className="absolute inset-0 bg-gray-200 opacity-50 flex items-center justify-center z-50">
+                  <div className="opacity-100">⌛️ Loading...</div>
+                </div>
+              )}
               <input
                 ref={searchBoxRef}
                 className="border-gray-200 border rounded w-full py-1 px-1"
@@ -480,8 +509,9 @@ const SearchBox = observer(
             </div>
           </div>
           {searchBoxFocused && (
-            <div className="max-h-36 overflow-y-scroll absolute top-9 w-full bg-white border border-gray-100 p-1 rounded-sm"
-            style={{zIndex: 9999}}
+            <div
+              className="max-h-36 overflow-y-scroll absolute top-9 w-full bg-white border border-gray-100 p-1 rounded-sm"
+              style={{ zIndex: 9999 }}
             >
               {pendingSearchesComputed.get().map((pendingSearch, index) => (
                 <div
@@ -568,7 +598,7 @@ const SearchBox = observer(
             </div>
           )}
           {selectedPendingSearch !== undefined &&
-            selectedPendingSearch._type !== "document" ? (
+          selectedPendingSearch._type !== "document" ? (
             <div className="absolute top-2 right-2 bg-white z-10 text-gray-400 text-sm">
               {results.length} result{results.length !== 1 ? "s" : null}
             </div>

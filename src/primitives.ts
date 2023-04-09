@@ -1,4 +1,11 @@
-import { computed, IObservableValue, observable, runInAction, reaction, autorun } from "mobx";
+import {
+  computed,
+  IObservableValue,
+  observable,
+  runInAction,
+  reaction,
+  autorun,
+} from "mobx";
 import { EditorState, Text } from "@codemirror/state";
 import { generateNanoid } from "./utils";
 import { evaluateFormula } from "./formulas";
@@ -134,18 +141,20 @@ export const selectedTextDocumentIdBox = observable.box("welcome");
 let firstRun = true;
 
 autorun(() => {
-  const documentId = selectedTextDocumentIdBox.get()
+  const documentId = selectedTextDocumentIdBox.get();
 
   if (firstRun) {
-    firstRun = false
-    return
+    firstRun = false;
+    return;
   }
 
-
-  const queryString = documentId.startsWith("_") ? "" : `?openDocument=${documentId}`
-  const newurl = location.protocol + "//" + location.host + location.pathname + queryString;
-  history.replaceState({path:newurl},'',newurl);
-})
+  const queryString = documentId.startsWith("_")
+    ? ""
+    : `?openDocument=${documentId}`;
+  const newurl =
+    location.protocol + "//" + location.host + location.pathname + queryString;
+  history.replaceState({ path: newurl }, "", newurl);
+});
 
 type SearchBoxState = {
   search: string;
@@ -158,7 +167,7 @@ export const searchTermBox: IObservableValue<SearchBoxState> =
     selectedSearchIndex: 0,
   });
 
-type PendingSearch =
+export type PendingSearch =
   | { _type: "saved"; sheetConfig: SheetConfig }
   | { _type: "new"; search: string }
   | { _type: "document"; documentId: string };
@@ -310,3 +319,4 @@ export const isSheetExpandedMobx = observable.map<string, boolean>({});
 export const showDocumentSidebarBox = observable.box(true);
 export const showSearchPanelBox = observable.box(false);
 export const isSearchBoxFocused = observable.box(false);
+export const isLoadingGPTSearchBox = observable.box(false);

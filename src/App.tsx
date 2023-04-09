@@ -27,6 +27,7 @@ import {
   PendingSearch,
   isLLMLoadingSearchBox,
   isUserRequestingLLMSearchBox,
+  LLMLoadPercentageBox,
 } from "./primitives";
 import { observer } from "mobx-react-lite";
 import { KeyboardEventHandler, useEffect, useRef, useState } from "react";
@@ -382,7 +383,8 @@ const SearchBox = observer(
     const searchBoxRef = useRef<HTMLInputElement>(null);
     const results = searchResults.get();
     const selectedPendingSearch = selectedPendingSearchComputed.get();
-    const isLoadingGPTSearch = isLLMLoadingSearchBox.get();
+    const isLLMLoading = isLLMLoadingSearchBox.get();
+    const LLMLoadPercentage = LLMLoadPercentageBox.get();
 
     const focusSearchBox = () => {
       if (searchState.search === "" || searchState.search === null) {
@@ -425,8 +427,18 @@ const SearchBox = observer(
             return;
           }
 
+          // TODO: encapsulate more of this LLM stuff in domain model, not within UI?
           if (selectedPendingSearch._type === "llmRequest") {
             isLLMLoadingSearchBox.set(true);
+            LLMLoadPercentageBox.set(0);
+
+            // Update the LLM load percentage every 100ms, maxing out at 100% after 5 seconds
+            const interval = setInterval(() => {
+              if (LLMLoadPercentageBox.get() < 100) {
+                LLMLoadPercentageBox.set(LLMLoadPercentageBox.get() + 2);
+              }
+            }, 100);
+
             searchBoxRef.current?.blur();
             const pendingSearch = await createSearchWithLLM(
               textDocument.text.sliceString(0),
@@ -483,10 +495,15 @@ const SearchBox = observer(
           <div className="flex items-center gap-2 mb-2">
             <div className="grow relative">
               {/* Show a loading indicator over the input while GPT is loading, with a 50% opacity grey background */}
-              {isLoadingGPTSearch && (
-                <div className="absolute inset-0 bg-gray-200 opacity-70 flex items-center justify-center z-50">
-                  ⌛️ Loading...
-                </div>
+              {isLLMLoading && (
+                <div
+                  className="absolute inset-0 bg-blue-200 opacity-50 flex items-center justify-center -z-0"
+                  style={{
+                    width: `${LLMLoadPercentage}%`,
+                    // animate the width property
+                    transition: "width 0.5s",
+                  }}
+                />
               )}
               <input
                 ref={searchBoxRef}
@@ -609,7 +626,9 @@ const SearchBox = observer(
                     </div>
                   ) : (
                     <div className="text-sm flex">
-                      <div className=" text-gray-400 mr-2 w-12">🪄 Auto</div>{" "}
+                      <div className=" text-white mr-2 w-24 px-2 bg-purple-500 rounded-md">
+                        Search w/ AI
+                      </div>
                       <div>
                         <span className="font-medium">
                           {pendingSearch.search}

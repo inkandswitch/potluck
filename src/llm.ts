@@ -174,6 +174,7 @@ export const createSearchWithLLM = async (
 ): Promise<PendingSearch | { _type: "error" }> => {
   const response = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
+    temperature: 0,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
       {

@@ -336,4 +336,5 @@ export const showDocumentSidebarBox = observable.box(true);
 export const showSearchPanelBox = observable.box(false);
 export const isSearchBoxFocused = observable.box(false);
 export const isLLMLoadingSearchBox = observable.box(false);
+export const LLMLoadPercentageBox = observable.box(0);
 export const isUserRequestingLLMSearchBox = observable.box(false);

@@ -423,6 +423,13 @@ const SearchBox = observer(
           const pendingSearch: PendingSearch = {
             _type: "new",
             search: "testing 123",
+            computedProperties: [
+              {
+                name: "test",
+                formula: "2 + 2",
+                visibility: PropertyVisibility.Hidden,
+              },
+            ],
           };
 
           savePendingSearchToSheet(pendingSearch, textDocument);
@@ -474,8 +481,8 @@ const SearchBox = observer(
             <div className="grow relative">
               {/* Show a loading indicator over the input while GPT is loading, with a 50% opacity grey background */}
               {isLoadingGPTSearch && (
-                <div className="absolute inset-0 bg-gray-200 opacity-50 flex items-center justify-center z-50">
-                  <div className="opacity-100">⌛️ Loading...</div>
+                <div className="absolute inset-0 bg-gray-200 opacity-70 flex items-center justify-center z-50">
+                  ⌛️ Loading...
                 </div>
               )}
               <input

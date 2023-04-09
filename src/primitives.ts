@@ -169,7 +169,7 @@ export const searchTermBox: IObservableValue<SearchBoxState> =
 
 export type PendingSearch =
   | { _type: "saved"; sheetConfig: SheetConfig }
-  | { _type: "new"; search: string }
+  | { _type: "new"; search: string; computedProperties?: PropertyDefinition[] }
   | { _type: "document"; documentId: string };
 
 export const GROUP_NAME_PREFIX = "group:";
@@ -255,6 +255,7 @@ export const savePendingSearchToSheet = (
             formula: pendingSearch.search,
             visibility: PropertyVisibility.Hidden,
           },
+          ...(pendingSearch.computedProperties || []),
         ],
       };
       sheetConfigsMobx.set(sheetConfigId, sheetConfig);

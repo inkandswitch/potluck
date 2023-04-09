@@ -169,6 +169,7 @@ export const searchTermBox: IObservableValue<SearchBoxState> =
 
 export type PendingSearch =
   | { _type: "saved"; sheetConfig: SheetConfig }
+  | { _type: "llmRequest"; search: string }
   | {
       _type: "new";
       name?: string;
@@ -180,9 +181,17 @@ export type PendingSearch =
 export const GROUP_NAME_PREFIX = "group:";
 
 /** Get all the pending searches to suggest for a given string entered into the searchbox */
-export function getPendingSearches(search: string): PendingSearch[] {
+export function getPendingSearches(
+  search: string,
+  isUserRequestingLLMSearch: boolean
+): PendingSearch[] {
   let newSearches: PendingSearch[];
-  newSearches = [{ _type: "new", search }];
+
+  if (isUserRequestingLLMSearch) {
+    newSearches = [{ _type: "llmRequest", search }];
+  } else {
+    newSearches = [{ _type: "new", search }];
+  }
 
   return [
     ...newSearches,
@@ -211,7 +220,8 @@ export function getMatchingDocuments(search: string): TextDocument[] {
 
 export const pendingSearchesComputed = computed<PendingSearch[]>(() => {
   const search = searchTermBox.get().search;
-  return getPendingSearches(search);
+  const isUserRequestingLLMSearch = isUserRequestingLLMSearchBox.get();
+  return getPendingSearches(search, isUserRequestingLLMSearch);
 });
 
 export const selectedPendingSearchComputed = computed<
@@ -325,4 +335,5 @@ export const isSheetExpandedMobx = observable.map<string, boolean>({});
 export const showDocumentSidebarBox = observable.box(true);
 export const showSearchPanelBox = observable.box(false);
 export const isSearchBoxFocused = observable.box(false);
-export const isLoadingGPTSearchBox = observable.box(false);
+export const isLLMLoadingSearchBox = observable.box(false);
+export const isUserRequestingLLMSearchBox = observable.box(false);

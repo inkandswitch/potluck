@@ -25,7 +25,8 @@ import {
   DEFAULT_SEARCHES_ID,
   copySheetsAcrossDocuments,
   PendingSearch,
-  isLoadingGPTSearchBox,
+  isLLMLoadingSearchBox,
+  isUserRequestingLLMSearchBox,
 } from "./primitives";
 import { observer } from "mobx-react-lite";
 import { KeyboardEventHandler, useEffect, useRef, useState } from "react";
@@ -381,7 +382,7 @@ const SearchBox = observer(
     const searchBoxRef = useRef<HTMLInputElement>(null);
     const results = searchResults.get();
     const selectedPendingSearch = selectedPendingSearchComputed.get();
-    const isLoadingGPTSearch = isLoadingGPTSearchBox.get();
+    const isLoadingGPTSearch = isLLMLoadingSearchBox.get();
 
     const focusSearchBox = () => {
       if (searchState.search === "" || searchState.search === null) {
@@ -416,31 +417,34 @@ const SearchBox = observer(
 
     const handleInputKeydown = (e: KeyboardEvent) => {
       runInAction(async () => {
-        if (e.key === "Enter" && e.metaKey) {
-          isLoadingGPTSearchBox.set(true);
-          const pendingSearch = await createSearchWithLLM(
-            textDocument.text.sliceString(0),
-            (selectedPendingSearch?._type === "new" &&
-              selectedPendingSearch.search) ||
-              searchState.search
-          );
-          isLoadingGPTSearchBox.set(false);
-
-          if (pendingSearch._type === "error") {
-            searchTermBox.get().search = "Sorry, error!";
+        if (e.key === "Meta") {
+          isUserRequestingLLMSearchBox.set(true);
+        }
+        if (e.key === "Enter") {
+          if (selectedPendingSearch === undefined) {
             return;
           }
 
-          savePendingSearchToSheet(pendingSearch, textDocument);
-          searchTermBox.get().search = "";
-          searchBoxRef.current?.blur();
-        }
-        if (e.key === "Enter" && !e.metaKey) {
-          if (selectedPendingSearch !== undefined) {
+          if (selectedPendingSearch._type === "llmRequest") {
+            isLLMLoadingSearchBox.set(true);
+            searchBoxRef.current?.blur();
+            const pendingSearch = await createSearchWithLLM(
+              textDocument.text.sliceString(0),
+              selectedPendingSearch.search
+            );
+            isLLMLoadingSearchBox.set(false);
+            if (pendingSearch._type === "error") {
+              searchTermBox.get().search = "Sorry, error!";
+              return;
+            }
+
+            savePendingSearchToSheet(pendingSearch, textDocument);
+            searchTermBox.get().search = "";
+          } else {
             savePendingSearchToSheet(selectedPendingSearch, textDocument);
+            searchTermBox.get().search = "";
+            searchBoxRef.current?.blur();
           }
-          searchTermBox.get().search = "";
-          searchBoxRef.current?.blur();
         }
         if (e.key === "Escape") {
           searchBoxRef.current?.blur();
@@ -504,6 +508,11 @@ const SearchBox = observer(
                 onKeyDown={
                   handleInputKeydown as unknown as KeyboardEventHandler<HTMLInputElement>
                 }
+                onKeyUp={(e) => {
+                  if (e.key === "Meta") {
+                    isUserRequestingLLMSearchBox.set(false);
+                  }
+                }}
                 onChange={action((e) => {
                   searchTermBox.set({
                     ...searchState,
@@ -589,9 +598,18 @@ const SearchBox = observer(
                         );
                       })()}
                     </div>
-                  ) : (
+                  ) : pendingSearch._type === "new" ? (
                     <div className="text-sm flex">
                       <div className=" text-gray-400 mr-2 w-12">New</div>{" "}
+                      <div>
+                        <span className="font-medium">
+                          {pendingSearch.search}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-sm flex">
+                      <div className=" text-gray-400 mr-2 w-12">🪄 Auto</div>{" "}
                       <div>
                         <span className="font-medium">
                           {pendingSearch.search}

@@ -433,13 +433,14 @@ const SearchBox = observer(
             LLMLoadPercentageBox.set(0);
 
             // Update the LLM load percentage every 100ms, maxing out at 100% after 5 seconds
-            const interval = setInterval(() => {
+            setInterval(() => {
               if (LLMLoadPercentageBox.get() < 100) {
                 LLMLoadPercentageBox.set(LLMLoadPercentageBox.get() + 2);
               }
             }, 100);
 
             searchBoxRef.current?.blur();
+            isUserRequestingLLMSearchBox.set(false);
             const pendingSearch = await createSearchWithLLM(
               textDocument.text.sliceString(0),
               selectedPendingSearch.search

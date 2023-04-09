@@ -52,8 +52,10 @@ type Output = {
 			name: string;
 			/* JavaScript code for a computation (computation language described below) */
 			formula: string;
-      /* How to show the computation output. Default to "HIDDEN" for intermediate values,
-       * and use "INLINE" for the final output of a computation. */
+      /* How to show the computation output.
+       * Default to "HIDDEN" for intermediate values.
+       * Use "INLINE" for the final output of a computation.
+       * Use "STYLE" if the user wants to restyle some text. */
       visibility: PropertyVisibility
 		}
 	}>
@@ -132,18 +134,47 @@ A Potluck search also has an array of _computations_, which compute derived valu
 - Any named capture group can be referenced by name. (Note: Capture groups MAY NOT be implicitly referenced with a number like $1. if you want to reference a group, you MUST assign it a name.)
 - The name of any prior computation in the list may be referenced by name
 
+### Intermediate values
+
 When the user asks for a numeric computation, you should add a computation to do the raw math, and then add another computation which adds a unit.
 
-For example, if the user asked you to double the number of bananas in the doc, you could return the following search and "computations":
+For example, if the user asked:
+
+double the number of bananas
+
+You could return the following search and computations:
 
 {
 	"name": "numBananas",
 	"search": "{number:amount} bananas",
 	"computations": [
-		{ "name": "doubled", "formula": "amount * 2", "visibility": "HIDDEN" },
+		{ "name": "doubled", "formula": "amount * 2",  },
 		{ "name": "doubledWithLabel", "formula": "\${doubled} bananas", "visibility": "INLINE" }
 	]
 }
+
+### Styling
+
+A computation can change the style of the text.
+The name of the computation is the CSS property (use dashes, do not use camelcase).
+The return value of the computation is the CSS value.
+To have a styling effect the visibility should be set to "STYLE".
+
+For example, if the user asked:
+
+highlight any number of bananas and make it bold
+
+You could return the following search and computations:
+
+{
+	"name": "numBananas",
+	"search": "{number:amount} bananas",
+	"computations": [
+		{ "name": "background-color", "formula": "'yellow'", visibility: "STYLE" },
+		{ "name": "font-weight", "formula": "'bold'", visibility: "STYLE" },
+	]
+}
+
 
 ## Example
 

@@ -433,7 +433,7 @@ const SearchBox = observer(
             LLMLoadPercentageBox.set(0);
 
             // Update the LLM load percentage every 100ms, maxing out at 100% after 5 seconds
-            setInterval(() => {
+            const interval = setInterval(() => {
               if (LLMLoadPercentageBox.get() < 100) {
                 LLMLoadPercentageBox.set(LLMLoadPercentageBox.get() + 2);
               }
@@ -446,6 +446,8 @@ const SearchBox = observer(
               selectedPendingSearch.search
             );
             isLLMLoadingSearchBox.set(false);
+            LLMLoadPercentageBox.set(0);
+            clearInterval(interval);
             if (pendingSearch._type === "error") {
               searchTermBox.get().search = "Sorry, error!";
               return;

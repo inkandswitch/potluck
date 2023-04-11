@@ -1,8 +1,6 @@
 import { Configuration, OpenAIApi } from "openai";
 import { PendingSearch, PropertyVisibility } from "./primitives";
 
-console.log("env", import.meta.env, import.meta.env["VITE_OPENAI_API_KEY"]);
-
 const configuration = new Configuration({
   apiKey: import.meta.env["VITE_OPENAI_API_KEY"],
 });
@@ -27,8 +25,10 @@ type LLMResponse = {
 const SYSTEM_PROMPT = `You are a helpful AI coding assistant. You follow the user's instructions carefully and exactly to the letter.
 
 Only output a JSON object. Do not output any text before or after the JSON.
+`;
 
-Your task is to write a code snippet that finds patterns in some text. You'll be given an example text document, and a natural langauge description of the desired pattern. The code should be in the Potluck search language, which I will describe below.
+const CREATE_SHEET_INSTRUCTIONS = `
+Your task is to write a code snippet that finds patterns in some text. You'll be given an example text document, and a natural language description of the desired pattern.
 
 ## Output format
 
@@ -60,6 +60,32 @@ type Output = {
 		}
 	}>
 }
+
+## Example
+
+### User-provided text
+
+🌲 Big Pine Creek 14 miles
+🌲 Sea to Summit 7 miles
+🌲 Redwood Regional Park 8 miles
+
+### User-provided search
+
+convert hike distances from miles to km
+
+### Your output
+
+{
+	"name": "hikeDistances",
+	"search": "{number: distance} {/(miles|mi)/:unit}",
+	"computations": [
+		{ "name": "km", "code": "distance * 1.6093", "visibility": "HIDDEN" },
+		{ "name": "kmWithLabel", "code": "\`\${km} km\`", "visibility": "INLINE" }
+	]
+}
+`;
+
+const POTLUCK_TUTORIAL = `Here's a summary of the Potluck search language and computation language, which you will need to understand to complete your task.
 
 ## Potluck search language
 
@@ -126,9 +152,19 @@ We can also assign a name to a regex in a curly brace, like this:
 	"computations": []
 }
 
+6) Occasionally you may need a more sophisticated computation to find the matching text within a document. You can write = followed by a Potluck computation formula that returns highlights. For example, the following search finds spans of Markdown-formatted text:
+
+{
+	"name": "markdown",
+	"search": "=Markdown()",
+	"computations": []
+}
+
 ## Potluck computation language
 
-A Potluck search also has an array of _computations_, which compute derived values based on the values returned by the search. The computation code is written in JavaScript (no npm libraries may be used). The code for a computation can reference the following values:
+A Potluck search also has an array of _computations_, which compute derived values based on the values returned by the search.
+
+The computation code is written in JavaScript. The code can reference the following values:
 
 - $ refers to the entire string returned by the search
 - Any named capture group can be referenced by name. (Note: Capture groups MAY NOT be implicitly referenced with a number like $1. if you want to reference a group, you MUST assign it a name.)
@@ -175,43 +211,79 @@ You could return the following search and computations:
 	]
 }
 
+### Standard Library
 
-## Example
+There are some predefined functions in the standard library which may be used in the JavaScript code for a computation. Here are the type signatures below.
 
-### User-provided text
+Note: Highlight is a datatype representing a text span in the document. The result of a Potluck search is a highlight. To treat a Highlight as a string, use TextOfHighlight(highlight).
 
-🌲 Big Pine Creek 14 miles
-🌲 Sea to Summit 7 miles
-🌲 Redwood Regional Park 8 miles
+Functions that return highlights and are useful for searches:
 
-### User-provided search
+SplitLines(until?: string) => Highlight[]
+MatchRegexp(regexString: string, flags?: string) => Highlight[]
+MatchString(values: string | string[] | Highlight[], isCaseSensitive?: boolean) => Highlight[]
+MatchHighlight(values: Highlight[], isCaseSensitive?: boolean) => Highlight[]
+Find(type: string) => Highlight
+FindAll(type: string) => Highlight[]
+Markdown() => Highlight[]
+DataFromDoc(docName: string, sheetConfigName: string, columnName: string) => Highlight[]
 
-convert hike distances from miles to km
+Functions which can start from a given highlight and return spatially related highlights:
 
-### Your output
+NextOfType(highlight: Highlight, type: string, distanceLimit?: number) => Highlight
+PrevOfType(highlight: Highlight, type: string, distanceLimit?: number) => Highlight
+PrevUntil(highlight: Highlight, stopCondition: any) => Highlight[]
+NextUntil(highlight: Highlight, stopCondition: any) => Highlight[]
 
-{
-	"name": "hikeDistances",
-	"search": "{number: distance} {/(miles|mi)/:unit}",
-	"computations": [
-		{ "name": "km", "code": "distance * 1.6093", "visibility": "HIDDEN" },
-		{ "name": "kmWithLabel", "code": "\`\${km} km\`", "visibility": "INLINE" }
-	]
-}`;
+Functions for working with highlights:
+
+HasType(type: string, highlight: Highlight) => boolean
+HasTextOnLeft(text: string, highlight: Highlight) => boolean
+HasTextOnRight(text: string, highlight: Highlight) => boolean
+TextAfter(highlight: Highlight, until: string) => Highlight
+TextBefore(highlight: Highlight, until: string) => Highlight
+TextOfHighlight(highlight: Highlight) => string
+SameLine(a: Highlight, b: Highlight) => boolean
+
+General computational utilities:
+
+Filter(list: any[], condition: any) => any[]
+Not(value: any)
+First(list: any[])
+Second(list: any[])
+Third(list: any[])
+ParseInt(number: string)
+ParseFloat(number: string)
+Uppercase(text: Highlight | string) => string
+Lowercase(text: Highlight | string) => string
+IsNumber(value: any)
+Sum(values: (number | Highlight)[])
+Average(values: (number | Highlight)[])
+Round(value: number, precision: number = 0)
+Repeat(text: string, count: number | Highlight)
+NowDate() => Date
+USDAFoodName(foodName: Highlight) => string?
+HasCursorFocus() => boolean
+
+These formulas output interactive components which can be included back in the document:
+
+Slider(highlight: Highlight, initialValue: number = 0) => Component
+Timer(durationHighlight: Highlight) => Component
+TemplateButton(highlight: Highlight, buttonLabel: string, updateText: string, operation?: "append" | "prepend" | "replace") => Component
+`;
 
 export const createSearchWithLLM = async (
   doc: string,
   search: string
 ): Promise<PendingSearch | { _type: "error" }> => {
-  const response = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo",
-    temperature: 0,
-    messages: [
-      { role: "system", content: SYSTEM_PROMPT },
-      {
-        role: "user",
-        content: `
-      ### User-provided text
+  const createSheetMessage = `
+  ---
+
+  ${POTLUCK_TUTORIAL}
+
+  ---
+
+  ${CREATE_SHEET_INSTRUCTIONS}
 
 Here is the text of the document the user is searching:
 
@@ -220,15 +292,24 @@ ${doc}
 ### User-provided search
 
 ${search}
-      `,
+  `;
+
+  console.log(createSheetMessage);
+
+  const response = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    temperature: 0,
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      {
+        role: "user",
+        content: createSheetMessage,
       },
     ],
   });
 
+  console.log({ response });
   const output = response.data.choices[0].message?.content as string;
-
-  console.log("raw LLM output");
-  console.log(output);
 
   try {
     const parsed: LLMResponse = JSON.parse(output);

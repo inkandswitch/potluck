@@ -56,10 +56,15 @@ import { EditorView, minimalSetup } from "codemirror";
 import { bracketMatching, LanguageSupport } from "@codemirror/language";
 import { javascriptLanguage } from "@codemirror/lang-javascript";
 import { highlightSpecialChars, keymap, tooltips } from "@codemirror/view";
-import { autocompletion, closeBrackets, closeBracketsKeymap, } from "@codemirror/autocomplete";
+import {
+  autocompletion,
+  closeBrackets,
+  closeBracketsKeymap,
+} from "@codemirror/autocomplete";
 import { IObservableArray } from "mobx/dist/internal";
 import { getPatternExprGroupNames } from "./patterns";
 import { Highlight } from "./highlight";
+import { explainSheetWithLLM } from "./llm";
 
 let i = 1;
 
@@ -341,7 +346,7 @@ function FormulaReferenceButton({ className }: { className?: string }) {
         <Popover.Content
           align="end"
           className="font-mono text-xs bg-gray-50 p-4 rounded shadow-lg overflow-auto max-h-[calc(100vh-256px)]"
-          style={{zIndex: 99999}}
+          style={{ zIndex: 99999 }}
         >
           <div className="uppercase mb-2">available formulas</div>
           <table>
@@ -942,27 +947,23 @@ export const SheetComponent = observer(
   }) => {
     const [sheetView, setSheetView] = useState(SheetView.Table);
 
-
     const textDocumentSheet = textDocument.sheets.find(
       (sheet) => sheet.id === textDocumentSheetId
     )!;
 
     const sheetConfig = sheetConfigsMobx.get(textDocumentSheet.configId);
 
-
     // HACK: for demo automatically expand calendar view if search is opened
-    useEffect(() =>  {
+    useEffect(() => {
       if (!sheetConfig) {
-        return
+        return;
       }
 
-      if (textDocument.id === "workout" && sheetConfig.name === 'exercise') {
-        isSheetExpandedMobx.set(textDocumentSheet.id, true)
-        setSheetView(SheetView.Calendar)
+      if (textDocument.id === "workout" && sheetConfig.name === "exercise") {
+        isSheetExpandedMobx.set(textDocumentSheet.id, true);
+        setSheetView(SheetView.Calendar);
       }
-
-    }, [textDocument.id, sheetConfig?.name])
-
+    }, [textDocument.id, sheetConfig?.name]);
 
     if (sheetConfig === undefined) {
       return null;
@@ -1012,6 +1013,18 @@ export const SheetComponent = observer(
             })}
             className="text-xs font-semibold outline-none bg-transparent text-gray-500 focus:text-gray-600"
           />
+          <button
+            onClick={async () => {
+              console.log("loading...");
+              const explanation = await explainSheetWithLLM(
+                textDocument.text.sliceString(0),
+                sheetConfig
+              );
+              console.log(explanation);
+            }}
+          >
+            Explain
+          </button>
           {isExpanded && (canRenderAsCalendar || canRenderAsNutritionLabel) ? (
             <div className="flex gap-2 pr-1">
               <button

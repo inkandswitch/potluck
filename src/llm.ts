@@ -1,5 +1,5 @@
 import { Configuration, OpenAIApi } from "openai";
-import { PendingSearch, PropertyVisibility } from "./primitives";
+import { PendingSearch, PropertyVisibility, SheetConfig } from "./primitives";
 
 const configuration = new Configuration({
   apiKey: import.meta.env["VITE_OPENAI_API_KEY"],
@@ -23,66 +23,6 @@ type LLMResponse = {
 };
 
 const SYSTEM_PROMPT = `You are a helpful AI coding assistant. You follow the user's instructions carefully and exactly to the letter.
-
-Only output a JSON object. Do not output any text before or after the JSON.
-`;
-
-const CREATE_SHEET_INSTRUCTIONS = `
-Your task is to write a code snippet that finds patterns in some text. You'll be given an example text document, and a natural language description of the desired pattern.
-
-## Output format
-
-Output a JSON object in the following shape. Do not include any other text before or after the JSON.
-
-enum PropertyVisibility {
-  Hidden = "HIDDEN",
-  Inline = "INLINE",
-  Superscript = "SUPERSCRIPT",
-  Replace = "REPLACE",
-  Style = "STYLE",
-}
-
-type Output = {
-	/* a human-readable name for the search (camel-cased with no spaces) */
-	name: string;
-	/* code for a Potluck search (search language described below) */
-	search: string;
-	computations: Array<{
-			/* a human-readable name for the computed value (camel-cased with no spaces) */
-			name: string;
-			/* JavaScript code for a computation (computation language described below) */
-			formula: string;
-      /* How to show the computation output.
-       * Default to "HIDDEN" for intermediate values.
-       * Use "INLINE" for the final output of a computation.
-       * Use "STYLE" if the user wants to restyle some text. */
-      visibility: PropertyVisibility
-		}
-	}>
-}
-
-## Example
-
-### User-provided text
-
-🌲 Big Pine Creek 14 miles
-🌲 Sea to Summit 7 miles
-🌲 Redwood Regional Park 8 miles
-
-### User-provided search
-
-convert hike distances from miles to km
-
-### Your output
-
-{
-	"name": "hikeDistances",
-	"search": "{number: distance} {/(miles|mi)/:unit}",
-	"computations": [
-		{ "name": "km", "code": "distance * 1.6093", "visibility": "HIDDEN" },
-		{ "name": "kmWithLabel", "code": "\`\${km} km\`", "visibility": "INLINE" }
-	]
-}
 `;
 
 const POTLUCK_TUTORIAL = `Here's a summary of the Potluck search language and computation language, which you will need to understand to complete your task.
@@ -272,6 +212,64 @@ Timer(durationHighlight: Highlight) => Component
 TemplateButton(highlight: Highlight, buttonLabel: string, updateText: string, operation?: "append" | "prepend" | "replace") => Component
 `;
 
+const CREATE_SHEET_INSTRUCTIONS = `
+Your task is to write a code snippet that finds patterns in some text. You'll be given an example text document, and a natural language description of the desired pattern. Only output a JSON object. Do not output any text before or after the JSON.
+
+## Output format
+
+Output a JSON object in the following shape. Do not include any other text before or after the JSON.
+
+enum PropertyVisibility {
+  Hidden = "HIDDEN",
+  Inline = "INLINE",
+  Superscript = "SUPERSCRIPT",
+  Replace = "REPLACE",
+  Style = "STYLE",
+}
+
+type Output = {
+	/* a human-readable name for the search (camel-cased with no spaces) */
+	name: string;
+	/* code for a Potluck search (search language described below) */
+	search: string;
+	computations: Array<{
+			/* a human-readable name for the computed value (camel-cased with no spaces) */
+			name: string;
+			/* JavaScript code for a computation (computation language described below) */
+			formula: string;
+      /* How to show the computation output.
+       * Default to "HIDDEN" for intermediate values.
+       * Use "INLINE" for the final output of a computation.
+       * Use "STYLE" if the user wants to restyle some text. */
+      visibility: PropertyVisibility
+		}
+	}>
+}
+
+## Example
+
+### User-provided text
+
+🌲 Big Pine Creek 14 miles
+🌲 Sea to Summit 7 miles
+🌲 Redwood Regional Park 8 miles
+
+### User-provided search
+
+convert hike distances from miles to km
+
+### Your output
+
+{
+	"name": "hikeDistances",
+	"search": "{number: distance} {/(miles|mi)/:unit}",
+	"computations": [
+		{ "name": "km", "code": "distance * 1.6093", "visibility": "HIDDEN" },
+		{ "name": "kmWithLabel", "code": "\`\${km} km\`", "visibility": "INLINE" }
+	]
+}
+`;
+
 export const createSearchWithLLM = async (
   doc: string,
   search: string
@@ -323,4 +321,108 @@ ${search}
       _type: "error",
     };
   }
+};
+
+const EXPLAIN_SHEET_INSTRUCTIONS = `
+Your task is to generate a natural language description summarizing the behavior of a Potluck spreadsheet (SheetConfig) which contains a search and some computational properties.
+
+Here's the type signature for the SheetConfig:
+
+export enum PropertyVisibility {
+  Hidden = "HIDDEN",
+  Inline = "INLINE",
+  Superscript = "SUPERSCRIPT",
+  Replace = "REPLACE",
+  Style = "STYLE",
+}
+
+export type PropertyDefinition = {
+  name: string;
+  formula: string;
+  isPatternGroup?: boolean;
+  visibility: PropertyVisibility;
+};
+
+export type SheetConfig = {
+  id: string;
+  name: string;
+  properties: PropertyDefinition[];
+};
+
+## Example
+
+### User-provided document
+
+🌲 Big Pine Creek 14 miles
+🌲 Sea to Summit 7 miles
+🌲 Redwood Regional Park 8 miles
+
+### SheetConfig
+
+{
+  "id": "hikes.2",
+  "name": "distance",
+  "properties": [
+    {
+      "name": "$",
+      "formula": "{number:miles} miles",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "km",
+      "formula": "\`= \${Round(miles * 1.60934, 1)} km\`",
+      "visibility": "INLINE"
+    }
+  ]
+}
+
+### Your output
+
+This search finds distances in miles, and outputs the distance converted to kilometers.
+
+`;
+
+export const explainSheetWithLLM = async (
+  doc: string,
+  config: SheetConfig
+): Promise<string> => {
+  const explainSheetMessage = `
+  ---
+
+  ${POTLUCK_TUTORIAL}
+
+  ---
+
+  ${EXPLAIN_SHEET_INSTRUCTIONS}
+
+### User-provided document
+
+${doc}
+
+### SheetConfig
+
+${JSON.stringify(config)}
+
+### Your output
+
+  `;
+
+  console.log(explainSheetMessage);
+
+  const response = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    temperature: 0,
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      {
+        role: "user",
+        content: explainSheetMessage,
+      },
+    ],
+  });
+
+  console.log({ response });
+  const output = response.data.choices[0].message?.content as string;
+
+  return output;
 };

@@ -20,6 +20,7 @@ import {
   TextDocumentSheet,
   textEditorStateMobx,
   textEditorViewMobx,
+  hoveredPropertyNameBox,
 } from "./primitives";
 import {
   doSpansOverlap,
@@ -371,7 +372,7 @@ function FormulaReferenceButton({ className }: { className?: string }) {
   );
 }
 
-const ContentWithIds = ({
+const ExplanationWithPropertyReferences = ({
   text,
   properties,
   selectProperty,
@@ -393,7 +394,8 @@ const ContentWithIds = ({
       {contentParts.map((part, index) => {
         const property = properties.find((p) => p.name === part);
         if (property) {
-          const isEditable = index !== 0 && !property.isPatternGroup;
+          const isEditable =
+            properties.indexOf(property) !== 0 && !property.isPatternGroup;
           return (
             <span
               onMouseEnter={() => selectProperty(part)}
@@ -417,7 +419,7 @@ const ContentWithIds = ({
   );
 };
 
-function ExplainSheetButton({
+function ExplainSheetPopoverContent({
   textDocument,
   sheetConfig,
 }: {
@@ -445,6 +447,39 @@ function ExplainSheetButton({
 
     return () => {};
   }, [sheetConfig]);
+
+  return (
+    <div>
+      <div className="text-xs text-gray-400 mb-2">What does this sheet do?</div>
+      {explanation ? (
+        <div>
+          <ExplanationWithPropertyReferences
+            text={explanation}
+            properties={sheetConfigWithAllProperties.properties}
+            selectProperty={(propertyName) =>
+              runInAction(() =>
+                hoveredPropertyNameBox.set({ sheetConfig, propertyName })
+              )
+            }
+            deselectProperty={() =>
+              runInAction(() => hoveredPropertyNameBox.set(undefined))
+            }
+          />
+        </div>
+      ) : (
+        <span className="text-gray-400">Loading...</span>
+      )}
+    </div>
+  );
+}
+
+function ExplainSheetButton({
+  textDocument,
+  sheetConfig,
+}: {
+  textDocument: TextDocument;
+  sheetConfig: SheetConfig;
+}) {
   return (
     <Popover.Root>
       <Popover.Anchor asChild={true}>
@@ -466,25 +501,10 @@ function ExplainSheetButton({
           className="text-sm bg-gray-50 p-4 rounded shadow-lg overflow-auto w-[500px]"
           style={{ zIndex: 99999 }}
         >
-          <div className="text-xs text-gray-400 mb-2">
-            What does this sheet do?
-          </div>
-          {explanation ? (
-            <div>
-              <ContentWithIds
-                text={explanation}
-                properties={sheetConfigWithAllProperties.properties}
-                selectProperty={(propertyName) =>
-                  console.log(`select ${propertyName}`)
-                }
-                deselectProperty={(propertyName) =>
-                  console.log(`deselect ${propertyName}`)
-                }
-              />
-            </div>
-          ) : (
-            "Loading..."
-          )}
+          <ExplainSheetPopoverContent
+            textDocument={textDocument}
+            sheetConfig={sheetConfig}
+          />
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
@@ -894,6 +914,17 @@ export const SheetTable = observer(
               >
                 {columnsWithPatternGroups.map((column, index) => {
                   const isEditable = index !== 0 && !column.isPatternGroup;
+                  const isHovered =
+                    hoveredPropertyNameBox.get()?.sheetConfig === sheetConfig &&
+                    hoveredPropertyNameBox.get()?.propertyName === column.name;
+
+                  const bgColor = isEditable
+                    ? isHovered
+                      ? "bg-orange-200"
+                      : "bg-orange-100"
+                    : isHovered
+                    ? "bg-indigo-200"
+                    : "bg-indigo-100";
 
                   return (
                     <th
@@ -908,8 +939,9 @@ export const SheetTable = observer(
                           className={classNames(
                             "px-1 rounded-sm font-medium text-xs border",
                             isEditable
-                              ? "bg-orange-100 text-orange-500 border-orange-200"
-                              : "bg-indigo-100 text-indigo-500 border-indigo-200"
+                              ? " text-orange-500 border-orange-200"
+                              : " text-indigo-500 border-indigo-200",
+                            bgColor
                           )}
                         >
                           {column.name}

@@ -210,6 +210,36 @@ These formulas output interactive components which can be included back in the d
 Slider(highlight: Highlight, initialValue: number = 0) => Component
 Timer(durationHighlight: Highlight) => Component
 TemplateButton(highlight: Highlight, buttonLabel: string, updateText: string, operation?: "append" | "prepend" | "replace") => Component
+
+## Type signatures
+
+Here are some relevant type signatures for background:
+
+/** Options for how to show value of a given property within the text document */
+export enum PropertyVisibility {
+  Hidden = "HIDDEN",
+  Inline = "INLINE",
+  Superscript = "SUPERSCRIPT",
+  Replace = "REPLACE",
+  Style = "STYLE",
+}
+
+export type PropertyDefinition = {
+  /** A human-visible name for the property */
+  name: string;
+  /** Computation code for the property */
+  formula: string;
+  /** True if this property is a capture group from the search pattern, rather than a JS computation */
+  isPatternGroup?: boolean;
+  /** Defines how the property is shown in the document */
+  visibility: PropertyVisibility;
+};
+
+export type SheetConfig = {
+  id: string;
+  name: string;
+  properties: PropertyDefinition[];
+};
 `;
 
 const CREATE_SHEET_INSTRUCTIONS = `
@@ -218,14 +248,6 @@ Your task is to write a code snippet that finds patterns in some text. You'll be
 ## Output format
 
 Output a JSON object in the following shape. Do not include any other text before or after the JSON.
-
-enum PropertyVisibility {
-  Hidden = "HIDDEN",
-  Inline = "INLINE",
-  Superscript = "SUPERSCRIPT",
-  Replace = "REPLACE",
-  Style = "STYLE",
-}
 
 type Output = {
 	/* a human-readable name for the search (camel-cased with no spaces) */
@@ -324,69 +346,35 @@ ${search}
 };
 
 const EXPLAIN_SHEET_INSTRUCTIONS = `
-Your task is to generate a natural language description summarizing the behavior of a Potluck sheet which contains a search and some computational properties.
+Your task is to generate a brief natural language description summarizing the behavior of a Potluck sheet which contains a search and some computational properties.
 
-- Your explanation should reference individual properties by name using the syntax [@property_name]. Try to incorporate all the properties in your explanation.
+Rules:
+
+- Your explanation MUST reference ALL of the individual properties in the sheet. Use the syntax [@property_name] to refer to a property. For example, you can say things like "This computation outputs [@distance] and [@unit]."
+- Be concise. Your explanation should be three or four short sentences.
 - Refer to the sheet as a "sheet", not a SheetConfig.
-
-Here's the type signature for SheetConfig:
-
-export enum PropertyVisibility {
-  Hidden = "HIDDEN",
-  Inline = "INLINE",
-  Superscript = "SUPERSCRIPT",
-  Replace = "REPLACE",
-  Style = "STYLE",
-}
-
-export type PropertyDefinition = {
-  name: string;
-  formula: string;
-  isPatternGroup?: boolean;
-  visibility: PropertyVisibility;
-};
-
-export type SheetConfig = {
-  id: string;
-  name: string;
-  properties: PropertyDefinition[];
-};
 
 ## Example
 
 ### User-provided document
 
-🌲 Big Pine Creek 14 miles
-🌲 Sea to Summit 7 miles
-🌲 Redwood Regional Park 8 miles
+Recipe
+Grind 11 g coffee, medium-fine.
+Add 200 g water, brew 2 minutes, plunge!
+
+scale by
+
+Notes
+6/22/22: Pretty good, but forgot to swirl.
+6/23/22: Felt weak and under-extracted. Grind finer?
 
 ### SheetConfig
 
-{
-  "id": "hikes.2",
-  "name": "distance",
-  "properties": [
-    {
-      "name": "$",
-      "formula": "{number:miles} miles",
-      "visibility": "HIDDEN"
-    },
-    {
-      "name": "km",
-      "formula": "Round(miles * 1.60934, 1)",
-      "visibility": "HIDDEN"
-    },
-    {
-      "name": "kmWithLabel",
-      "formula": "\`= \${km} km\`",
-      "visibility": "INLINE"
-    }
-  ]
-}
+{"id":"food.quantity","name":"quantity","properties":[{"name":"$","formula":"{number:amount} {/(cup|tablespoon|tbsp|teaspoon|tsp|pound|lb|gram|g|milliliter|ml)s?/:unit}","visibility":"HIDDEN"},{"name":"amount","isPatternGroup":true,"formula":"","visibility":"HIDDEN"},{"name":"unit","isPatternGroup":true,"formula":"","visibility":"HIDDEN"},{"name":"scaleFactor","formula":"Find(\"scale\")?.data.sliderValue","visibility":"HIDDEN"},{"name":"scaledAmount","formula":"(scaleFactor && scaleFactor !== 1 && amount) ? \`\${scaleFactor * amount.data.value} \${unit}\${amount.data.value === 1 ? 's' : ''}\` : undefined","visibility":"REPLACE"}]}
 
 ### Your output
 
-This sheet converts distances in miles to km. [@km] does the numeric conversion, and [@kmWithLabel] adds a km label.
+This sheet scales quantities in a recipe. It extracts the [@amount] and [@unit] for each quantity, and extracts the scaling factor from the text into [@scaleFactor]. Then [@scaledAmount] does the multiplication and replaces the original quantity in the document.
 
 `;
 
@@ -418,7 +406,7 @@ ${JSON.stringify(config)}
   console.log(explainSheetMessage);
 
   const response = await openai.createChatCompletion({
-    model: "gpt-4",
+    model: "gpt-3.5-turbo",
     temperature: 0,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },

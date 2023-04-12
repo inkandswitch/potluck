@@ -357,3 +357,6 @@ export const isSearchBoxFocused = observable.box(false);
 export const isLLMLoadingSearchBox = observable.box(false);
 export const LLMLoadPercentageBox = observable.box(0);
 export const isUserRequestingLLMSearchBox = observable.box(false);
+export const hoveredPropertyNameBox = observable.box<
+  { sheetConfig: SheetConfig; propertyName: string } | undefined
+>(undefined);

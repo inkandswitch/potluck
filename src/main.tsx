@@ -1,5 +1,4 @@
-const openDocumentId = new URLSearchParams(location.search).get("openDocument")
-
+const openDocumentId = new URLSearchParams(location.search).get("openDocument");
 
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -10,15 +9,16 @@ import "./index.css";
 import { selectedTextDocumentIdBox, textDocumentsMobx } from "./primitives";
 
 if (openDocumentId && textDocumentsMobx.get(openDocumentId)) {
-  selectedTextDocumentIdBox.set(openDocumentId)
+  selectedTextDocumentIdBox.set(openDocumentId);
 }
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <Tooltip.Provider>
-      <Toast.Provider>
-        <App />
-      </Toast.Provider>
-    </Tooltip.Provider>
-  </React.StrictMode>
+  // avoid double network requests by disabling strict mode
+  // <React.StrictMode>
+  <Tooltip.Provider>
+    <Toast.Provider>
+      <App />
+    </Toast.Provider>
+  </Tooltip.Provider>
+  // </React.StrictMode>
 );

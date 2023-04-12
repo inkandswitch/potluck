@@ -7,12 +7,13 @@ import {
   autorun,
 } from "mobx";
 import { EditorState, Text } from "@codemirror/state";
-import { generateNanoid } from "./utils";
+import { generateNanoid, transformColumnFormula } from "./utils";
 import { evaluateFormula } from "./formulas";
 import { getStateFromFiles } from "./persistence";
 import { DefaultFiles } from "./DefaultState";
 import { EditorView } from "@codemirror/view";
 import { Highlight } from "./highlight";
+import { getPatternExprGroupNames } from "./patterns";
 
 let counter = 1;
 
@@ -327,6 +328,24 @@ export const searchResults = computed<Highlight[]>(() => {
   }
   return results;
 });
+
+export const computeColumnsWithPatternGroups = (
+  columns: PropertyDefinition[]
+) => {
+  const headFormula = transformColumnFormula(columns[0].formula, true);
+  const groupNames = getPatternExprGroupNames(headFormula);
+  return columns
+    .slice(0, 1)
+    .concat(
+      groupNames.map((name) => ({
+        name,
+        isPatternGroup: true,
+        formula: "",
+        visibility: PropertyVisibility.Hidden,
+      }))
+    )
+    .concat(columns.slice(1));
+};
 
 export const hoverHighlightsMobx = observable.array<Highlight>([]);
 

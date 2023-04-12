@@ -292,7 +292,7 @@ ${doc}
 ${search}
   `;
 
-  console.log(createSheetMessage);
+  // console.log(createSheetMessage);
 
   const response = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
@@ -306,7 +306,7 @@ ${search}
     ],
   });
 
-  console.log({ response });
+  // console.log({ response });
   const output = response.data.choices[0].message?.content as string;
 
   try {
@@ -324,9 +324,12 @@ ${search}
 };
 
 const EXPLAIN_SHEET_INSTRUCTIONS = `
-Your task is to generate a natural language description summarizing the behavior of a Potluck spreadsheet (SheetConfig) which contains a search and some computational properties.
+Your task is to generate a natural language description summarizing the behavior of a Potluck sheet which contains a search and some computational properties.
 
-Here's the type signature for the SheetConfig:
+- Your explanation should reference individual properties by name using the syntax [@property_name]. Try to incorporate all the properties in your explanation.
+- Refer to the sheet as a "sheet", not a SheetConfig.
+
+Here's the type signature for SheetConfig:
 
 export enum PropertyVisibility {
   Hidden = "HIDDEN",
@@ -370,7 +373,12 @@ export type SheetConfig = {
     },
     {
       "name": "km",
-      "formula": "\`= \${Round(miles * 1.60934, 1)} km\`",
+      "formula": "Round(miles * 1.60934, 1)",
+      "visibility": "HIDDEN"
+    },
+    {
+      "name": "kmWithLabel",
+      "formula": "\`= \${km} km\`",
       "visibility": "INLINE"
     }
   ]
@@ -378,7 +386,7 @@ export type SheetConfig = {
 
 ### Your output
 
-This search finds distances in miles, and outputs the distance converted to kilometers.
+This sheet converts distances in miles to km. [@km] does the numeric conversion, and [@kmWithLabel] adds a km label.
 
 `;
 
@@ -410,7 +418,7 @@ ${JSON.stringify(config)}
   console.log(explainSheetMessage);
 
   const response = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4",
     temperature: 0,
     messages: [
       { role: "system", content: SYSTEM_PROMPT },
@@ -421,7 +429,7 @@ ${JSON.stringify(config)}
     ],
   });
 
-  console.log({ response });
+  // console.log({ response });
   const output = response.data.choices[0].message?.content as string;
 
   return output;

@@ -5,6 +5,7 @@ import { action, comparer, computed, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import React, { FC, forwardRef, useEffect, useRef, useState } from "react";
 import {
+  computeColumnsWithPatternGroups,
   hoverHighlightsMobx,
   isSheetExpandedMobx,
   PropertyDefinition,
@@ -364,6 +365,126 @@ function FormulaReferenceButton({ className }: { className?: string }) {
               ))}
             </tbody>
           </table>
+        </Popover.Content>
+      </Popover.Portal>
+    </Popover.Root>
+  );
+}
+
+const ContentWithIds = ({
+  text,
+  properties,
+  selectProperty,
+  deselectProperty,
+}: {
+  text: string;
+  properties: PropertyDefinition[];
+  selectProperty: (name: string) => void;
+  deselectProperty: (name: string) => void;
+}) => {
+  // Define the regex to match the IDs pattern
+  const idRegex = /\[@([a-zA-Z0-9\$\-]*)\]/g;
+
+  // Use the split method to create an array containing parts and matched IDs
+  const contentParts = text.split(idRegex);
+
+  return (
+    <div>
+      {contentParts.map((part, index) => {
+        const property = properties.find((p) => p.name === part);
+        if (property) {
+          const isEditable = index !== 0 && !property.isPatternGroup;
+          return (
+            <span
+              onMouseEnter={() => selectProperty(part)}
+              onMouseLeave={() => deselectProperty(part)}
+              className={classNames(
+                "px-1 rounded-sm font-medium text-xs border cursor-default",
+                isEditable
+                  ? "bg-orange-100 text-orange-500 border-orange-200 hover:bg-orange-200"
+                  : "bg-indigo-100 text-indigo-500 border-indigo-200 hover:bg-indigo-200"
+              )}
+            >
+              {property.name}
+            </span>
+          );
+        } else {
+          // Render plain text for non-ID parts
+          return <React.Fragment key={index}>{part}</React.Fragment>;
+        }
+      })}
+    </div>
+  );
+};
+
+function ExplainSheetButton({
+  textDocument,
+  sheetConfig,
+}: {
+  textDocument: TextDocument;
+  sheetConfig: SheetConfig;
+}) {
+  const [explanation, setExplanation] = useState<string | null>(null);
+  const columnsWithPatternGroups = computeColumnsWithPatternGroups(
+    sheetConfig.properties
+  );
+  const sheetConfigWithAllProperties = {
+    ...sheetConfig,
+    properties: columnsWithPatternGroups,
+  };
+
+  useEffect(() => {
+    (async () => {
+      const explanation = await explainSheetWithLLM(
+        textDocument.text.sliceString(0),
+        sheetConfigWithAllProperties
+      );
+
+      setExplanation(explanation);
+    })();
+
+    return () => {};
+  }, [sheetConfig]);
+  return (
+    <Popover.Root>
+      <Popover.Anchor asChild={true}>
+        <Popover.Trigger asChild={true}>
+          <button
+            className={classNames(
+              "flex flex-shrink-0 items-center justify-center text-gray-400 hover:text-gray-600"
+            )}
+          >
+            <QuestionMarkCircledIcon />
+          </button>
+        </Popover.Trigger>
+      </Popover.Anchor>
+      <Popover.Portal>
+        <Popover.Content
+          side="top"
+          sideOffset={8}
+          align="end"
+          className="text-sm bg-gray-50 p-4 rounded shadow-lg overflow-auto w-[500px]"
+          style={{ zIndex: 99999 }}
+        >
+          <div className="text-xs text-gray-400 mb-2">
+            What does this sheet do?
+          </div>
+          {explanation ? (
+            <div>
+              <ContentWithIds
+                text={explanation}
+                properties={sheetConfigWithAllProperties.properties}
+                selectProperty={(propertyName) =>
+                  console.log(`select ${propertyName}`)
+                }
+                deselectProperty={(propertyName) =>
+                  console.log(`deselect ${propertyName}`)
+                }
+              />
+            </div>
+          ) : (
+            "Loading..."
+          )}
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>
@@ -757,17 +878,7 @@ export const SheetTable = observer(
 
     const groupColumnsOffset = groupNames.length;
 
-    const columnsWithPatternGroups = columns
-      .slice(0, 1)
-      .concat(
-        groupNames.map((name) => ({
-          name,
-          isPatternGroup: true,
-          formula: "",
-          visibility: PropertyVisibility.Hidden,
-        }))
-      )
-      .concat(columns.slice(1));
+    const columnsWithPatternGroups = computeColumnsWithPatternGroups(columns);
 
     return (
       <>
@@ -1013,18 +1124,10 @@ export const SheetComponent = observer(
             })}
             className="text-xs font-semibold outline-none bg-transparent text-gray-500 focus:text-gray-600"
           />
-          <button
-            onClick={async () => {
-              console.log("loading...");
-              const explanation = await explainSheetWithLLM(
-                textDocument.text.sliceString(0),
-                sheetConfig
-              );
-              console.log(explanation);
-            }}
-          >
-            Explain
-          </button>
+          <ExplainSheetButton
+            sheetConfig={sheetConfig}
+            textDocument={textDocument}
+          />
           {isExpanded && (canRenderAsCalendar || canRenderAsNutritionLabel) ? (
             <div className="flex gap-2 pr-1">
               <button

@@ -30,6 +30,7 @@ export type SheetValueRowWithoutSpan = {
 };
 export type SheetValueRow = Highlight | SheetValueRowWithoutSpan;
 
+/** Options for how to show value of a given property within the text document */
 export enum PropertyVisibility {
   Hidden = "HIDDEN",
   Inline = "INLINE",
@@ -39,9 +40,13 @@ export enum PropertyVisibility {
 }
 
 export type PropertyDefinition = {
+  /** A human-visible name for the property */
   name: string;
+  /** Computation code for the property */
   formula: string;
+  /** True if this property is a capture group from the search pattern, rather than a JS computation */
   isPatternGroup?: boolean;
+  /** Defines how the property is shown in the document */
   visibility: PropertyVisibility;
 };
 

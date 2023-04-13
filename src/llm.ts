@@ -1,5 +1,10 @@
 import { Configuration, OpenAIApi } from "openai";
-import { PendingSearch, PropertyVisibility, SheetConfig } from "./primitives";
+import {
+  PendingSearch,
+  PropertyDefinition,
+  PropertyVisibility,
+  SheetConfig,
+} from "./primitives";
 
 const configuration = new Configuration({
   apiKey: import.meta.env["VITE_OPENAI_API_KEY"],
@@ -250,8 +255,6 @@ Your task is to write a code snippet that finds patterns in some text. You'll be
 Output a JSON object in the following shape. Do not include any other text before or after the JSON.
 
 type Output = {
-	/* a human-readable name for the search (camel-cased with no spaces) */
-	name: string;
 	/* code for a Potluck search (search language described below) */
 	search: string;
 	computations: Array<{
@@ -283,13 +286,77 @@ convert hike distances from miles to km
 ### Your output
 
 {
-	"name": "hikeDistances",
 	"search": "{number: distance} {/(miles|mi)/:unit}",
 	"computations": [
 		{ "name": "km", "code": "distance * 1.6093", "visibility": "HIDDEN" },
 		{ "name": "kmWithLabel", "code": "\`\${km} km\`", "visibility": "INLINE" }
 	]
 }
+`;
+
+const EDIT_SHEET_INSTRUCTIONS = `
+Your task is to edit a Potluck sheet which finds patterns in some text and runs computations on them. Only output a JSON object. DO NOT output any text before or after the JSON. Do not explain what you did.
+
+You'll be given a text document, a natural language description of the desired pattern (a "search"), and a prior draft of the sheet's properties containing search and computations. Your task is to return an edited version of the sheet that better matches the user's intent.
+
+Try to preserve the user's work as much as possible. It's better to add new computations than edit existing ones.
+
+## Output format
+
+Output a JSON object in the following shape. Do not include any other text before or after the JSON.
+
+type Output = {
+	/* code for a Potluck search (search language described below) */
+	search: string;
+	computations: Array<{
+			/* a human-readable name for the computed value (camel-cased with no spaces) */
+			name: string;
+			/* JavaScript code for a computation (computation language described below) */
+			formula: string;
+      /* How to show the computation output.
+       * Default to "HIDDEN" for intermediate values.
+       * Use "INLINE" for the final output of a computation.
+       * Use "STYLE" if the user wants to restyle some text. */
+      visibility: PropertyVisibility
+		}
+	}>
+}
+
+---
+
+Example
+
+### User-provided text:
+
+🌲 Big Pine Creek 14 miles
+🌲 Sea to Summit 7 miles
+🌲 Redwood Regional Park 8 miles
+
+### User-provided search
+
+convert hike distances from miles to km (rounded)
+
+### Draft sheet
+
+[
+  { "name": "$", "formula": "{number: distance} {/(miles|mi)/:unit}", "visibility": "HIDDEN" },
+  { "name": "km", "formula": "distance * 1.6093", "visibility": "HIDDEN" },
+  { "name": "kmWithLabel", "formula": "\`\${km} km\`", "visibility": "INLINE" }
+]
+
+### Your edited output
+
+{
+	"search": "{number: distance} {/(miles|mi)/:unit}",
+	"computations": [
+		{ "name": "km", "code": "distance * 1.6093", "visibility": "HIDDEN" },
+		{ "name": "kmRounded", "code": "Round(km)", "visibility": "HIDDEN" },
+		{ "name": "kmWithLabel", "code": "\`\${kmRounded} km\`", "visibility": "INLINE" },
+	]
+}
+
+---
+
 `;
 
 export const createSearchWithLLM = async (
@@ -336,6 +403,7 @@ ${search}
     return {
       _type: "new",
       ...parsed,
+      name: search,
     };
   } catch {
     console.error("Failed to parse output", output);
@@ -421,4 +489,68 @@ ${JSON.stringify(config)}
   const output = response.data.choices[0].message?.content as string;
 
   return output;
+};
+
+export const editSheetWithLLM = async (
+  doc: string,
+  existingProperties: PropertyDefinition[],
+  newDescription: string
+): Promise<PendingSearch | { _type: "error" }> => {
+  const editSheetMessage = `
+  ---
+
+  ${POTLUCK_TUTORIAL}
+
+  ---
+
+  ${EDIT_SHEET_INSTRUCTIONS}
+
+  ---
+
+### User-provided document
+
+${doc}
+
+### User-provided search
+
+${newDescription}
+
+### Draft sheet
+
+${JSON.stringify(existingProperties)}
+
+### Your edited output
+
+  `;
+
+  console.log(editSheetMessage);
+
+  const response = await openai.createChatCompletion({
+    model: "gpt-3.5-turbo",
+    temperature: 0,
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      {
+        role: "user",
+        content: editSheetMessage,
+      },
+    ],
+  });
+
+  // console.log({ response });
+  const output = response.data.choices[0].message?.content as string;
+
+  try {
+    const parsed: LLMResponse = JSON.parse(output);
+    return {
+      _type: "new",
+      ...parsed,
+      name: newDescription,
+    };
+  } catch {
+    console.error("Failed to parse output", output);
+    return {
+      _type: "error",
+    };
+  }
 };

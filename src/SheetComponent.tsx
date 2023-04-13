@@ -66,7 +66,7 @@ import {
 import { IObservableArray } from "mobx/dist/internal";
 import { getPatternExprGroupNames } from "./patterns";
 import { Highlight } from "./highlight";
-import { explainSheetWithLLM } from "./llm";
+import { editSheetWithLLM, explainSheetWithLLM } from "./llm";
 
 let i = 1;
 
@@ -1076,6 +1076,15 @@ export const SheetTable = observer(
   }
 );
 
+type LLMLoadingState =
+  | {
+      type: "idle";
+    }
+  | {
+      type: "loading";
+      percent: number;
+    };
+
 export const SheetComponent = observer(
   ({
     id,
@@ -1089,6 +1098,9 @@ export const SheetComponent = observer(
     rows: SheetValueRow[];
   }) => {
     const [sheetView, setSheetView] = useState(SheetView.Table);
+    const [LLMLoadingState, setLLMLoadingState] = useState<LLMLoadingState>({
+      type: "idle",
+    });
 
     const textDocumentSheet = textDocument.sheets.find(
       (sheet) => sheet.id === textDocumentSheetId
@@ -1148,14 +1160,68 @@ export const SheetComponent = observer(
     return (
       <div className="z-10">
         <div className="pl-8 flex items-center justify-between mb-2">
-          <input
-            type="text"
-            value={sheetConfig.name}
-            onChange={action((e) => {
-              sheetConfig.name = e.target.value;
-            })}
-            className="text-xs font-semibold outline-none bg-transparent text-gray-500 focus:text-gray-600"
-          />
+          <div className="grow relative">
+            {LLMLoadingState.type === "loading" && (
+              <div
+                className="absolute inset-0 bg-blue-200 opacity-50 flex items-center justify-center -z-0"
+                style={{
+                  width: `${LLMLoadingState.percent}%`,
+                  // animate the width property
+                  transition: "width 0.5s",
+                }}
+              />
+            )}
+            <input
+              type="text"
+              value={sheetConfig.name}
+              onKeyDown={async (e) => {
+                if (e.key === "Enter" && e.metaKey) {
+                  console.log("edit sheet config", sheetConfig.name);
+                  setLLMLoadingState({ type: "loading", percent: 0 });
+                  const interval = setInterval(() => {
+                    setLLMLoadingState((state) => {
+                      if (state.type !== "loading") {
+                        return state;
+                      }
+                      return {
+                        ...state,
+                        percent: Math.min(100, state.percent + 1),
+                      };
+                    });
+                  }, 5000 / 100); // estimate 5 seconds total load time
+                  const editedSheetConfig = await editSheetWithLLM(
+                    textDocument.text.sliceString(0),
+                    sheetConfig.properties,
+                    sheetConfig.name
+                  );
+                  clearInterval(interval);
+                  setLLMLoadingState({ type: "idle" });
+                  if (editedSheetConfig._type !== "new") {
+                    return;
+                  }
+                  console.log("done", editedSheetConfig);
+                  runInAction(() => {
+                    sheetConfigsMobx.set(sheetConfig.id, {
+                      ...sheetConfig,
+                      properties: [
+                        {
+                          name: "$",
+                          formula: editedSheetConfig.search,
+                          visibility: PropertyVisibility.Hidden,
+                        },
+                        ...(editedSheetConfig.computations || []),
+                      ],
+                    });
+                  });
+                }
+              }}
+              onChange={action((e) => {
+                sheetConfig.name = e.target.value;
+              })}
+              className="text-xs font-semibold outline-none bg-transparent text-gray-500 focus:text-gray-600 w-full"
+            />
+          </div>
+
           <ExplainSheetButton
             sheetConfig={sheetConfig}
             textDocument={textDocument}
